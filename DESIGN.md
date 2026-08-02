@@ -897,3 +897,52 @@ defaults kept creeping upwards to fill it. With the root sustaining, a gap is
 the drone alone — which is a texture rather than an absence — so the piece can
 afford to be much emptier. The defaults moved accordingly: pulse 0.26 to 0.32
 and density 0.75 to 0.6, which is 1.65 notes a second where it used to be 2.6.
+
+## 16. What the old engine has, and why we cannot use it yet
+
+The old engine sounds chaotic and occasionally produces something jazzy, with
+real chords. Both come from one mechanism: **every note is chosen against the
+sonority actually sounding** — not against a chord symbol, but against the
+partials in the air, by roughness, from the instrument's own spectrum
+(`src/choose.js`). Three things make that pay: the pitches come from a small
+held field that is periodically transposed exactly, which is modulation with
+nothing approximated; the voices share a register, so they can interfere at all;
+and the chooser aims at a roughness *target* rather than the minimum, because
+always taking the smoothest note gives the most boring music available.
+
+The chaos is the same property from the other side. Every note is re-chosen from
+scratch, so nothing recurs — which is what §12 recorded.
+
+**The same criterion was built into the fixed-root engine and then removed
+again, because it earned nothing.** A phrase's anchor was scored on how the
+whole phrase would sit against what was still sounding, stretched across the
+candidates so the worst placement paid a fixed number of bits. It moved the
+roughness between parts by about 1%, and the measurement says why:
+
+- the parts sit in separate register bands, **1684 cents apart on average**, and
+  roughness hardly varies at that distance, so the term has nothing to choose
+  between. Forced into a shared register the same parts sit 303 cents apart,
+  roughness goes from 0.42 to 0.58, and the term starts doing real work;
+- only **5% of notes are struck together**, so there is barely a vertical to be
+  right or wrong about at all.
+
+So the criterion is not wrong, it is premature. Its two preconditions — parts
+that share enough register to interfere, and parts that strike together — are
+both missing, and both are changes to a texture that has been settled by ear.
+Thirty lines of roughness machinery that buys 1% is worse than nothing, because
+it looks like the vertical dimension is handled. It is not handled. It is
+absent, deliberately, until the texture can support it.
+
+The material is ready when the texture is: the hexany contains **4:5:7**, a
+septimal seventh chord, which is the sound in question.
+
+## 17. A rest is a whole number of beats
+
+Every duration in this engine is an integer multiple of the shared unit — that
+is what gave the project a pulse in the first place. But the rest between
+phrases was then scaled by a fractional roominess, which pushed the part off the
+grid and left it there for the rest of the piece.
+
+Measured: **53% of onsets were landing on the shared grid, and 100% do now.**
+Nothing else changed. It is one line, and it is the only part of the vertical
+experiment worth keeping — found by accident while looking for something else.
