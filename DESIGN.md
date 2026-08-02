@@ -1117,3 +1117,26 @@ held open instead of fading.
 
 This is the first time the instrument and the score are the same thing here,
 which was in the founding intent and has been missing since.
+
+## 22. One engine
+
+The cell engine and the original weighted-cost engine are gone. Both are in git
+history with their own design notes; §12 records why the original was replaced
+and §16 what it still had that this one does not.
+
+What that leaves is smaller than it looks. `src/` is now the instrument and the
+ear — ratios, the lattice, the resonator model, roughness, the sonority — and
+nothing that composes. All the composing is in `explore/ratios/`, three files.
+The controls went from five panels to one, and the presets, which were written
+in the old engine's vocabulary and had no meaning in this one, were rewritten in
+terms of the five things that are left: pulse, how adventurous, cents worth one
+bit, how long it remembers, how many parts, how busy.
+
+**The equal-temperament comparison still works and is now worth more.** It
+rounds every pitch to the nearest twelve-tone step on its way to the synth,
+which is the only place in this project that rounds anything, and it applies to
+the generated music as much as to the pads. It used to be a way of hearing what
+a chord gives up. Now that the music is built entirely from ratios against a
+sounding root, it is a way of hearing what the whole piece gives up — and the
+notes it damages most are the ones the design leans on hardest, since 7/6 and
+35/24 are 33 and 47 cents from anything twelve-tone has.

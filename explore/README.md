@@ -1,20 +1,20 @@
-# Explorations
+# The engine
 
-Two engines live here. Both are wired into `src/main.js` and can be chosen from
-the engine selector; neither is a library.
+`ratios/` is the composition engine, and now the only one.
 
-- **`ratios/`** — the current one, and the one the design document is about. A
-  fixed root with the root sounding underneath, pitch material from a
-  combination product set, phrases as fixed transposable objects, and variation
-  by a single ratio move. See DESIGN.md §§12-15.
-- **`bits/`** — the cell engine that came before it. A well-formed scale built by
-  stacking one generator, with a Dirichlet posterior over moves. Kept because it
-  is a genuinely different answer to the same question and it is measurable
-  against the same ruler (`bits/measure.js`, `bits/search.js`). `bits/live.js` is
-  shared: it is what drives either engine from the wall clock.
+- `cps.js` — combination product sets. A pitch is a set of factors, a move is an
+  exchange of one factor for another, and the interval of that move is the ratio
+  of the two. No scale degrees exist anywhere.
+- `compose.js` — a fixed root with the root sounding underneath; phrases as
+  fixed, transposable objects; variation by a single ratio move; a set of notes
+  that unfolds and folds back; and what somebody plays taken up as material.
+  DESIGN.md §§12-21 is about this file.
+- `live.js` — drives it from the wall clock, which is what makes it steerable
+  while it runs rather than a thing that renders and then plays.
 
-Three earlier branches were removed once the work they were reaching for had
-been done properly elsewhere. `surprisal/` carried the
-complexity-is-description-length identity, which is now recorded in DESIGN.md
-§12 and implemented in `bits/prior.js`; `algebra/` and `selfsimilar/` were never
-tested, never measured and never wired to anything.
+Two earlier engines were removed once this one worked: `bits/`, which built a
+well-formed scale by stacking a generator and kept a Dirichlet posterior over
+moves, and the original weighted-cost engine in `src/`, which chose every note
+afresh by scoring candidates. Both are in git history along with their own
+design notes; DESIGN.md §12 records why the second was replaced and §16 what the
+first still had that this one does not.

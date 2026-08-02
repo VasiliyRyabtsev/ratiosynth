@@ -5,10 +5,8 @@
 import { Engine } from "./audio/engine.js";
 import { harmonicSeries } from "./instrument.js";
 import { Sonority } from "./sonority.js";
-import { Player } from "./player.js";
-import { Composer } from "../explore/bits/compose.js";
-import { Composer as RootComposer } from "../explore/ratios/compose.js";
-import { LivePlayer } from "../explore/bits/live.js";
+import { Composer } from "../explore/ratios/compose.js";
+import { LivePlayer } from "../explore/ratios/live.js";
 import { fromFraction, format, cents, complexity, toNumber } from "./ratio.js";
 
 const engine = new Engine({ referenceHz: 264 });
@@ -63,43 +61,8 @@ const hearingKnobs = [
   { advanced: true, name: "radius", label: "search radius", min: 1, max: 3, step: 1, value: 1 },
 ];
 
-const chooseKnobs = [
-  { advanced: true, name: "balance", label: "melodic ← → harmonic", min: 0, max: 1, step: 0.02, value: 0.5 },
-  { name: "tension", label: "smooth ← → rough", min: 0, max: 1, step: 0.02, value: 0.3 },
-  { advanced: true, name: "reach", label: "simple ← → remote", min: 0, max: 1, step: 0.02, value: 0.2 },
-  { advanced: true, name: "spread", label: "decisive ← → wandering", min: 0, max: 0.6, step: 0.01, value: 0.12 },
-  { advanced: true, name: "stepRadius", label: "step size", min: 1, max: 3, step: 1, value: 1 },
-  { advanced: true, name: "doubling", label: "avoid octaves", min: 0, max: 0.6, step: 0.02, value: 0.25 },
-  { name: "homing", label: "pull toward home", min: 0, max: 1, step: 0.02, value: 0.3 },
-  { name: "stepwise", label: "steps ← → leaps", min: 0, max: 4, step: 0.1, value: 2 },
-  { advanced: true, name: "registerLow", label: "register floor", min: -2400, max: 0, step: 100, value: -1200, unit: "¢" },
-  { advanced: true, name: "registerHigh", label: "register ceiling", min: 0, max: 3600, step: 100, value: 1600, unit: "¢" },
-];
-
-const playKnobs = [
-  { name: "fieldSize", label: "pitches in play", min: 3, max: 12, step: 1, value: 7 },
-  { name: "harmonicRhythm", label: "phrases before it moves", min: 1, max: 12, step: 1, value: 4 },
-  { name: "pulse", label: "pulse", min: 0.06, max: 1, step: 0.01, value: 0.32, unit: "s" },
-  { name: "layers", label: "layers", min: 1, max: 6, step: 1, value: 3 },
-  { advanced: true, name: "layerSpread", label: "layers together ← → apart", min: 0, max: 1, step: 0.02, value: 0.75 },
-  { name: "recurrence", label: "how often shapes return", min: 0, max: 1, step: 0.02, value: 0.55 },
-  { advanced: true, name: "gestureLength", label: "shape length", min: 2, max: 12, step: 1, value: 5 },
-  { name: "density", label: "how busy", min: 0.1, max: 0.9, step: 0.02, value: 0.4 },
-  { name: "dynamics", label: "swell", min: 0, max: 1, step: 0.02, value: 0.5 },
-  { advanced: true, name: "fieldHoming", label: "how far harmony wanders", min: 0, max: 1.5, step: 0.05, value: 0.35 },
-  { advanced: true, name: "bars", label: "pattern length", min: 1, max: 4, step: 1, value: 2 },
-  { advanced: true, name: "accent", label: "downbeat accent", min: 0, max: 0.8, step: 0.02, value: 0.3 },
-  { advanced: true, name: "restChance", label: "dropped notes", min: 0, max: 0.6, step: 0.02, value: 0.1 },
-  { name: "hold", label: "note length", min: 0.2, max: 2, step: 0.05, value: 0.9 },
-  { advanced: true, name: "swing", label: "off the grid", min: 0, max: 0.3, step: 0.01, value: 0.06 },
-  { advanced: true, name: "playVelocity", label: "loudness", min: 0.1, max: 1, step: 0.02, value: 0.7 },
-];
-
-// The cell engine. Far fewer controls, because nearly everything it used to
-// need a number for is now worked out from the ratios.
-const GENERATORS = [[3, 2], [4, 3], [5, 4], [7, 4], [7, 6], [8, 5], [11, 8]];
-
 const rootKnobs = [
+  { name: "pulse", label: "pulse", min: 0.06, max: 1, step: 0.01, value: 0.32, unit: "s" },
   { name: "rootSurprise", label: "settled ← → adventurous", min: 0.5, max: 3.5, step: 0.1, value: 2.0, unit: "bits" },
   { name: "nearness", label: "cents worth one bit", min: 40, max: 600, step: 10, value: 200, unit: "¢" },
   { name: "rootMemory", label: "how long it remembers", min: 8, max: 160, step: 4, value: 48 },
@@ -107,17 +70,7 @@ const rootKnobs = [
   { name: "rootDensity", label: "how busy", min: 0.2, max: 1, step: 0.05, value: 0.3 },
 ];
 
-const cellKnobs = [
-  { name: "surprise", label: "settled ← → adventurous", min: 1.4, max: 4.6, step: 0.1, value: 3.4, unit: "bits" },
-  { name: "notes", label: "notes in the scale", min: 3, max: 12, step: 1, value: 7 },
-  { name: "generator", label: "which world", min: 0, max: GENERATORS.length - 1, step: 1, value: 0 },
-  { name: "subdivision", label: "beats to a pulse", min: 1, max: 4, step: 1, value: 2 },
-  { name: "memory", label: "how long it remembers", min: 8, max: 160, step: 4, value: 48 },
-  { name: "voices", label: "parts", min: 1, max: 5, step: 1, value: 3 },
-  { name: "cellDensity", label: "how busy", min: 0.2, max: 1, step: 0.05, value: 0.7 },
-];
-
-const allKnobs = [...voiceKnobs, ...bodyKnobs, ...hearingKnobs, ...chooseKnobs, ...playKnobs, ...cellKnobs, ...rootKnobs];
+const allKnobs = [...voiceKnobs, ...bodyKnobs, ...hearingKnobs, ...rootKnobs];
 const state = {};
 for (const knob of allKnobs) state[knob.name] = knob.value;
 
@@ -198,49 +151,8 @@ buildKnobs(document.getElementById("hearingKnobs"), hearingKnobs, () => {
     radius: state.radius,
   });
 });
-buildKnobs(document.getElementById("chooseKnobs"), chooseKnobs, () => {});
-buildKnobs(document.getElementById("playKnobs"), playKnobs, () => applyPlayParams());
-buildKnobs(document.getElementById("cellKnobs"), cellKnobs, () => applyCellParams());
 buildKnobs(document.getElementById("rootKnobs"), rootKnobs, () => applyRootParams());
 
-function applyPlayParams() {
-  player.setParams({
-    pulse: state.pulse,
-    layers: state.layers,
-    layerSpread: state.layerSpread,
-    recurrence: state.recurrence,
-    gestureLength: state.gestureLength,
-    restChance: state.restChance,
-    density: state.density,
-    dynamics: state.dynamics,
-    bars: state.bars,
-    accent: state.accent,
-    fieldSize: state.fieldSize,
-    harmonicRhythm: state.harmonicRhythm,
-    fieldHoming: state.fieldHoming,
-    hold: state.hold,
-    swing: state.swing,
-    velocity: state.playVelocity,
-    registerLow: state.registerLow,
-    registerHigh: state.registerHigh,
-  });
-}
-
-// The chooser reads its parameters fresh on every decision, so moving a slider
-// changes the next note rather than requiring anything to be restarted.
-function chooseParams() {
-  return {
-    balance: state.balance,
-    tension: state.tension,
-    reach: state.reach,
-    spread: state.spread,
-    radius: state.stepRadius,
-    doubling: state.doubling,
-    homing: state.homing,
-    registerLow: state.registerLow,
-    registerHigh: state.registerHigh,
-  };
-}
 
 // --- presets ---
 //
@@ -251,40 +163,32 @@ const PRESETS = {
   settled: {
     label: "settled",
     values: {
-      pulse: 0.34, layers: 3, fieldSize: 5, harmonicRhythm: 6, recurrence: 0.85,
-      tension: 0.14, homing: 0.6, spread: 0.05, restChance: 0.06, hold: 1.15,
-      gestureLength: 4, layerSpread: 0.8, balance: 0.55, reach: 0.12,
-      density: 0.3, bars: 2, accent: 0.35, dynamics: 0.6, stepwise: 2.6,
+      pulse: 0.4, rootSurprise: 1.4, nearness: 150, rootMemory: 96,
+      rootVoices: 2, rootDensity: 0.25,
       decay: 3.4, decaySlope: 0.8, brightness: 2400, noise: 0.4, memory: 6,
     },
   },
   flowing: {
     label: "flowing",
     values: {
-      pulse: 0.26, layers: 3, fieldSize: 7, harmonicRhythm: 4, recurrence: 0.6,
-      tension: 0.3, homing: 0.35, spread: 0.12, restChance: 0.12, hold: 0.9,
-      gestureLength: 5, layerSpread: 0.75, balance: 0.5, reach: 0.2,
-      density: 0.4, bars: 2, accent: 0.3, dynamics: 0.5, stepwise: 2,
+      pulse: 0.32, rootSurprise: 2.0, nearness: 200, rootMemory: 48,
+      rootVoices: 2, rootDensity: 0.3,
       decay: 2.5, decaySlope: 0.7, brightness: 3000, noise: 0.5, memory: 4,
     },
   },
   restless: {
     label: "restless",
     values: {
-      pulse: 0.15, layers: 4, fieldSize: 10, harmonicRhythm: 2, recurrence: 0.3,
-      tension: 0.6, homing: 0.12, spread: 0.26, restChance: 0.22, hold: 0.6,
-      gestureLength: 7, layerSpread: 0.5, balance: 0.4, reach: 0.45,
-      density: 0.55, bars: 3, accent: 0.2, dynamics: 0.35, stepwise: 1.2,
+      pulse: 0.2, rootSurprise: 3.2, nearness: 300, rootMemory: 16,
+      rootVoices: 3, rootDensity: 0.55,
       decay: 1.4, decaySlope: 0.6, brightness: 4200, noise: 0.65, memory: 2.5,
     },
   },
   bells: {
     label: "bells",
     values: {
-      pulse: 0.5, layers: 2, fieldSize: 6, harmonicRhythm: 8, recurrence: 0.75,
-      tension: 0.2, homing: 0.5, spread: 0.08, restChance: 0.3, hold: 1.8,
-      gestureLength: 4, layerSpread: 0.9, balance: 0.65, reach: 0.15,
-      density: 0.22, bars: 2, accent: 0.45, dynamics: 0.7, stepwise: 2.2,
+      pulse: 0.6, rootSurprise: 1.6, nearness: 120, rootMemory: 120,
+      rootVoices: 2, rootDensity: 0.2,
       decay: 7, decaySlope: 0.45, brightness: 5200, noise: 0.3, memory: 9,
       count: 24, ampSlope: 1.3, stretchAmount: 0.12,
     },
@@ -307,7 +211,7 @@ function applyPreset(name) {
   applyVoiceParams();
   engine.setReverb(state.reverb);
   sonority.setParams({ memory: state.memory, gravity: state.gravity, radius: state.radius });
-  applyPlayParams();
+  applyRootParams();
   rebuildInstrument();
 }
 
@@ -451,7 +355,6 @@ let heard = [];
 let settle = null;
 
 function heardNote(ratio) {
-  if (!usingRoot()) return;
   heard.push({ ratio, at: now() });
 
   // The longest note the engine writes is eight beats of its own grid; stop for
@@ -475,54 +378,7 @@ function heardNote(ratio) {
 
 // --- letting it play itself ---
 
-const player = new Player({
-  sonority,
-  now,
-  // It plays through exactly the same door the pads do, so the temperament
-  // comparison applies to it too.
-  play: (ratio, velocity, tag) => {
-    const id = engine.noteOn(ratio, { velocity, hz: temperedHz(ratio) });
-    sonority.noteOn(id, ratio, { velocity, at: now(), tag });
-    return id;
-  },
-  release: releaseNote,
-  instrument: () => ({
-    modes: engine.modes,
-    referenceHz: engine.referenceHz,
-    params: chooseParams(),
-  }),
-});
-
-const composer = new Composer({ registerLow: -1400, registerHigh: 1600 });
-
-const live = new LivePlayer({
-  composer,
-  now,
-  // Same door the pads and the old engine use, so everything downstream — the
-  // temperament comparison, the sonority readout — applies to it unchanged.
-  play: (ratio, velocity, tag) => {
-    const id = engine.noteOn(ratio, { velocity, hz: temperedHz(ratio) });
-    sonority.noteOn(id, ratio, { velocity, at: now(), tag });
-    return id;
-  },
-  release: releaseNote,
-});
-
-function applyCellParams() {
-  const [n, d] = GENERATORS[Math.round(state.generator)];
-  live.setParams({
-    pulse: state.pulse,
-    surprise: state.surprise,
-    notes: state.notes,
-    subdivision: state.subdivision,
-    memory: state.memory,
-    voices: state.voices,
-    density: state.cellDensity,
-    generator: fromFraction(n, d),
-  });
-}
-
-const rootComposer = new RootComposer({ registerLow: -1400, registerHigh: 1600 });
+const rootComposer = new Composer({ registerLow: -1400, registerHigh: 1600 });
 
 const rootLive = new LivePlayer({
   composer: rootComposer,
@@ -546,61 +402,19 @@ function applyRootParams() {
   });
 }
 
-function engineMode() {
-  return document.getElementById("engine")?.value ?? "root";
-}
-
-function usingRoot() {
-  return engineMode() === "root";
-}
-
-function usingCells() {
-  return engineMode() === "cells";
-}
-
 async function toggleAuto() {
   const button = document.getElementById("auto");
 
-  if (usingRoot()) {
-    if (rootLive.running) {
-      rootLive.stop();
-      button.classList.remove("on");
-      button.textContent = "let it play";
-      return;
-    }
-    await ensureStarted();
-    applyRootParams();
-    rootLive.start();
-    button.classList.add("on");
-    button.textContent = "stop";
-    return;
-  }
-
-  if (usingCells()) {
-    if (live.running) {
-      live.stop();
-      button.classList.remove("on");
-      button.textContent = "let it play";
-      return;
-    }
-    await ensureStarted();
-    applyCellParams();
-    live.start();
-    button.classList.add("on");
-    button.textContent = "stop";
-    return;
-  }
-
-  if (player.running) {
-    player.stop();
+  if (rootLive.running) {
+    rootLive.stop();
     button.classList.remove("on");
     button.textContent = "let it play";
     return;
   }
 
   await ensureStarted();
-  applyPlayParams();
-  player.start();
+  applyRootParams();
+  rootLive.start();
   button.classList.add("on");
   button.textContent = "stop";
 }
@@ -617,28 +431,6 @@ async function playChord(fractions) {
   setTimeout(() => ids.forEach(releaseNote), 2600);
 }
 
-function showMode() {
-  // Only the panel for the engine in use, so there is nothing to wonder about.
-  document.body.classList.remove("mode-root", "mode-cells", "mode-old");
-  document.body.classList.add(`mode-${engineMode()}`);
-}
-
-document.getElementById("engine").addEventListener("change", () => {
-  // Switching engines stops whichever is running; they must never both play.
-  if (player.running) player.stop();
-  if (live.running) live.stop();
-  if (rootLive.running) rootLive.stop();
-  const button = document.getElementById("auto");
-  button.classList.remove("on");
-  button.textContent = "let it play";
-  showMode();
-  // Let it go, so a stray arrow key or scroll cannot switch engines — and
-  // switching engines stops the music, which looks from the outside exactly
-  // like the music having broken.
-  document.getElementById("engine").blur();
-});
-
-showMode();
 
 document.getElementById("start").addEventListener("click", ensureStarted);
 document.getElementById("auto").addEventListener("click", toggleAuto);
@@ -654,7 +446,7 @@ document.getElementById("seventh").addEventListener("click", () => {
 document.getElementById("panic").addEventListener("click", () => {
   held.clear();
   document.querySelectorAll(".pad.on").forEach((pad) => pad.classList.remove("on"));
-  if (player.running) toggleAuto();
+  if (rootLive.running) toggleAuto();
   engine.allOff();
   sonority.clear();
 });
@@ -746,57 +538,8 @@ function drawReading() {
     })
     .join("");
 
-  drawDecision();
   drawShape();
   requestAnimationFrame(drawReading);
-}
-
-// The parts, the pulse they are on, and the shapes it has kept. This is where
-// the structure is visible: which layer moves at which speed, where in the
-// phrase we are, and what is being repeated.
-function drawShape() {
-  if (usingRoot()) return drawRootShape();
-  const shape = player.describe(now());
-
-  const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
-  document.getElementById("shape").innerHTML = [
-    field("periods", player.periods.join(":") || "—"),
-    field("phrase", `${shape.inPhrase + 1}/${shape.phrase}`),
-    field("shapes kept", shape.gestures.length),
-    field(
-      "swell",
-      `<span class="conf"><span style="width:${(shape.intensity * 100).toFixed(0)}%"></span></span>`,
-    ),
-  ].join("");
-
-  document.getElementById("parts").innerHTML = shape.layers
-    .map((layer) => {
-      const { pattern, steps, onsets } = layer.rhythm;
-      const cells = pattern
-        .map(
-          (on, i) =>
-            `<span class="cell${on ? " beat" : ""}${i === layer.place ? " now" : ""}"></span>`,
-        )
-        .join("");
-      return `<div class="part">
-        <span class="name">${onsets} of ${steps}</span>
-        <span class="grid">${cells}</span>
-        <span class="rep">${layer.replaying ? "↻" : ""}</span>
-        <span class="pitch">${layer.at ? format(layer.at) : "—"}</span>
-      </div>`;
-    })
-    .join("");
-
-  // Click a shape to pin it, so it stops fading and keeps coming back.
-  renderShapes(
-    shape.gestures.slice(0, 12).map((gesture) => ({
-      id: String(gesture.id),
-      label: gesture.moves.map(format).join(" "),
-      weight: gesture.weight,
-      pinned: gesture.pinned,
-      live: false,
-    })),
-  );
 }
 
 /**
@@ -846,7 +589,7 @@ function renderShapes(items) {
  * stops fading, and it becomes as likely to be played as whatever the music
  * meant to play, wherever it is.
  */
-function drawRootShape() {
+function drawShape() {
   const shape = rootComposer.describe();
 
   const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
@@ -890,55 +633,11 @@ function drawRootShape() {
 document.getElementById("gestures").addEventListener("pointerdown", (event) => {
   const shape = event.target.closest(".shape");
   if (!shape) return;
-  if (usingRoot()) {
-    const id = shape.dataset.id;
-    const phrase = rootComposer.phrases.get(id);
-    rootComposer.pin(id, !phrase?.pinned);
-    return;
-  }
-  const id = Number(shape.dataset.id);
-  const entry = player.gestures.entries.find((candidate) => candidate.id === id);
-  player.gestures.pin(id, !entry?.pinned);
+  const id = shape.dataset.id;
+  const phrase = rootComposer.phrases.get(id);
+  rootComposer.pin(id, !phrase?.pinned);
 });
 
-// The last decision, with the runners-up. The point is to be able to see that
-// the choice was scored rather than picked from a list — and to see what it
-// turned down.
-function drawDecision() {
-  const choice = player.lastChoice;
-  const decision = document.getElementById("decision");
-  const table = document.getElementById("candidates");
-
-  if (!choice) {
-    decision.innerHTML = `<div><span class="lbl">nothing chosen yet</span></div>`;
-    table.innerHTML = "";
-    return;
-  }
-
-  const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
-  decision.innerHTML = [
-    field("played", `<span class="big">${format(choice.ratio)}</span>`),
-    field("rough", choice.roughness.toFixed(3)),
-    field("tangle", choice.tangle.toFixed(2)),
-    field("cost", choice.cost.toFixed(3)),
-    field("considered", player.lastCandidates.length),
-  ].join("");
-
-  const rows = [`<tr><th>ratio</th><th>cents</th><th>rough</th><th>tangle</th><th>cost</th></tr>`];
-  for (const candidate of player.lastCandidates.slice(0, 8)) {
-    const picked = candidate === choice;
-    rows.push(
-      `<tr class="${picked ? "chosen" : ""}">
-        <td>${format(candidate.ratio)}${candidate.doubles ? " ·8" : ""}</td>
-        <td>${cents(candidate.ratio).toFixed(0)}</td>
-        <td>${candidate.roughness.toFixed(3)}</td>
-        <td>${candidate.tangle.toFixed(2)}</td>
-        <td>${candidate.cost.toFixed(3)}</td>
-      </tr>`,
-    );
-  }
-  table.innerHTML = rows.join("");
-}
 
 buildPresets();
 document.getElementById("showAll").addEventListener("change", (event) => {
