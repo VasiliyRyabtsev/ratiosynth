@@ -728,15 +728,52 @@ function drawShape() {
     .join("");
 
   // Click a shape to pin it, so it stops fading and keeps coming back.
-  document.getElementById("gestures").innerHTML = shape.gestures
-    .slice(0, 12)
-    .map(
-      (gesture) => `<div class="shape${gesture.pinned ? " pinned" : ""}" data-id="${gesture.id}">
-        ${gesture.moves.map(format).join(" ")}
-        <span class="bar" style="width:${Math.round(gesture.weight * 100)}%"></span>
-      </div>`,
-    )
-    .join("");
+  renderShapes(
+    shape.gestures.slice(0, 12).map((gesture) => ({
+      id: String(gesture.id),
+      label: gesture.moves.map(format).join(" "),
+      weight: gesture.weight,
+      pinned: gesture.pinned,
+      live: false,
+    })),
+  );
+}
+
+/**
+ * The shapes panel, updated in place rather than rebuilt.
+ *
+ * This is not an optimisation. The panel was being written with innerHTML on
+ * every animation frame, which destroys and recreates every row sixty times a
+ * second — and a browser only fires a click when the press and the release
+ * happen on the same element. The row was always gone by the time the button
+ * came up, so the click landed on the container instead, `closest(".shape")`
+ * found nothing, and pinning silently did nothing at all. In either engine, for
+ * as long as the feature has existed.
+ *
+ * Keeping the elements and changing their attributes fixes it. Moving a node is
+ * safe; replacing it is not.
+ */
+function renderShapes(items) {
+  const container = document.getElementById("gestures");
+  const existing = new Map([...container.children].map((element) => [element.dataset.id, element]));
+
+  for (const item of items) {
+    let element = existing.get(item.id);
+    if (element) {
+      existing.delete(item.id);
+    } else {
+      element = document.createElement("div");
+      element.dataset.id = item.id;
+      element.append(document.createElement("span"), document.createElement("span"));
+      element.lastChild.className = "bar";
+    }
+    element.className = `shape${item.pinned ? " pinned" : ""}${item.live ? " live" : ""}`;
+    if (element.firstChild.innerHTML !== item.label) element.firstChild.innerHTML = item.label;
+    element.lastChild.style.width = `${Math.round(item.weight * 100)}%`;
+    container.append(element); // appending one that is already here just moves it
+  }
+
+  for (const element of existing.values()) element.remove();
 }
 
 /**
@@ -774,22 +811,23 @@ function drawRootShape() {
     .join("");
 
   const playing = new Set(shape.parts.map((part) => part.playing));
-  document.getElementById("gestures").innerHTML = shape.phrases
-    .slice(0, 12)
-    .map(
-      (phrase) => `<div class="shape${phrase.pinned ? " pinned" : ""}${playing.has(phrase.id) ? " live" : ""}" data-id="${escapeAttribute(phrase.id)}">
-        ${phrase.notes.map((note, i) => `${format(note)}<sub>${phrase.counts[i]}</sub>`).join(" ")}
-        <span class="bar" style="width:${Math.round(phrase.weight * 100)}%"></span>
-      </div>`,
-    )
-    .join("");
+  renderShapes(
+    shape.phrases.slice(0, 12).map((phrase) => ({
+      id: phrase.id,
+      label: phrase.notes.map((note, i) => `${format(note)}<sub>${phrase.counts[i]}</sub>`).join(" "),
+      weight: phrase.weight,
+      pinned: phrase.pinned,
+      live: playing.has(phrase.id),
+    })),
+  );
 }
 
-function escapeAttribute(text) {
-  return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-}
-
-document.getElementById("gestures").addEventListener("click", (event) => {
+// On press, not on click. A click needs the press and the release to land on the
+// same element, which is one more thing that has to hold in a panel that is
+// redrawn continuously; pressing is decided the moment it happens and there is
+// nothing left to go wrong. It also feels quicker, which is the point of a
+// control you are meant to use while listening.
+document.getElementById("gestures").addEventListener("pointerdown", (event) => {
   const shape = event.target.closest(".shape");
   if (!shape) return;
   if (usingRoot()) {
