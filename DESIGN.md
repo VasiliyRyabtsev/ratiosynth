@@ -999,3 +999,45 @@ the room. It must never be excluded from anything that chooses notes, for the
 same reason. But it is a *constant*, and listing a constant among the variables
 buries them — the drone never stops, so it was most of the panel most of the
 time. It is shown once, on its own line, and what changes is shown below it.
+
+## 20. Folding back
+
+The unfolding only ever went one way. Over an hour the piece reached its full
+set of notes and then stayed there, so the last forty-five minutes had no shape
+above the length of a section. The question was when it should fold back up
+again, and the answer had to come from the music rather than from a clock.
+
+**First the counter had to mean what it said.** "Settled" is meant to mean the
+piece just repeated itself, and it was measuring something else: a phrase's
+`count` rises when it is picked to build a *new section* out of, so a phrase
+inside a section that repeats for ten minutes could be heard two hundred times
+with its count still at one — and every one of those statements reset the
+counter to zero. The engine was calling its most repetitive stretches unsettled.
+Measured, one run in three never finished unfolding in an hour, and whether it
+unfolded at all was close to a coin toss. It now counts statements of a phrase
+that has been stated before, which is what the words always meant. All three
+seeds now unfold, in the same order, at comparable times.
+
+**Then the fold-back is the other branch of the same test.** Settling long
+enough means the piece has run out of things to say with what it has. If there
+is a note left to admit, admit it. If there is not — everything is in play and
+it has gone on repeating for as long again — then there is nothing left to
+reveal, and it returns to what it opened with and unfolds again from there. One
+counter, one threshold, no clock, no new parameter. It is the shape of
+everything else here: depart, and come home when there is no reason to be away.
+
+A phrase is only offered if every note of it is currently in play. Without that
+the fold-back would be inaudible, because the vocabulary keeps every phrase it
+ever invented and would go on playing the notes just withdrawn.
+
+Measured over three hours, three seeds: cycles of roughly 60 to 90 minutes,
+4 → 5 → 6 → 4, two or three fold-backs each.
+
+**The two halves of the cycle are not the same length, and that is worth
+knowing.** The first unfolding takes 20 to 50 minutes, because the vocabulary is
+empty and every new shape resets the counter. After a fold-back the counter runs
+almost uninterrupted, because everything that fits four notes is already known —
+so the return to the opening texture lasts about three minutes before it climbs
+again. There is an argument that this is right, since a piece that knows its
+material should move through it faster. Whether three minutes is a breath or a
+blip is a listening question, not a measurable one.

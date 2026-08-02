@@ -390,7 +390,13 @@ export class Composer {
     // whatever was actually meant, and it can arrive in the middle of a family
     // it has no relation to. It is the only way anything outside the music
     // reaches in, and it costs one term.
-    const family = [...this.phrases.values()].filter((p) => p.pinned || this.distance(p, intended) < Infinity);
+    // Only shapes made of notes that are currently in play — otherwise folding
+    // back would change nothing audible, since the vocabulary keeps every phrase
+    // it ever invented and would go on playing the notes just withdrawn.
+    let family = [...this.phrases.values()].filter(
+      (p) => p.pinned || (this.fits(p) && this.distance(p, intended) < Infinity),
+    );
+    if (family.length === 0) family = [intended];
     const child = this.vary(intended);
     if (child && !this.phrases.has(child.id)) family.push(child);
     const weights = family.map((p) => Math.pow(2, -(p.pinned ? 0 : this.distance(p, intended))));
@@ -477,9 +483,30 @@ export class Composer {
     // threshold exhausts a large set no slower than a small one — measured, that
     // unfolded the whole set inside the first minute and there was nothing to
     // hear. A cube gives each stage a length in proportion to what it contains.
-    this.settled = intended.count > 1 ? this.settled + 1 : 0;
-    if (this.settled >= Math.pow(this.admitted, 3) && this.admitted < this.order.length) {
-      this.admitted += 1;
+    // Settled means the piece just said something it has said before. It has to
+    // be about what was *played*, and it was not: `count` rises when a phrase is
+    // picked to build a new section out of, so a phrase inside a section that
+    // repeats for ten minutes can be heard two hundred times with its count
+    // still at one — and every one of those statements reset the counter.
+    // Measured, one run in three never finished unfolding in an hour, and the
+    // engine was calling its most repetitive stretches unsettled.
+    phrase.said = (phrase.said ?? 0) + 1;
+    this.settled = phrase.said > 1 ? this.settled + 1 : 0;
+
+    // One counter, and the fold-back is the other branch of it.
+    //
+    // Settling long enough means the piece has run out of things to say with
+    // what it has. If there is something left to admit, admit it. If there is
+    // not — everything is already in play and it has gone on repeating for as
+    // long again — then there is nothing left to reveal, and the piece returns
+    // to what it opened with and unfolds again from there, over different
+    // material, because the vocabulary it built is still there.
+    //
+    // The alternative was a clock, and this project does not have clocks. This
+    // is the same shape as everything else here: depart, and come home when
+    // there is no reason to be away.
+    if (this.settled >= Math.pow(this.admitted, 3)) {
+      this.admitted = this.admitted < this.order.length ? this.admitted + 1 : this.openingSize();
       this.settled = 0;
     }
     return phrase;
@@ -673,6 +700,12 @@ export class Composer {
       { ratio: withOctaves(UNISON, -1), velocity: 0.3, sustain: 0.2, tag: "drone" },
       { ratio: withOctaves(UNISON, 0), velocity: 0.21, sustain: 0.14, tag: "drone" },
     ];
+  }
+
+  /** Is every note of this shape one of the notes currently in play? */
+  fits(phrase) {
+    const inPlay = this.available();
+    return phrase.points.every((point) => inPlay.some((member) => equals(member.ratio, point)));
   }
 
   /** Hold a shape in the vocabulary, or let it go again. */
