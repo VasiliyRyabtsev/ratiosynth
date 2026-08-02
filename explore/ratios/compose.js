@@ -82,6 +82,7 @@ export class Composer {
     // While somebody is playing, the parts hold back. Two things making music at
     // once without listening to each other is not an accompaniment.
     this.quietUntil = 0;
+    this.wanted = null;
 
     // Progressive disclosure. The piece does not begin with its whole pitch set;
     // it admits them one at a time, simplest against the root first, the way an
@@ -343,7 +344,16 @@ export class Composer {
     }
 
     const made = phraseFrom(points, counts);
-    return made.id === phrase.id ? null : made;
+    if (made.id === phrase.id) return null;
+    // A child inherits its parent's favour, and with it the right to be heard at
+    // all. Without this a played shape is stated once and then cannot go
+    // anywhere: every variation of it still contains the notes that were played,
+    // so the rule that a phrase must be built from the notes currently in play
+    // throws all of them away, and the lineage dies with the first statement.
+    // Favour fades on its own, so a line of descent is absorbed rather than cut.
+    made.favour = phrase.favour;
+    made.from = phrase.from ?? phrase.id;
+    return made;
   }
 
   /**
@@ -397,12 +407,17 @@ export class Composer {
     // back would change nothing audible, since the vocabulary keeps every phrase
     // it ever invented and would go on playing the notes just withdrawn.
     let family = [...this.phrases.values()].filter(
-      (p) => p.pinned || (this.fits(p) && this.distance(p, intended) < Infinity),
+      (p) => p.pinned || p.favour > 0 || (this.fits(p) && this.distance(p, intended) < Infinity),
     );
     if (family.length === 0) family = [intended];
     const child = this.vary(intended);
     if (child && !this.phrases.has(child.id)) family.push(child);
-    const weights = family.map((p) => Math.pow(2, -(p.pinned ? 0 : this.distance(p, intended))));
+
+    // Favour is distance forgiven, in bits, and it fades. Pinning is the same
+    // quantity held open: a pinned shape is simply always home.
+    const weights = family.map((p) =>
+      Math.pow(2, -(p.pinned ? 0 : Math.max(0, this.distance(p, intended) - p.favour))),
+    );
     const picked = draw(family, weights, this.random);
     if (!this.phrases.has(picked.id)) this.phrases.set(picked.id, picked);
     return picked;
@@ -445,6 +460,22 @@ export class Composer {
    * an ear that has heard AABA once will hear the return of A.
    */
   chooseSection() {
+    // Something was just played. Say it, answer it, say it again.
+    if (this.wanted) {
+      const shape = this.wanted;
+      this.wanted = null;
+      const strongest = Math.max(1, ...[...this.sections.values()].map((s) => s.count));
+      const section = { phrases: [shape, this.choosePhrase(), shape], count: strongest };
+      section.id = section.phrases.map((phrase) => phrase.id).join("/");
+      const seen = this.sections.get(section.id);
+      if (seen) {
+        seen.count += 1;
+        return seen;
+      }
+      this.sections.set(section.id, section);
+      return section;
+    }
+
     const known = [...this.sections.values()];
     const length = 2 + Math.floor(this.random() * 3);
     const fresh = { phrases: Array.from({ length }, () => this.choosePhrase()), count: 1 };
@@ -495,6 +526,11 @@ export class Composer {
     // engine was calling its most repetitive stretches unsettled.
     phrase.said = (phrase.said ?? 0) + 1;
     this.settled = phrase.said > 1 ? this.settled + 1 : 0;
+
+    const fade = Math.exp(-1 / Math.max(1, this.params.memory));
+    for (const known of this.phrases.values()) {
+      if (known.favour > 0) known.favour = known.favour > 0.05 ? known.favour * fade : 0;
+    }
 
     // One counter, and the fold-back is the other branch of it.
     //
@@ -739,9 +775,40 @@ export class Composer {
 
     const phrase = phraseFrom(points, counts, octaves);
     const known = this.phrases.get(phrase.id) ?? phrase;
-    known.pinned = true;
+    // Four bits nearer than it is. Measured, a phrase and the variants it is
+    // heard against sit two to four bits apart, so four bits puts a played shape
+    // ahead of them without silencing them — it leads, it does not take over.
+    // And it fades at the same rate as everything else the piece remembers, so
+    // it is absorbed rather than installed. Clicking it pins it, which is the
+    // same quantity held open instead of decaying.
+    known.favour = 4;
+    known.from = known.id;
     known.said = (known.said ?? 0) + 1;
+    // Weighted as heavily as whatever the piece is most about. Left at one it
+    // was stated once and then never chosen again, because the vocabulary is
+    // drawn on in proportion to use and everything else had a running start —
+    // measured, it was 11% of the first two minutes and 0% of every minute
+    // after. This puts it level with the piece's main material rather than
+    // above it, and it fades from there like anything else.
+    known.count = Math.max(1, ...[...this.phrases.values()].map((p) => p.count));
     this.phrases.set(known.id, known);
+
+    // And the piece means to play it.
+    //
+    // Adding it to the vocabulary is not enough, and measuring showed why:
+    // phrase choice is a draw weighted by distance from what was *meant*, and a
+    // played shape is far from anything the engine wrote — different notes,
+    // often a different length, which makes the distance infinite. Forgiving it
+    // four bits changed nothing; it was chosen 0% of the time. Pinning worked
+    // only because it threw distance away altogether, which is why it dominated.
+    //
+    // Neither is right. A shape somebody played is not a candidate to be
+    // measured against what the music meant — it is a new thing for the music to
+    // mean. So it becomes an intention, and from there everything else follows
+    // on its own: the piece states it, varies it one ratio at a time, and comes
+    // back to it, because that is what it does with anything it means.
+    this.wanted = known;
+    for (const part of this.parts) part.section = null;
     return known;
   }
 
@@ -894,6 +961,7 @@ function phraseFrom(points, counts, octaves) {
     counts,
     count: 1,
     pinned: false,
+    favour: 0, // bits nearer than it really is, and fading
     octaves: octaves ?? contourFor(points),
     id: key(points) + " " + counts.join("."),
   };

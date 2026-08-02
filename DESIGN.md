@@ -1069,14 +1069,40 @@ Where one phrase ends and the next begins is the longest note the engine writes,
 eight beats of its own grid. Nothing arbitrary is chosen; it is the unit the
 music is already counting in.
 
-**It comes in pinned**, and pinned already means two useful things: at distance
-nought from wherever the music is, so the piece takes it up immediately; and
-exempt from the rule that a phrase must be built from the notes currently in
-play, so it survives being played in notes the set does not contain. Somebody
-who plays a note has said they want it. Measured, a played shape is 54% of the
-phrases in the following ten minutes, and from there the existing machinery
-varies it one ratio at a time and keeps returning to it. It appears in the
-shapes panel; clicking lets it go.
+**It does not come in pinned.** Pinning throws distance away entirely, which
+made a played shape 54% of everything for as long as the session lasted — a
+looper, not a musician. But the opposite, letting it merely influence the
+weighting, measured 0%: phrase choice is a draw weighted by distance from what
+was *meant*, and a played shape is far from anything the engine wrote, different
+notes and often a different length, which makes that distance infinite.
+Forgiving it four bits changed nothing at all.
+
+Neither is right, and the measurement says why. **A shape somebody played is not
+a candidate to be judged against what the music meant. It is a new thing for the
+music to mean.** So it becomes an intention: the piece states it, answers it, and
+states it again, and from there everything already built does the rest — it is
+varied one ratio at a time and returned to, because that is what this engine does
+with anything it means.
+
+Three things make it stick, each found by measuring the previous attempt:
+
+- it is weighted as heavily as whatever the piece is most about, not at one.
+  Left at one it was stated once and never chosen again, because the vocabulary
+  is drawn on in proportion to use and everything else had a running start;
+- its children inherit its favour, and with it the right to be heard at all.
+  Every variation of a played shape still contains the notes that were played,
+  so the rule that a phrase must be built from the notes currently in play threw
+  all of them away and the lineage died with the first statement;
+- favour fades, so the line of descent is absorbed rather than installed.
+
+Measured over a quarter of an hour after playing a rising 1/1 9/8 5/4 3/2 2/1:
+17% of phrases in the first two minutes are the shape itself, around 10% for the
+next six, and by minutes twelve to sixteen the shape itself has gone entirely
+while its descendants are still 9 to 11%. It is played back, then absorbed, then
+survives transformed — which is what happens to a phrase you give a musician.
+
+It appears in the shapes panel, and clicking pins it, which is the same quantity
+held open instead of fading.
 
 This is the first time the instrument and the score are the same thing here,
 which was in the founding intent and has been missing since.
