@@ -79,6 +79,9 @@ export class Composer {
       next: 0,
     }));
     this.droneNext = 0;
+    // While somebody is playing, the parts hold back. Two things making music at
+    // once without listening to each other is not an accompaniment.
+    this.quietUntil = 0;
 
     // Progressive disclosure. The piece does not begin with its whole pitch set;
     // it admits them one at a time, simplest against the root first, the way an
@@ -702,6 +705,46 @@ export class Composer {
     ];
   }
 
+  /**
+   * Keep something the player played.
+   *
+   * It arrives as absolute pitches with times on them, and a phrase here is a
+   * word of ratios with note lengths and a contour — which is the same object,
+   * so nothing has to be approximated. Each note is divided by the first, which
+   * makes the shape independent of where it was played; the gaps between onsets
+   * are rounded to whole beats of the engine's own grid; and the ups and downs
+   * are taken from what was actually played rather than recomputed, because the
+   * point is to keep what was meant.
+   *
+   * It comes in pinned. That is not a flourish — pinned already means "at
+   * distance nought from wherever the music is", so a played shape is as likely
+   * as anything the piece meant to play and can arrive anywhere, and pinned
+   * shapes are exempt from the rule that a phrase must be built from the notes
+   * currently in play. Somebody who plays a note has said they want it. The
+   * shapes panel shows it, and clicking lets it go again.
+   */
+  listen(played) {
+    if (!played || played.length < 2) return null;
+    const unit = this.params.pulse / this.subdivision;
+    const home = played[0].ratio;
+
+    const points = played.map((note) => octaveReduce(div(note.ratio, home)));
+    const octaves = played.map((note, i) =>
+      Math.round((cents(div(note.ratio, home)) - cents(points[i])) / 1200),
+    );
+    const counts = played.map((note, i) => {
+      const span = i + 1 < played.length ? played[i + 1].at - note.at : note.held ?? unit;
+      return Math.max(1, Math.round(span / unit));
+    });
+
+    const phrase = phraseFrom(points, counts, octaves);
+    const known = this.phrases.get(phrase.id) ?? phrase;
+    known.pinned = true;
+    known.said = (known.said ?? 0) + 1;
+    this.phrases.set(known.id, known);
+    return known;
+  }
+
   /** Is every note of this shape one of the notes currently in play? */
   fits(phrase) {
     const inPlay = this.available();
@@ -843,10 +886,17 @@ function contourFor(points) {
 }
 
 /** A phrase, built from its notes and their lengths. */
-function phraseFrom(points, counts) {
+function phraseFrom(points, counts, octaves) {
   // The rhythm is part of the phrase's name, because two phrases on the same
   // notes with different lengths are two phrases.
-  return { points, counts, count: 1, pinned: false, octaves: contourFor(points), id: key(points) + " " + counts.join(".") };
+  return {
+    points,
+    counts,
+    count: 1,
+    pinned: false,
+    octaves: octaves ?? contourFor(points),
+    id: key(points) + " " + counts.join("."),
+  };
 }
 
 /** The interval from each note of a phrase to the next. */

@@ -425,12 +425,52 @@ async function noteOnExact(ratio, velocity = 0.8) {
   // The sonority is told the ratio, never the frequency — even under the
   // temperament comparison, where the two no longer agree.
   sonority.noteOn(id, ratio, { velocity, at: now() });
+  heardNote(ratio);
   return id;
 }
 
 function releaseNote(id) {
   engine.noteOff(id);
   sonority.noteOff(id, { at: now() });
+}
+
+// --- what the player plays becomes material ---
+//
+// Two things were wrong with pads and the engine running together. Nothing the
+// player did reached the music — it went into the sonority and no further — and
+// both were sounding at once, which is not an accompaniment, it is two things
+// making music in the same room without listening.
+//
+// So: while a note is being played the parts hold back, and once the playing
+// stops the phrase is handed to the engine as a shape, pinned. From there the
+// machinery that already exists does the rest — a pinned shape is at distance
+// nought from wherever the music is, so the piece takes it up, varies it by one
+// ratio at a time and keeps coming back to it.
+
+let heard = [];
+let settle = null;
+
+function heardNote(ratio) {
+  if (!usingRoot()) return;
+  heard.push({ ratio, at: now() });
+
+  // The longest note the engine writes is eight beats of its own grid; stop for
+  // longer than that and the phrase is over. Nothing arbitrary is being chosen —
+  // it is the same unit the music is already counting in.
+  const unit = rootComposer.params.pulse / rootComposer.subdivision;
+  const gap = unit * 8;
+
+  if (rootLive.running) rootLive.hush(gap);
+  clearTimeout(settle);
+  settle = setTimeout(() => {
+    const played = heard;
+    heard = [];
+    if (played.length < 2) return; // one note is a note, not a shape
+    for (let i = 0; i < played.length; i++) {
+      played[i].held = (i + 1 < played.length ? played[i + 1].at : played[i].at + unit) - played[i].at;
+    }
+    rootComposer.listen(played);
+  }, gap * 1000);
 }
 
 // --- letting it play itself ---

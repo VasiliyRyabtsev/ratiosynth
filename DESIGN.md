@@ -1041,3 +1041,42 @@ so the return to the opening texture lasts about three minutes before it climbs
 again. There is an argument that this is right, since a piece that knows its
 material should move through it faster. Whether three minutes is a breath or a
 blip is a listening question, not a measurable one.
+
+## 21. What the player plays becomes material
+
+Playing a pad while the engine ran did nothing to the music. The note went into
+the sonority and no further, and the engine carried on generating over the top —
+two things making music in the same room without listening to each other.
+
+Both halves are now joined, and the joining needed almost no new machinery,
+because a played phrase and a written one are the same kind of object.
+
+**While somebody is playing, the parts hold back.** They are carried forward
+rather than paused, so they do not build up a debt of notes and discharge it in
+a burst the moment the player stops. They simply were not playing during that
+time, which is what a musician who is listening does.
+
+**When the playing stops, the phrase is kept.** It arrives as absolute pitches
+with times on them; a phrase here is a word of ratios with note lengths and a
+contour, which is the same object, so nothing is approximated. Each note is
+divided by the first, which makes the shape independent of where it was played.
+The gaps between onsets are rounded to whole beats of the engine's own grid. The
+ups and downs are taken from what was actually played rather than recomputed,
+because the point is to keep what was meant — measured, a rising 1/1 9/8 5/4 3/2
+2/1 comes back as 0 204 386 702 1200 cents, exactly.
+
+Where one phrase ends and the next begins is the longest note the engine writes,
+eight beats of its own grid. Nothing arbitrary is chosen; it is the unit the
+music is already counting in.
+
+**It comes in pinned**, and pinned already means two useful things: at distance
+nought from wherever the music is, so the piece takes it up immediately; and
+exempt from the rule that a phrase must be built from the notes currently in
+play, so it survives being played in notes the set does not contain. Somebody
+who plays a note has said they want it. Measured, a played shape is 54% of the
+phrases in the following ten minutes, and from there the existing machinery
+varies it one ratio at a time and keeps returning to it. It appears in the
+shapes panel; clicking lets it go.
+
+This is the first time the instrument and the score are the same thing here,
+which was in the founding intent and has been missing since.

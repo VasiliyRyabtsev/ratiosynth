@@ -72,6 +72,15 @@ export class LivePlayer {
   step_() {
     const at = this.now() - this.origin;
 
+    // Hold back while somebody is playing. The parts are carried forward so they
+    // do not pile up a debt of notes and then discharge it in a burst the moment
+    // the player stops — they simply were not playing during that time, which is
+    // what a musician who is listening does.
+    if (this.composer.quietUntil > at) {
+      for (const part of this.composer.parts) if (part.next < at) part.next = at;
+      return this.sweep();
+    }
+
     // The guard is not politeness: if a parameter change makes every part's
     // duration tiny, this loop would otherwise try to catch up forever inside
     // one timer callback and freeze the page.
@@ -114,11 +123,22 @@ export class LivePlayer {
       }
     }
 
+    this.sweep();
+  }
+
+  /** Let go of anything whose time is up. */
+  sweep() {
     const now = this.now();
     this.holding = this.holding.filter((held) => {
       if (held.until > now) return true;
       this.release(held.id);
       return false;
     });
+  }
+
+  /** Keep quiet for a while — somebody else is playing. */
+  hush(seconds) {
+    if (this.composer.quietUntil === undefined) return;
+    this.composer.quietUntil = this.now() - this.origin + seconds;
   }
 }
