@@ -1,0 +1,6 @@
+node_modules/
+dist/
+
+# MIDI corpora used for measuring structure, not part of the project.
+# See tools/corpus.js; the measurements they produce live in tools/out/.
+_dev_data/

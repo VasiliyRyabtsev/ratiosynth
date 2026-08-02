@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ratiosynth</title>
+    <style>
+      :root {
+        --bg: #14161a;
+        --panel: #1c1f25;
+        --line: #2b3038;
+        --text: #d8dce3;
+        --dim: #7a828f;
+        --accent: #7fd4c1;
+        --hot: #e8b06a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      }
+      h1 { font-size: 15px; font-weight: 600; margin: 0 0 2px; letter-spacing: 0.04em; }
+      .sub { color: var(--dim); margin-bottom: 20px; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
+      @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+
+      button {
+        font: inherit;
+        color: var(--text);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 7px 12px;
+        cursor: pointer;
+      }
+      button:hover { border-color: var(--dim); }
+      #start { border-color: var(--accent); color: var(--accent); }
+      #start[hidden] { display: none; }
+
+      .pads { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0; }
+      .pad {
+        min-width: 74px;
+        padding: 12px 8px;
+        text-align: center;
+        user-select: none;
+        touch-action: none;
+      }
+      .pad .r { font-size: 15px; }
+      .pad .c { color: var(--dim); font-size: 11px; }
+      .pad .k { color: var(--line); font-size: 10px; }
+      .pad.on { background: #26313a; border-color: var(--accent); color: var(--accent); }
+      .pad.on .c { color: var(--accent); }
+
+      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+      .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); margin: 0 0 10px; font-weight: 600; }
+      .panel + .panel { margin-top: 14px; }
+
+      .knob { margin-bottom: 9px; }
+      .knob label { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+      .knob .val { color: var(--hot); }
+      input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+      table { border-collapse: collapse; width: 100%; }
+      th, td { text-align: right; padding: 1px 6px; }
+      th { color: var(--dim); font-weight: 400; }
+      td:first-child, th:first-child { text-align: left; }
+      .partials { max-height: 260px; overflow-y: auto; }
+      .bar { display: inline-block; height: 7px; background: var(--accent); border-radius: 1px; vertical-align: middle; }
+      .note { color: var(--dim); margin-top: 12px; }
+
+      .reading { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 12px; }
+      .reading div { display: flex; gap: 6px; }
+      .reading .lbl { color: var(--dim); }
+      .reading .big { color: var(--accent); font-size: 15px; }
+      .memory { display: flex; flex-wrap: wrap; gap: 4px; min-height: 44px; align-content: flex-start; }
+      .mem {
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px 6px;
+        text-align: center;
+        color: var(--dim);
+        min-width: 46px;
+      }
+      .mem.live { color: var(--accent); border-color: var(--accent); }
+      .mem .w { display: block; height: 3px; background: currentColor; border-radius: 1px; margin-top: 3px; }
+      .conf { display: inline-block; width: 60px; height: 7px; border: 1px solid var(--line); border-radius: 2px; vertical-align: middle; }
+      .conf span { display: block; height: 100%; background: var(--accent); }
+      tr.chosen td { color: var(--accent); }
+
+      .parts { margin-bottom: 12px; }
+      .part { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+      .part .name { color: var(--dim); width: 58px; }
+      .part .grid { display: flex; gap: 2px; flex: 1; flex-wrap: nowrap; overflow: hidden; }
+      .part .cell { width: 7px; height: 12px; border-radius: 1px; background: var(--line); flex: none; }
+      .part .cell.beat { background: #39424d; }
+      .part .cell.now { background: var(--accent); }
+      .part .pitch { width: 62px; text-align: right; color: var(--accent); }
+      .part .rep { color: var(--hot); width: 16px; }
+
+      .gestures { display: flex; flex-wrap: wrap; gap: 5px; }
+      .shape {
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px 7px;
+        cursor: pointer;
+        color: var(--dim);
+        font-size: 11px;
+      }
+      .shape:hover { border-color: var(--dim); }
+      .shape.pinned { border-color: var(--hot); color: var(--hot); }
+      .shape .bar { display: block; height: 2px; margin-top: 3px; background: currentColor; }
+      #auto.on { border-color: var(--hot); color: var(--hot); }
+      .row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+      .compare { color: var(--hot); }
+      .knob.advanced, .panel.advanced { display: none; }
+      body.expert .knob.advanced { display: block; }
+      body.expert .panel.advanced { display: block; }
+      .mode-only { display: none; }
+      .mode-root #rootPanel, .mode-cells #cellPanel { display: block; }
+    </style>
+  </head>
+  <body>
+    <h1>ratiosynth</h1>
+    <div class="sub">pitches are ratios; frequencies happen once, at the end. the rhythm is the same numbers as the harmony.</div>
+
+    <div class="layout">
+      <div>
+        <div class="row">
+          <button id="start">click to start audio</button>
+          <button id="auto">let it play</button>
+          <button id="triad">play 4:5:6</button>
+          <button id="seventh">play 4:5:6:7</button>
+          <button id="panic">stop all</button>
+          <label class="row"><input type="checkbox" id="et" /> <span class="compare">compare to equal temperament</span></label>
+          <label class="row"><span class="compare">engine</span>
+            <select id="engine">
+              <option value="root">fixed root + drone</option>
+              <option value="cells">cells</option>
+              <option value="old">original</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row" id="presets" style="margin-top:10px">
+          <span class="lbl" style="color:var(--dim)">start from</span>
+        </div>
+
+        <div class="pads" id="pads"></div>
+
+        <div class="panel">
+          <h2>the sonority — what it hears</h2>
+          <div class="reading" id="reading"></div>
+          <div class="memory" id="memory"></div>
+        </div>
+
+        <div class="panel">
+          <h2>the shape — parts, pulse and what recurs</h2>
+          <div class="reading" id="shape"></div>
+          <div class="parts" id="parts"></div>
+          <div class="gestures" id="gestures"></div>
+        </div>
+
+        <div class="panel">
+          <h2>the choice — why it played that</h2>
+          <div class="reading" id="decision"></div>
+          <div class="partials"><table id="candidates"></table></div>
+        </div>
+
+        <div class="panel">
+          <h2>partials of the instrument</h2>
+          <div class="partials"><table id="partials"></table></div>
+        </div>
+
+        <div class="note">
+          hold a pad or its key to sustain. click a remembered shape to pin it, and it
+          stops fading and keeps coming back. the comparison toggle rounds every pitch
+          to the nearest equal-tempered step — the only place in this project that
+          rounds anything, and it is there so you can hear what is being given up.
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <label class="row"><input type="checkbox" id="showAll" /> show every control</label>
+        </div>
+        <div class="panel">
+          <h2>strike and life</h2>
+          <div id="voiceKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>the body</h2>
+          <div id="bodyKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>listening</h2>
+          <div id="hearingKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>choosing</h2>
+          <div id="chooseKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>playing</h2>
+          <div id="playKnobs"></div>
+        </div>
+
+        <div class="panel mode-only" data-mode="cells" id="cellPanel">
+          <h2>cell engine</h2>
+          <div id="cellKnobs"></div>
+        </div>
+
+        <div class="panel mode-only" data-mode="root" id="rootPanel">
+          <h2>fixed root</h2>
+          <div id="rootKnobs"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

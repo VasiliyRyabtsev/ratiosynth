@@ -1,0 +1,16 @@
+{
+  "name": "ratiosynth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A browser instrument that tunes itself",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "vite": "^8.2.0"
+  }
+}
