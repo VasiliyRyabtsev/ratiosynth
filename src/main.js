@@ -592,6 +592,10 @@ document.getElementById("engine").addEventListener("change", () => {
   button.classList.remove("on");
   button.textContent = "let it play";
   showMode();
+  // Let it go, so a stray arrow key or scroll cannot switch engines — and
+  // switching engines stops the music, which looks from the outside exactly
+  // like the music having broken.
+  document.getElementById("engine").blur();
 });
 
 showMode();

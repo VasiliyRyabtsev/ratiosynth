@@ -53,6 +53,23 @@ export class LivePlayer {
   }
 
   tick() {
+    // Nothing thrown in here may be allowed to stop the music silently.
+    //
+    // A timer callback that throws leaves the page looking exactly like a page
+    // where somebody pressed stop: no sound, no error, no clue. Whatever went
+    // wrong with one tick, the next one gets a fresh try, and the problem says
+    // so out loud once rather than never.
+    try {
+      this.step_();
+    } catch (problem) {
+      if (!this.complained) {
+        this.complained = true;
+        console.error("the player hit a problem and is carrying on", problem);
+      }
+    }
+  }
+
+  step_() {
     const at = this.now() - this.origin;
 
     // The guard is not politeness: if a parameter change makes every part's

@@ -326,7 +326,14 @@ export class Composer {
       const weights = options.map((n) => Math.pow(2, -complexity(fromFraction(n, counts[i]))));
       const to = draw(options, weights, this.random);
       const spare = to - counts[i];
-      const j = counts.findIndex((c, k) => k !== i && c - spare >= 1);
+      // The compensating note has to stay a sensible length. The phrase's total
+      // is invariant, so nothing stops one note absorbing the others over many
+      // generations — and a note lasting 43 beats is not only unmusical, it is a
+      // prime the ratio type does not carry, so measuring the distance to it
+      // would throw. Six seeds run for an hour never got past 8, but "rare" is
+      // the wrong guarantee for something that would stop the music dead.
+      const longest = COUNTS[COUNTS.length - 1];
+      const j = counts.findIndex((c, k) => k !== i && c - spare >= 1 && c - spare <= longest);
       if (j < 0) return null;
       counts[i] = to;
       counts[j] -= spare;
