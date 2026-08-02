@@ -409,7 +409,13 @@ export class Composer {
     let family = [...this.phrases.values()].filter(
       (p) => p.pinned || p.favour > 0 || (this.fits(p) && this.distance(p, intended) < Infinity),
     );
-    if (family.length === 0) family = [intended];
+    // Nothing fits: write something that does, rather than playing the intention
+    // anyway. Playing it anyway was letting the piece drift back into material it
+    // had just withdrawn — measured, a played shape's descendants fell to 1% by
+    // the twentieth minute and then climbed to 38% by the sixtieth, because every
+    // fold-back narrows the set, empties this list more often, and hands the
+    // music back to whatever the section happened to be holding.
+    if (family.length === 0) return this.invent();
     const child = this.vary(intended);
     if (child && !this.phrases.has(child.id)) family.push(child);
 
@@ -425,7 +431,9 @@ export class Composer {
 
   /** A phrase to build a section out of: one already used, or a new one. */
   choosePhrase() {
-    const known = [...this.phrases.values()];
+    // Sections are built only from shapes that can actually be played with the
+    // notes in play — or that somebody asked for.
+    const known = [...this.phrases.values()].filter((p) => p.pinned || p.favour > 0 || this.fits(p));
     const fresh = this.invent();
     fresh.count = 1;
     const candidates = known.concat([fresh]);

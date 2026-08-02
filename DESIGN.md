@@ -1095,11 +1095,22 @@ Three things make it stick, each found by measuring the previous attempt:
   all of them away and the lineage died with the first statement;
 - favour fades, so the line of descent is absorbed rather than installed.
 
-Measured over a quarter of an hour after playing a rising 1/1 9/8 5/4 3/2 2/1:
-17% of phrases in the first two minutes are the shape itself, around 10% for the
-next six, and by minutes twelve to sixteen the shape itself has gone entirely
-while its descendants are still 9 to 11%. It is played back, then absorbed, then
-survives transformed — which is what happens to a phrase you give a musician.
+Measured over an hour after playing a rising 1/1 9/8 5/4 3/2 2/1: the shape and
+its descendants are 13% of the phrases in the first five minutes, 5% in the next
+five, 1% by the fifteenth and nothing after. It is played back, then absorbed,
+then survives transformed for a while — which is what happens to a phrase you
+give a musician.
+
+**That measurement first came out very wrong, and the way it was wrong matters.**
+Followed for only a quarter of an hour the lineage looked like a slow tail, but
+over a full hour it fell to 1% by the twentieth minute and then *climbed back to
+38% by the sixtieth*. Nothing was reviving it. Each fold-back narrows the set,
+and two rules then handed the music back to material it had just withdrawn:
+sections were being built from phrases that no longer fit, and when nothing in
+the vocabulary fitted, the intended phrase was played anyway. Both now defer to
+what is in play — sections are built only from shapes that fit, and where nothing
+fits the engine writes something rather than reaching for something old. A short
+measurement would have called this feature finished.
 
 It appears in the shapes panel, and clicking pins it, which is the same quantity
 held open instead of fading.
