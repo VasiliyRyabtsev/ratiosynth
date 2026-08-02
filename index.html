@@ -111,6 +111,8 @@
       }
       .shape:hover { border-color: var(--dim); }
       .shape.pinned { border-color: var(--hot); color: var(--hot); }
+      .shape.live { color: var(--fg); }
+      .shape sub { font-size: 8px; opacity: 0.55; vertical-align: baseline; }
       .shape .bar { display: block; height: 2px; margin-top: 3px; background: currentColor; }
       #auto.on { border-color: var(--hot); color: var(--hot); }
       .row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
@@ -176,9 +178,12 @@
 
         <div class="note">
           hold a pad or its key to sustain. click a remembered shape to pin it, and it
-          stops fading and keeps coming back. the comparison toggle rounds every pitch
-          to the nearest equal-tempered step — the only place in this project that
-          rounds anything, and it is there so you can hear what is being given up.
+          stops fading and keeps coming back — under the fixed-root engine a pinned
+          shape also counts as home wherever the music is, so it can arrive in the
+          middle of anything. the small numbers are how long each note is held. the
+          comparison toggle rounds every pitch to the nearest equal-tempered step —
+          the only place in this project that rounds anything, and it is there so you
+          can hear what is being given up.
         </div>
       </div>
 

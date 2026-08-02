@@ -946,3 +946,30 @@ grid and left it there for the rest of the piece.
 Measured: **53% of onsets were landing on the shared grid, and 100% do now.**
 Nothing else changed. It is one line, and it is the only part of the vertical
 experiment worth keeping — found by accident while looking for something else.
+
+## 18. Pinning a shape
+
+The old engine had one manual control worth keeping: a panel of remembered
+shapes, each fading with age, and a click to pin one so it stops fading. It was
+wired only to the old engine, so the sentence describing it in the page was
+false for the engine anyone was actually listening to.
+
+The fixed-root engine now has it, and pinning means something exact here rather
+than something approximate. Two things:
+
+- **A pinned shape stops fading.** It is exempt from the decay that makes an old
+  phrase less likely to be built into a new section.
+- **A pinned shape is at distance nought from wherever the music is.** Phrase
+  choice is already a draw weighted by 2^-(distance from what was meant), so
+  saying a shape is at distance nought says it is home — not home for the family
+  it belongs to, but home everywhere. It becomes as likely as whatever was
+  actually meant, and it can arrive in the middle of a family it has no relation
+  to at all.
+
+Measured over eight minutes after pinning at the two-minute mark: a shape that
+was 1% of what got played becomes **45%** when pinned, or 64% if it was already
+the strongest. It is a real handle, not a hint.
+
+This is the only place anything outside the music reaches into it, and it costs
+one term in one weighting. The panel shows the vocabulary strongest first, with
+the notes each shape moves through and, in small type, how long each is held.

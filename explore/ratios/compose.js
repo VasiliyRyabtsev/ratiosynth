@@ -375,10 +375,18 @@ export class Composer {
    * back because home is the most probable place to be.
    */
   near(intended) {
-    const family = [...this.phrases.values()].filter((p) => this.distance(p, intended) < Infinity);
+    // A pinned phrase is at distance nought from wherever the music is.
+    //
+    // Pinning is the listener saying "that one". Said in this engine's own
+    // currency, that means the shape is home — not home for the family it
+    // belongs to, but home everywhere, so it is as likely to be played as
+    // whatever was actually meant, and it can arrive in the middle of a family
+    // it has no relation to. It is the only way anything outside the music
+    // reaches in, and it costs one term.
+    const family = [...this.phrases.values()].filter((p) => p.pinned || this.distance(p, intended) < Infinity);
     const child = this.vary(intended);
     if (child && !this.phrases.has(child.id)) family.push(child);
-    const weights = family.map((p) => Math.pow(2, -this.distance(p, intended)));
+    const weights = family.map((p) => Math.pow(2, -(p.pinned ? 0 : this.distance(p, intended))));
     const picked = draw(family, weights, this.random);
     if (!this.phrases.has(picked.id)) this.phrases.set(picked.id, picked);
     return picked;
@@ -403,7 +411,10 @@ export class Composer {
     // unfolding, so a forgotten phrase gets re-invented under the same name a
     // minute later with a freshly drawn rhythm.
     const keep = Math.exp(-1 / Math.max(1, this.params.memory));
-    for (const phrase of this.phrases.values()) phrase.count = Math.max(0.05, phrase.count * keep);
+    for (const phrase of this.phrases.values()) {
+      if (phrase.pinned) continue; // pinned is exactly this: it stops fading
+      phrase.count = Math.max(0.05, phrase.count * keep);
+    }
     return seen ?? picked;
   }
 
@@ -647,6 +658,45 @@ export class Composer {
     ];
   }
 
+  /** Hold a shape in the vocabulary, or let it go again. */
+  pin(id, on = true) {
+    const phrase = this.phrases.get(id);
+    if (phrase) phrase.pinned = on;
+    return phrase;
+  }
+
+  /**
+   * What the piece is made of just now, for looking at.
+   *
+   * The vocabulary is the interesting thing to show: this engine's whole claim
+   * is that it has one, and that it comes back to it. Weight is how strongly a
+   * shape is currently drawn on, against whichever is drawn on most.
+   */
+  describe() {
+    const phrases = [...this.phrases.values()].sort((a, b) => b.count - a.count);
+    const most = Math.max(1e-9, ...phrases.map((p) => p.count));
+    return {
+      admitted: this.admitted,
+      of: this.order.length,
+      progress: this.progress(),
+      phrases: phrases.map((phrase) => ({
+        id: phrase.id,
+        notes: phrase.points,
+        counts: phrase.counts,
+        weight: phrase.count / most,
+        pinned: phrase.pinned,
+      })),
+      parts: this.parts.map((part) => ({
+        index: part.index,
+        playing: part.phrase ? part.phrase.id : null,
+        muted: part.mute,
+        anchor: part.anchor ? part.anchor.ratio : null,
+        step: part.step,
+        length: part.phrase ? part.phrase.points.length : 0,
+      })),
+    };
+  }
+
   maybeMove() {
     return false; // the root does not move. That is the whole idea.
   }
@@ -746,7 +796,7 @@ function contourFor(points) {
 function phraseFrom(points, counts) {
   // The rhythm is part of the phrase's name, because two phrases on the same
   // notes with different lengths are two phrases.
-  return { points, counts, count: 1, octaves: contourFor(points), id: key(points) + " " + counts.join(".") };
+  return { points, counts, count: 1, pinned: false, octaves: contourFor(points), id: key(points) + " " + counts.join(".") };
 }
 
 /** The interval from each note of a phrase to the next. */

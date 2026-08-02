@@ -695,6 +695,7 @@ function drawReading() {
 // the structure is visible: which layer moves at which speed, where in the
 // phrase we are, and what is being repeated.
 function drawShape() {
+  if (usingRoot()) return drawRootShape();
   const shape = player.describe(now());
 
   const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
@@ -738,9 +739,65 @@ function drawShape() {
     .join("");
 }
 
+/**
+ * The same panel for the fixed-root engine.
+ *
+ * Its vocabulary is the thing worth seeing — the whole claim of that engine is
+ * that it has one and comes back to it — so the shapes list is its phrases,
+ * strongest first, with the notes each one moves through and how long they are
+ * held. Clicking still pins, and pinning still means the same thing: this shape
+ * stops fading, and it becomes as likely to be played as whatever the music
+ * meant to play, wherever it is.
+ */
+function drawRootShape() {
+  const shape = rootComposer.describe();
+
+  const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
+  document.getElementById("shape").innerHTML = [
+    field("notes in play", `${shape.admitted}/${shape.of}`),
+    field("shapes kept", shape.phrases.length),
+    field(
+      "unfolded",
+      `<span class="conf"><span style="width:${(shape.progress * 100).toFixed(0)}%"></span></span>`,
+    ),
+  ].join("");
+
+  document.getElementById("parts").innerHTML = shape.parts
+    .map(
+      (part) => `<div class="part">
+        <span class="name">part ${part.index + 1}</span>
+        <span class="grid">${part.length ? "•".repeat(part.step) + "·".repeat(Math.max(0, part.length - part.step)) : ""}</span>
+        <span class="rep">${part.muted ? "" : "↻"}</span>
+        <span class="pitch">${part.anchor ? format(part.anchor) : "—"}</span>
+      </div>`,
+    )
+    .join("");
+
+  const playing = new Set(shape.parts.map((part) => part.playing));
+  document.getElementById("gestures").innerHTML = shape.phrases
+    .slice(0, 12)
+    .map(
+      (phrase) => `<div class="shape${phrase.pinned ? " pinned" : ""}${playing.has(phrase.id) ? " live" : ""}" data-id="${escapeAttribute(phrase.id)}">
+        ${phrase.notes.map((note, i) => `${format(note)}<sub>${phrase.counts[i]}</sub>`).join(" ")}
+        <span class="bar" style="width:${Math.round(phrase.weight * 100)}%"></span>
+      </div>`,
+    )
+    .join("");
+}
+
+function escapeAttribute(text) {
+  return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
 document.getElementById("gestures").addEventListener("click", (event) => {
   const shape = event.target.closest(".shape");
   if (!shape) return;
+  if (usingRoot()) {
+    const id = shape.dataset.id;
+    const phrase = rootComposer.phrases.get(id);
+    rootComposer.pin(id, !phrase?.pinned);
+    return;
+  }
   const id = Number(shape.dataset.id);
   const entry = player.gestures.entries.find((candidate) => candidate.id === id);
   player.gestures.pin(id, !entry?.pinned);
