@@ -88,7 +88,10 @@ export class LivePlayer {
         for (const voice of drone) {
           const id = this.play(voice.ratio, voice.velocity, voice.tag, { sustain: voice.sustain ?? 0.5 });
           if (id !== null && id !== undefined) {
-            this.holding.push({ id, until: this.now() + this.composer.params.pulse * 17 });
+            // Held until the piece stops. Releasing a drone kills its sustain,
+            // which is the whole of it, so it can only be renewed by striking it
+            // again — and a strike on a fixed period is a metronome.
+            this.holding.push({ id, until: Infinity });
           }
         }
       }

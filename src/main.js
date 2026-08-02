@@ -676,7 +676,23 @@ function drawReading() {
 
   document.getElementById("reading").innerHTML = bits.join("");
 
+  // The drone apart from the rest.
+  //
+  // It belongs in the reading — it is sounding, and under the fixed-root engine
+  // every other note means its ratio to it, so a reading that hid it would be
+  // describing a harmony that is not the one in the room. But it is a constant,
+  // and listing a constant among the variables buries the variables: the drone
+  // never stops, so it was most of the panel most of the time, and the notes
+  // that were actually moving were hard to pick out of it.
+  //
+  // So it is shown, once, on its own line, and what changes is shown below.
+  const drone = reading.memory.filter((entry) => entry.tag === "drone" && entry.sounding);
+  document.getElementById("drone").innerHTML = drone.length
+    ? `drone <b>${drone.map((entry) => format(entry.ratio)).join(" + ")}</b>`
+    : "";
+
   document.getElementById("memory").innerHTML = reading.memory
+    .filter((entry) => entry.tag !== "drone")
     .map((entry) => {
       const width = Math.max(2, Math.round(entry.weight * 34));
       return `<div class="mem${entry.sounding ? " live" : ""}">

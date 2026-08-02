@@ -85,6 +85,9 @@
         min-width: 46px;
       }
       .mem.live { color: var(--accent); border-color: var(--accent); }
+      .drone { color: var(--dim); font-size: 11px; margin-bottom: 6px; }
+      .drone:empty { display: none; }
+      .drone b { color: var(--fg); font-weight: normal; }
       .mem .w { display: block; height: 3px; background: currentColor; border-radius: 1px; margin-top: 3px; }
       .conf { display: inline-block; width: 60px; height: 7px; border: 1px solid var(--line); border-radius: 2px; vertical-align: middle; }
       .conf span { display: block; height: 100%; background: var(--accent); }
@@ -155,6 +158,7 @@
         <div class="panel">
           <h2>the sonority — what it hears</h2>
           <div class="reading" id="reading"></div>
+          <div class="drone" id="drone"></div>
           <div class="memory" id="memory"></div>
         </div>
 

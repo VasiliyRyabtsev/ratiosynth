@@ -616,7 +616,17 @@ export class Composer {
   /** The root, sounding underneath. It is what makes the ratios audible. */
   droneDue(at) {
     if (!this.params.drone || at < this.droneNext) return null;
-    this.droneNext = at + this.params.pulse * 16;
+    // Struck once, and then held for as long as the piece lasts.
+    //
+    // It used to be restruck every sixteen pulses, imitating a tanpura's
+    // repeated pluck. That was a mistake about this instrument: these
+    // resonators are driven by a continuous trickle of noise while a note is
+    // held, so they genuinely sustain and never needed renewing. What the
+    // renewal added was a strike — measured, a jump of 3.6 to 15.5 dB — landing
+    // at exactly 11.7 beats a minute, forever. In a texture playing well under
+    // one note a second that was the loudest and by far the most regular event
+    // in the music, and it sounded like a metronome, because it was one.
+    this.droneNext = Infinity;
     // Root and fifth, the way a tanpura is strung. The fifth is not taken from
     // the product set and does not have to be in it — a drone is not melodic
     // material, it is the reference everything else is heard against, and 3/2 is
@@ -653,8 +663,8 @@ export class Composer {
     // against 1/1, so 1/1 is what should be sounding. If the shimmer of a second
     // string is wanted later, it has to be a member of the set.
     return [
-      { ratio: withOctaves(UNISON, -1), velocity: 0.3, sustain: 0.25, tag: "drone" },
-      { ratio: withOctaves(UNISON, 0), velocity: 0.21, sustain: 0.175, tag: "drone" },
+      { ratio: withOctaves(UNISON, -1), velocity: 0.3, sustain: 0.2, tag: "drone" },
+      { ratio: withOctaves(UNISON, 0), velocity: 0.21, sustain: 0.14, tag: "drone" },
     ];
   }
 

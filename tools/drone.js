@@ -39,15 +39,9 @@ function mulberry(seed) {
 
 /** The drone as the live player would play it, laid out on a timeline. */
 function droneEvents(composer) {
-  const events = [];
-  const every = composer.params.pulse * 16;
-  for (let at = 0; at < SECONDS; at += every) {
-    composer.droneNext = at;
-    for (const string of composer.droneDue(at) ?? []) {
-      events.push({ ...string, start: at, duration: composer.params.pulse * 17 });
-    }
-  }
-  return events;
+  // Struck once and held, so there is exactly one of each string.
+  composer.droneNext = 0;
+  return (composer.droneDue(0) ?? []).map((string) => ({ ...string, start: 0, duration: SECONDS }));
 }
 
 async function balance() {

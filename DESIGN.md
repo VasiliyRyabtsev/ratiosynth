@@ -973,3 +973,29 @@ the strongest. It is a real handle, not a hint.
 This is the only place anything outside the music reaches into it, and it costs
 one term in one weighting. The panel shows the vocabulary strongest first, with
 the notes each shape moves through and, in small type, how long each is held.
+
+## 19. The drone was a metronome
+
+It restruck every sixteen pulses — 5.12 seconds at the default, forever, exactly
+regular. Measured, each restrike jumped the level by 3.6 to 15.5 dB. In a
+texture playing 0.65 notes a second that was the loudest and by far the most
+regular event in the music, so the music sounded like a metronome, because it
+had one.
+
+The restriking was a mistake about this instrument. It was imitating a tanpura's
+repeated pluck, but these resonators are driven by a continuous trickle of noise
+for as long as a note is held, so they genuinely sustain and never needed
+renewing. Holding a drone is one line; the pulse was pure artefact.
+
+It is now struck once, at the start, and held until the piece stops. Nothing
+periodic is generated at all, so there is nothing to hear as a beat. Levels were
+retuned for a note that no longer decays between strikes — it sits 7.7 dB under
+the melody in the band that carries.
+
+**And the sonority panel shows it apart from the rest.** The drone belongs in the
+reading: it is sounding, and under this engine every other note means its ratio
+to it, so a reading that hid it would describe a harmony that is not the one in
+the room. It must never be excluded from anything that chooses notes, for the
+same reason. But it is a *constant*, and listing a constant among the variables
+buries them — the drone never stops, so it was most of the panel most of the
+time. It is shown once, on its own line, and what changes is shown below it.
