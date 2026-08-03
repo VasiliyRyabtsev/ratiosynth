@@ -345,6 +345,10 @@ export class Composer {
 
     const made = phraseFrom(points, counts);
     if (made.id === phrase.id) return null;
+    // The same invariant, enforced where phrases are made rather than only where
+    // they come in. A three-note shape can reach all-1/1 in two moves through an
+    // intermediate that is legal, so guarding the door alone would not hold.
+    if (!departs(points)) return null;
     // A child inherits its parent's favour, and with it the right to be heard at
     // all. Without this a played shape is stated once and then cannot go
     // anywhere: every variation of it still contains the notes that were played,
@@ -781,6 +785,21 @@ export class Composer {
       return Math.max(1, Math.round(span / unit));
     });
 
+    // A phrase leaves somewhere and comes back. Somebody tapping the same pad
+    // four times has played a rhythm, and a rhythm on one pitch is not a shape
+    // this engine has anywhere to put.
+    //
+    // Left in, it did not merely sit there. Every note of it is 1/1, so it is
+    // the one shape that can be played with *any* set of notes, and the rule
+    // that a phrase must fit the notes currently in play — the rule that makes
+    // folding back audible — never excludes it. So every fold-back narrowed the
+    // vocabulary around it while thinning out everything else. Measured from one
+    // four-tap gesture: 48% of every statement in the following twenty minutes
+    // was all-1/1, and seven of the forty-one shapes in the vocabulary were, all
+    // descended from it. Over a drone sounding that same 1/1, that is a
+    // metronome.
+    if (!departs(points)) return null;
+
     const phrase = phraseFrom(points, counts, octaves);
     const known = this.phrases.get(phrase.id) ?? phrase;
     // Four bits nearer than it is. Measured, a phrase and the variants it is
@@ -973,6 +992,17 @@ function phraseFrom(points, counts, octaves) {
     octaves: octaves ?? contourFor(points),
     id: key(points) + " " + counts.join("."),
   };
+}
+
+/**
+ * Does this shape go anywhere?
+ *
+ * The one thing a phrase in this engine is: a departure and a return. A word of
+ * notes that are all the same pitch has no departure, so there is nothing for a
+ * variation to vary and nothing for a return to return to.
+ */
+function departs(points) {
+  return points.some((point) => !equals(point, points[0]));
 }
 
 /** The interval from each note of a phrase to the next. */

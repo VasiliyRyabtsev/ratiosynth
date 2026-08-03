@@ -1140,3 +1140,47 @@ a chord gives up. Now that the music is built entirely from ratios against a
 sounding root, it is a way of hearing what the whole piece gives up — and the
 notes it damages most are the ones the design leans on hardest, since 7/6 and
 35/24 are 33 and 47 cents from anything twelve-tone has.
+
+## 23. A phrase has to go somewhere
+
+A phrase in this engine is one thing: a departure and a return. Everything else
+is built on that — a variation varies the departure, `near()` returns to it, and
+arrival is landing back on 1/1.
+
+`listen()` did not check it. It required two notes and nothing more, so tapping
+the same pad four times became a phrase of four unisons, and that shape then had
+a property nothing else had: every note of it is 1/1, so it fits *any* set of
+notes. The rule that a phrase must be playable with the notes currently in play
+— the rule that makes folding back audible — could never exclude it, while it
+thinned out everything else. Measured from a single four-tap gesture: 48% of
+every statement in the following twenty minutes was all-1/1, and seven of the
+forty-one shapes in the vocabulary were, all descended from it. Over a drone
+sounding that same 1/1, what that sounds like is a metronome. It was found in a
+real session's shapes panel, where the live shape was `1/1 1/1 1/1 1/1` at full
+weight with three variants of itself below it.
+
+So `departs()` is checked where phrases are made — at the door in `listen()`,
+and in `vary()`, because a three-note shape can reach all-1/1 in two legal moves
+through an intermediate that is fine.
+
+**The long silences were left alone, and that was a decision.** They are real:
+two parts each sounding 30% of the time, decided independently per phrase, give
+gaps of 35 to 55 seconds, and a gap that long has the music playing inside it
+with the sound off, because a muted phrase still burns its own length. Measured,
+that also costs the structure — sections were heard whole 10% of the time and
+only 29% of the statements driving the unfolding were audible.
+
+Making silence a rest instead of a deletion fixes all of that, and it was
+written and measured: sections whole 75%, unfolding 100% audible, longest gap
+55s down to 16s. It was reverted anyway, for two reasons that are the point of
+this file. It flattened the music — against the same number of notes a second,
+minute-scale unevenness fell from 0.31 to 0.11, and busier and sparser passages
+are not decoration, they are most of what makes a sparse texture sound alive.
+And it knocked the unfolding off its calibration: `settled >= admitted³` had
+been fitted against a counter inflated by inaudible statements, so with the
+counter corrected the piece stopped unfolding at all, and putting that right
+meant refitting the exponent, which meant rescaling every preset.
+
+A change that forces two unrelated constants to be re-fitted is a change
+fighting the design rather than following from it. The silences stay until
+something derives them.
