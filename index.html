@@ -40,17 +40,32 @@
       #start { border-color: var(--accent); color: var(--accent); }
       #start[hidden] { display: none; }
 
-      .pads { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0; }
+      .pads { margin: 14px 0; }
+      .padrow { display: flex; flex-wrap: wrap; gap: 7px; }
+      .padrow + .padrow-label { margin-top: 12px; }
+      .padrow-label { color: var(--dim); font-size: 11px; margin-bottom: 5px; }
+      /* The four --pad-* colours are set per pad from how simply the ratio
+         relates to the root: plain ones come forward, far-flung ones recede
+         towards the background. The defaults here are what a pad looks like
+         before the script has shaded it. */
       .pad {
+        --pad-fg: var(--text);
+        --pad-sub: var(--dim);
+        --pad-border: var(--line);
+        --pad-bg: var(--panel);
         min-width: 74px;
         padding: 12px 8px;
         text-align: center;
         user-select: none;
         touch-action: none;
+        color: var(--pad-fg);
+        background: var(--pad-bg);
+        border-color: var(--pad-border);
       }
+      .pad:hover { border-color: var(--dim); }
       .pad .r { font-size: 15px; }
-      .pad .c { color: var(--dim); font-size: 11px; }
-      .pad .k { color: var(--line); font-size: 10px; }
+      .pad .c { color: var(--pad-sub); font-size: 11px; }
+      .pad .k { color: var(--pad-border); font-size: 10px; }
       .pad.on { background: #26313a; border-color: var(--accent); color: var(--accent); }
       .pad.on .c { color: var(--accent); }
 
@@ -169,7 +184,13 @@
           shape also counts as home wherever the music is, so it can arrive in the
           middle of anything. the small numbers are how long each note is held.
           nothing anywhere rounds a pitch to a fixed step: every note you hear is
-          the exact ratio printed on its pad.
+          the exact ratio printed on its pad. under each ratio is how far above
+          the root it sits. how brightly a pad is drawn is the other thing worth
+          knowing about it — how simply it relates to that root, so the plain
+          ones come forward and the far-flung ones recede. hover a pad for the
+          number. try d then 2, or s then w: each pair is a comma apart — two
+          different ways of reaching almost the same place, which stay
+          stubbornly different, and here stay that way.
         </div>
       </div>
 

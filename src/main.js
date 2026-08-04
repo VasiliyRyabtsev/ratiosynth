@@ -17,20 +17,71 @@ const sonority = new Sonority({ memory: 4 });
 const startedAt = performance.now() / 1000;
 const now = () => engine.context?.currentTime ?? performance.now() / 1000 - startedAt;
 
-// A just scale, plus two intervals that no keyboard has ever been able to play.
-const SCALE = [
-  { fraction: [1, 1], key: "a" },
-  { fraction: [9, 8], key: "s" },
-  { fraction: [5, 4], key: "d" },
-  { fraction: [4, 3], key: "f" },
-  { fraction: [3, 2], key: "g" },
-  { fraction: [5, 3], key: "h" },
-  { fraction: [15, 8], key: "j" },
-  { fraction: [2, 1], key: "k" },
-  { fraction: [7, 4], key: "z" },
-  { fraction: [11, 8], key: "x" },
-  { fraction: [81, 64], key: "c" },
-].map((entry) => ({ ...entry, ratio: fromFraction(...entry.fraction) }));
+// What you can play by hand. Grouped, one group per keyboard row, because a flat
+// list of two dozen fractions says nothing about how they relate — and the
+// relations are the whole point. Within a row the ratios climb.
+//
+// This is not a scale in the sense of a set you must stay inside. The engine
+// plays whatever ratio it is handed; these are the ones simple enough to earn a
+// key of their own.
+//
+// The last two rows are here to be heard against the middle one. 81/64 is what
+// you get stacking 3/2 four times, and it is not 5/4 — it misses by a comma,
+// and pressing d then 2 is that comma. Same for 27/16 against 5/3, 32/27 against
+// 6/5, 16/9 against 9/5, and 10/9 against 9/8. Nothing in this project papers
+// over those gaps, so you can hear every one of them.
+const GROUPS = [
+  {
+    label: "the flat side, built on 5",
+    keys: [
+      { fraction: [16, 15], key: "q" },
+      { fraction: [10, 9], key: "w" },
+      { fraction: [6, 5], key: "e" },
+      { fraction: [45, 32], key: "r" },
+      { fraction: [8, 5], key: "t" },
+      { fraction: [9, 5], key: "y" },
+    ],
+  },
+  {
+    label: "the bright side, built on 5",
+    keys: [
+      { fraction: [1, 1], key: "a" },
+      { fraction: [9, 8], key: "s" },
+      { fraction: [5, 4], key: "d" },
+      { fraction: [4, 3], key: "f" },
+      { fraction: [3, 2], key: "g" },
+      { fraction: [5, 3], key: "h" },
+      { fraction: [15, 8], key: "j" },
+      { fraction: [2, 1], key: "k" },
+    ],
+  },
+  {
+    label: "built on 7, 11 and 13",
+    keys: [
+      { fraction: [7, 6], key: "z" },
+      { fraction: [11, 9], key: "x" },
+      { fraction: [11, 8], key: "c" },
+      { fraction: [7, 5], key: "v" },
+      { fraction: [13, 8], key: "b" },
+      { fraction: [7, 4], key: "n" },
+      { fraction: [11, 6], key: "m" },
+    ],
+  },
+  {
+    label: "built on 3 alone — 3/2 stacked up",
+    keys: [
+      { fraction: [32, 27], key: "1" },
+      { fraction: [81, 64], key: "2" },
+      { fraction: [27, 16], key: "3" },
+      { fraction: [16, 9], key: "4" },
+    ],
+  },
+].map((group) => ({
+  ...group,
+  keys: group.keys.map((entry) => ({ ...entry, ratio: fromFraction(...entry.fraction) })),
+}));
+
+const SCALE = GROUPS.flatMap((group) => group.keys);
 
 // --- parameters ---
 
@@ -254,35 +305,83 @@ function drawPartials(modes) {
 
 const held = new Map(); // pad element -> voice id
 
+// A pad carries two facts, and they are not the same kind of fact. How far up it
+// is, in cents, is a position — so it is printed, and the pads are ordered by it.
+// How simply it relates to the root is not a position at all, and printing it
+// next to the cents invited reading it as a second kind of height. So it is drawn
+// instead: the simpler the ratio, the brighter the pad. Near home is legible from
+// across the room, far out on the lattice fades towards the background.
+//
+// The ceiling below is a display scale and nothing else — no part of the music
+// reads it. It only has to keep the faintest pad readable. 81/64 is the most
+// remote thing on this bench at 12.3.
+const REMOTE = 13;
+
+// The palette comes back out of the stylesheet rather than being written twice.
+const theme = getComputedStyle(document.documentElement);
+const colour = (name) => theme.getPropertyValue(name).trim();
+
+/** Blend two hex colours from the palette. */
+function mix(from, to, amount) {
+  const channels = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const a = channels(from);
+  const b = channels(to);
+  const t = Math.min(1, Math.max(0, amount));
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(", ")})`;
+}
+
+/** Shade one pad by how simply its ratio relates to the root. */
+function shade(pad, remoteness) {
+  const near = Math.max(0, 1 - remoteness / REMOTE);
+  const bg = colour("--bg");
+  pad.style.setProperty("--pad-fg", mix(bg, colour("--text"), 0.3 + near * 0.7));
+  pad.style.setProperty("--pad-sub", mix(bg, colour("--dim"), 0.35 + near * 0.65));
+  pad.style.setProperty("--pad-border", mix(colour("--line"), colour("--dim"), near));
+  pad.style.setProperty("--pad-bg", mix(bg, colour("--panel"), 0.2 + near * 0.8));
+}
+
 function buildPads() {
   const container = document.getElementById("pads");
 
-  for (const entry of SCALE) {
-    const pad = document.createElement("button");
-    pad.className = "pad";
-    pad.innerHTML = `
-      <div class="r">${format(entry.ratio)}</div>
-      <div class="c">${cents(entry.ratio).toFixed(0)}¢ · ${complexity(entry.ratio).toFixed(1)}</div>
-      <div class="k">${entry.key}</div>`;
+  for (const group of GROUPS) {
+    const row = document.createElement("div");
+    row.className = "padrow";
 
-    const down = (event) => {
-      event.preventDefault();
-      if (held.has(pad)) return;
-      pad.classList.add("on");
-      startNote(pad, entry.ratio);
-    };
-    const up = () => {
-      pad.classList.remove("on");
-      stopNote(pad);
-    };
+    const label = document.createElement("div");
+    label.className = "padrow-label";
+    label.textContent = group.label;
+    container.append(label, row);
 
-    pad.addEventListener("pointerdown", down);
-    pad.addEventListener("pointerup", up);
-    pad.addEventListener("pointerleave", up);
-    pad.addEventListener("pointercancel", up);
+    for (const entry of group.keys) {
+      const remoteness = complexity(entry.ratio);
+      const pad = document.createElement("button");
+      pad.className = "pad";
+      shade(pad, remoteness);
+      pad.title = `${format(entry.ratio)} — complexity ${remoteness.toFixed(1)}`;
+      pad.innerHTML = `
+        <div class="r">${format(entry.ratio)}</div>
+        <div class="c">${cents(entry.ratio).toFixed(0)}¢</div>
+        <div class="k">${entry.key}</div>`;
 
-    entry.pad = pad;
-    container.append(pad);
+      const down = (event) => {
+        event.preventDefault();
+        if (held.has(pad)) return;
+        pad.classList.add("on");
+        startNote(pad, entry.ratio);
+      };
+      const up = () => {
+        pad.classList.remove("on");
+        stopNote(pad);
+      };
+
+      pad.addEventListener("pointerdown", down);
+      pad.addEventListener("pointerup", up);
+      pad.addEventListener("pointerleave", up);
+      pad.addEventListener("pointercancel", up);
+
+      entry.pad = pad;
+      row.append(pad);
+    }
   }
 }
 
