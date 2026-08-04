@@ -94,10 +94,10 @@ const SCALE = GROUPS.flatMap((group) => group.keys);
 const voiceKnobs = [
   { advanced: true, name: "strike", label: "strike", min: 1, max: 120, step: 1, value: 18, unit: "ms" },
   { name: "noise", label: "strike noise", min: 0, max: 1, step: 0.02, value: 0.5 },
-  { advanced: true, name: "brightness", label: "brightness", min: 200, max: 9000, step: 50, value: 3000, unit: "Hz" },
+  { advanced: true, name: "brightness", label: "brightness", min: 200, max: 9000, step: 50, value: 2000, unit: "Hz" },
   { advanced: true, name: "drift", label: "drift", min: 0, max: 25, step: 0.5, value: 4, unit: "¢" },
   { advanced: true, name: "driftRate", label: "drift rate", min: 0.05, max: 6, step: 0.05, value: 0.7, unit: "Hz" },
-  { advanced: true, name: "sustain", label: "sustain (bowing)", min: 0, max: 0.4, step: 0.005, value: 0 },
+  { advanced: true, name: "sustain", label: "sustain (bowing)", min: 0, max: 0.4, step: 0.005, value: 0.24 },
   { advanced: true, name: "damping", label: "release damping", min: 0, max: 1, step: 0.01, value: 0.25 },
   { advanced: true, name: "gain", label: "output", min: 0, max: 0.6, step: 0.01, value: 0.25 },
 ];
@@ -124,7 +124,7 @@ const rootKnobs = [
   { name: "nearness", label: "cents worth one bit", min: 40, max: 600, step: 10, value: 200, unit: "¢" },
   { name: "rootMemory", label: "how long it remembers", min: 8, max: 160, step: 4, value: 48 },
   { name: "rootVoices", label: "parts", min: 1, max: 5, step: 1, value: 2 },
-  { name: "rootDensity", label: "how busy", min: 0.2, max: 1, step: 0.05, value: 0.3 },
+  { name: "rootDensity", label: "how busy", min: 0.2, max: 1, step: 0.05, value: 0.35 },
 ];
 
 const allKnobs = [...voiceKnobs, ...bodyKnobs, ...hearingKnobs, ...rootKnobs];
