@@ -119,7 +119,6 @@
       .shape .bar { display: block; height: 2px; margin-top: 3px; background: currentColor; }
       #auto.on { border-color: var(--hot); color: var(--hot); }
       .row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
-      .compare { color: var(--hot); }
       .knob.advanced, .panel.advanced { display: none; }
       body.expert .knob.advanced { display: block; }
       body.expert .panel.advanced { display: block; }
@@ -137,7 +136,6 @@
           <button id="triad">play 4:5:6</button>
           <button id="seventh">play 4:5:6:7</button>
           <button id="panic">stop all</button>
-          <label class="row"><input type="checkbox" id="et" /> <span class="compare">compare to equal temperament</span></label>
         </div>
 
         <div class="row" id="presets" style="margin-top:10px">
@@ -169,10 +167,9 @@
           hold a pad or its key to sustain. click a remembered shape to pin it, and it
           stops fading and keeps coming back — under the fixed-root engine a pinned
           shape also counts as home wherever the music is, so it can arrive in the
-          middle of anything. the small numbers are how long each note is held. the
-          comparison toggle rounds every pitch to the nearest equal-tempered step —
-          the only place in this project that rounds anything, and it is there so you
-          can hear what is being given up.
+          middle of anything. the small numbers are how long each note is held.
+          nothing anywhere rounds a pitch to a fixed step: every note you hear is
+          the exact ratio printed on its pad.
         </div>
       </div>
 

@@ -11,14 +11,18 @@ import { readdirSync, statSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
 
 import { readMidi, voices, monophonic } from "./midi.js";
-import { lineStats, pool, summarise } from "./lines.js";
+import { STEPS, lineStats, pool, summarise } from "./lines.js";
 
-const SEMITONE = 100;
+// A MIDI pitch is a whole number of twelfths of an octave, so a corpus line
+// arrives already quantised — a limit of the file format, not something we do
+// anywhere in the project. It is why the buckets in lines.js are coarse: they
+// are the finest bins this data can actually fill.
+const PER_MIDI_STEP = 100;
 
 /** A MIDI voice as a line the stats can read: pitch in cents, time in beats. */
 export function asLine(voice, division) {
   return voice.map((note) => ({
-    cents: note.pitch * SEMITONE,
+    cents: note.pitch * PER_MIDI_STEP,
     start: note.start / division,
     duration: note.duration / division,
     velocity: note.velocity,
@@ -121,10 +125,9 @@ export function report(summary) {
     `${s.median.toFixed(places)}  (${s.low.toFixed(places)} – ${s.high.toFixed(places)})`;
 
   console.log("  interval sizes");
-  const names = ["same", "semitone", "tone", "third", "fourth", "tritone", "fifth", "6th–7th", "octave+"];
-  for (let i = 0; i < names.length; i++) {
+  for (let i = 0; i < STEPS.length; i++) {
     const share = summary.sizes[i];
-    console.log(`    ${names[i].padEnd(10)} ${pct(share).padStart(7)}  ${bar(share)}`);
+    console.log(`    ${STEPS[i].name.padEnd(10)} ${pct(share).padStart(7)}  ${bar(share)}`);
   }
   console.log(`\n  up ${pct(summary.up)}   down ${pct(summary.down)}   repeated ${pct(summary.level)}`);
   console.log(`  a leap is answered by turning round: ${pct(summary.leapReversal)}`);

@@ -119,8 +119,6 @@ test("cents match the usual figures", () => {
   assert.equal(cents(OCTAVE), 1200);
   assert.ok(Math.abs(cents(FIFTH) - 701.955) < 0.001);
   assert.ok(Math.abs(cents(MAJOR_THIRD) - 386.314) < 0.001);
-  // Equal temperament's fifth is 700 — this is the gap we refuse to close.
-  assert.ok(cents(FIFTH) - 700 > 1.9);
 });
 
 test("complexity says how tangled a ratio is", () => {

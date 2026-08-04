@@ -79,16 +79,16 @@ test("skipping distant pairs gives the same answer as comparing everything", () 
 test("unison and octave are the smoothest intervals there are", () => {
   const unison = atInterval(0);
   const octave = atInterval(1200);
-  const semitone = atInterval(100);
+  const narrow = atInterval(111.73); // 16/15, the narrowest step in the scale
 
   assert.ok(unison < 0.1);
   assert.ok(octave < 0.1);
-  assert.ok(semitone > unison * 10, "a semitone should be far rougher");
+  assert.ok(narrow > unison * 10, "a narrow interval should be far rougher");
 });
 
 test("the fifth is the smoothest interval that is not a unison or an octave", () => {
   const fifth = atInterval(702);
-  for (const cents of [100, 204, 316, 386, 498, 590, 814, 884, 1088]) {
+  for (const cents of [112, 204, 316, 386, 498, 590, 814, 884, 1088]) {
     assert.ok(fifth < atInterval(cents), `${cents} cents should be rougher than a fifth`);
   }
 });
@@ -163,12 +163,15 @@ test("total roughness adds up every pair in a chord", () => {
   assert.ok(totalRoughness(notes) > expected, "including self-roughness should add more");
 });
 
-test("a just triad is smoother than a tempered one", () => {
+test("a triad in tune beats the same triad slightly out", () => {
   const set = modes();
   const chord = (cents) => cents.map((c) => partialsAt(set, REFERENCE * 2 ** (c / 1200)));
 
-  const just = totalRoughness(chord([0, 386.31, 701.96]), { includeSelf: false });
-  const tempered = totalRoughness(chord([0, 400, 700]), { includeSelf: false });
+  // 4:5:6 exactly, against the same chord with its third fourteen cents sharp
+  // and its fifth two flat — small enough to still read as the same chord, and
+  // the model has to notice anyway. This is the whole reason nothing rounds.
+  const inTune = totalRoughness(chord([0, 386.31, 701.96]), { includeSelf: false });
+  const off = totalRoughness(chord([0, 400, 700]), { includeSelf: false });
 
-  assert.ok(just < tempered, `just ${just} should beat tempered ${tempered}`);
+  assert.ok(inTune < off, `in tune ${inTune} should beat out of tune ${off}`);
 });

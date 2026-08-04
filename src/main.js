@@ -7,7 +7,7 @@ import { harmonicSeries } from "./instrument.js";
 import { Sonority } from "./sonority.js";
 import { Composer } from "../explore/ratios/compose.js";
 import { LivePlayer } from "../explore/ratios/live.js";
-import { fromFraction, format, cents, complexity, toNumber } from "./ratio.js";
+import { fromFraction, format, cents, complexity } from "./ratio.js";
 
 const engine = new Engine({ referenceHz: 264 });
 const sonority = new Sonority({ memory: 4 });
@@ -254,15 +254,6 @@ function drawPartials(modes) {
 
 const held = new Map(); // pad element -> voice id
 
-// The A/B comparison, and the only rounding anywhere in the project: round a
-// ratio to the nearest twelfth of an octave. Returns null when the toggle is
-// off, so the engine does its own exact conversion.
-function temperedHz(ratio) {
-  if (!document.getElementById("et").checked) return undefined;
-  const steps = Math.round(12 * Math.log2(toNumber(ratio)));
-  return engine.referenceHz * 2 ** (steps / 12);
-}
-
 function buildPads() {
   const container = document.getElementById("pads");
 
@@ -321,13 +312,12 @@ async function ensureStarted() {
   document.getElementById("start").hidden = true;
 }
 
-// One place that decides the frequency, so the comparison toggle does not
-// leak into the rest of the code.
+// One place where a pad becomes a sounding note.
 async function noteOnExact(ratio, velocity = 0.8) {
   await ensureStarted();
-  const id = engine.noteOn(ratio, { velocity, hz: temperedHz(ratio) });
-  // The sonority is told the ratio, never the frequency — even under the
-  // temperament comparison, where the two no longer agree.
+  const id = engine.noteOn(ratio, { velocity });
+  // The sonority is told the ratio, never the frequency. Frequencies are a
+  // detail of the last step; everything that listens works in ratios.
   sonority.noteOn(id, ratio, { velocity, at: now() });
   heardNote(ratio);
   return id;
@@ -384,7 +374,7 @@ const rootLive = new LivePlayer({
   composer: rootComposer,
   now,
   play: (ratio, velocity, tag, options = {}) => {
-    const id = engine.noteOn(ratio, { velocity, hz: temperedHz(ratio), ...options });
+    const id = engine.noteOn(ratio, { velocity, ...options });
     sonority.noteOn(id, ratio, { velocity, at: now(), tag });
     return id;
   },

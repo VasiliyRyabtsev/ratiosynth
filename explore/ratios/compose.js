@@ -211,12 +211,12 @@ export class Composer {
       // in this set the 85-cent gap is 21/20 at 8.7 bits and the 386-cent gap is
       // 5/4 at 4.3, so narrow intervals are complex and simple ones are wide.
       // They are anti-correlated, and no weighting of the two can satisfy both.
-      // That is not a fact about product sets — it is the nature of just
-      // intonation, since two simple ratios lying close together always differ
-      // by something comma-like. It is the reason temperament was invented.
+      // That is not a fact about product sets — it is the nature of ratios
+      // themselves, since two simple ratios lying close together always differ
+      // by something comma-like.
       //
-      // The traditions that refuse temperament solve it the other way: against a
-      // sounding drone, a note means its ratio to the root, and the step between
+      // Drone-based traditions solve it the other way round: against a
+      // sounding root, a note means its ratio to the root, and the step between
       // two notes is allowed to be an ugly number because nobody is listening to
       // it as a ratio. So the destination's distance from the root is the
       // harmonic cost, and how far the ear has to jump is the melodic one. Those

@@ -6,21 +6,26 @@
 // measurements were computed two different ways the comparison would be
 // worthless, so they are computed once.
 //
-// Cents rather than semitones because we do not temper. A folk melody's major
-// third lands in the 300-400 bucket and so does ours; that much survives the
-// difference in tuning system. Anything that would need scale degrees or chord
-// names does not survive it and is not measured here.
+// Everything is measured in cents — hundredths of an octave's twelfth part, but
+// used here only as a ruler: a logarithm of the ratio with a convenient scale on
+// it, never a set of steps to land on. Nothing rounds to it.
+//
+// The buckets below are named by the span they cover rather than by a scale
+// degree. "Third" and "fifth" belong to a twelve-note keyboard, and using those
+// names would quietly invite us to read our own output as if it had degrees. It
+// does not: a melody here is ratios against a root, and the only thing an
+// interval has is a size.
 
 /** Buckets for interval sizes, in cents. The last one catches everything above. */
 export const STEPS = [
   { name: "same", to: 50 },
-  { name: "semitone", to: 150 },
-  { name: "tone", to: 250 },
-  { name: "third", to: 450 },
-  { name: "fourth", to: 550 },
-  { name: "tritone", to: 650 },
-  { name: "fifth", to: 750 },
-  { name: "sixth-seventh", to: 1150 },
+  { name: "50–150¢", to: 150 },
+  { name: "150–250¢", to: 250 },
+  { name: "250–450¢", to: 450 },
+  { name: "450–550¢", to: 550 },
+  { name: "550–650¢", to: 650 },
+  { name: "650–750¢", to: 750 },
+  { name: "750–1150¢", to: 1150 },
   { name: "octave+", to: Infinity },
 ];
 

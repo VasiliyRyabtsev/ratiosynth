@@ -54,6 +54,12 @@ scales keep those gaps and that is where their character comes from.
 
 So there is no rounding step anywhere, and no fixed set of notes to round *to*.
 
+This paragraph is the only place in the project that names the idea, and that is
+deliberate. The rest of the code has no notion of it — not a comparison mode, not
+a unit defined against it, not a bucket named after a keyboard degree. Naming a
+thing you do not do keeps inviting you to do it: it was worth a sentence here so
+it could be worth nothing anywhere else.
+
 ### How many primes — decided
 
 The model allows any primes: 7, 11, 13 and beyond are all valid pitch coordinates,
@@ -167,7 +173,7 @@ material is consistent; over a minute it has travelled.
 
 This does not contradict "no fixed scale". The set is derived from the lattice
 rather than chosen from a list, it is never the same set for long, and nothing in
-it is tempered. It is a moving window on infinity.
+it is rounded. It is a moving window on infinity.
 
 Two things fall out that are worth having:
 
@@ -475,9 +481,11 @@ the unit of identity matters.
 **A gesture is a shape on the lattice, not a set of pitches.** "Right, right, up-left"
 is an identity; start it anywhere and it is recognisably the same gesture.
 
-This system has a property ordinary tuning does not: **transposition is exact and
-free.** Move a shape anywhere on the lattice and every interval inside it is preserved
-perfectly. In 12-TET transposition distorts slightly; here not at all. Lattice shape
+This system has a property a fixed set of notes cannot have: **transposition is
+exact and free.** Move a shape anywhere on the lattice and every interval inside it
+is preserved perfectly, because the move is an addition on the exponents and the
+distances between them do not change. Nowhere else does a shape survive being
+moved. Lattice shape
 isn't just *a* candidate for the unit of recurrence — it is what this system is
 unusually good at.
 
@@ -740,12 +748,15 @@ music occupies — being outside is a bug, being inside is merely the absence of
 Optimising toward the middle of that range would produce something statistically
 unremarkable, which is a good description of beige.
 
-It survives the difference in tuning system because the buckets are coarse and
-their edges sit at 50, 250, 450, 750 and 1150 cents. Every tempered interval is
-therefore fifty cents clear of an edge, and retuning one to the nearest simple
-ratio moves it by at most thirty-three. Nothing can cross. That independence is
-the point rather than a lucky escape: a reference that shifted whenever our own
-scale logic shifted would not be a reference.
+The corpus arrives as MIDI, so its pitches are whole numbers of hundredths — a
+limit of the file format, and the reason the buckets are as coarse as they are.
+Their edges sit at 50, 250, 450, 750 and 1150 cents, which puts every value the
+format can express fifty cents clear of an edge; replacing one with the nearest
+simple ratio moves it by at most thirty-three, so nothing can cross. The buckets
+are named by the span they cover and not by a scale degree, because our own
+intervals have sizes and nothing else — no degrees to be a third or a fifth of.
+That independence is the point rather than a lucky escape: a reference that
+shifted whenever our own scale logic shifted would not be a reference.
 
 **What replaces it.**
 
@@ -1131,15 +1142,6 @@ The controls went from five panels to one, and the presets, which were written
 in the old engine's vocabulary and had no meaning in this one, were rewritten in
 terms of the five things that are left: pulse, how adventurous, cents worth one
 bit, how long it remembers, how many parts, how busy.
-
-**The equal-temperament comparison still works and is now worth more.** It
-rounds every pitch to the nearest twelve-tone step on its way to the synth,
-which is the only place in this project that rounds anything, and it applies to
-the generated music as much as to the pads. It used to be a way of hearing what
-a chord gives up. Now that the music is built entirely from ratios against a
-sounding root, it is a way of hearing what the whole piece gives up — and the
-notes it damages most are the ones the design leans on hardest, since 7/6 and
-35/24 are 33 and 47 cents from anything twelve-tone has.
 
 ## 23. A phrase has to go somewhere
 

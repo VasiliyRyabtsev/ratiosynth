@@ -166,7 +166,14 @@ export function log2(a) {
   return sum;
 }
 
-/** Size in cents — 1200 to the octave. Only for display and for tuning maths. */
+/**
+ * Size in cents — 1200 to the octave.
+ *
+ * A ruler, not a grid. It is the logarithm of the ratio with a readable scale on
+ * it, so that "how far apart" is a number the ear's own sense of distance agrees
+ * with. Nothing rounds to it and there are no steps to land on: 386.31 is as
+ * ordinary a value here as 400.
+ */
 export function cents(a) {
   return 1200 * log2(a);
 }

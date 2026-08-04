@@ -130,7 +130,7 @@ test("the ratio model drives the frequency", () => {
   const audio = render(synth, 1);
 
   assert.equal(hz, 396);
-  // Sharply peaked at the just fifth, not at equal temperament's 395.6.
+  // Sharply peaked at the fifth itself, not smeared across its neighbourhood.
   assert.ok(energyAt(audio, 396) > energyAt(audio, 384));
   assert.ok(energyAt(audio, 396) > energyAt(audio, 408));
 });
@@ -208,7 +208,7 @@ test("drift keeps the partials moving, and zero drift holds them still", () => {
   const alive = watch({ drift: 12, driftRate: 3 });
   const spread = Math.max(...alive) - Math.min(...alive);
   assert.ok(spread > 0, "drift should move the tuning");
-  // A wobble, not a slide: twelve cents is far less than a semitone.
+  // A wobble, not a slide: twelve cents is one percent of an octave.
   assert.ok(spread < 0.0005, `drifted too far, spread ${spread}`);
 });
 
