@@ -245,8 +245,8 @@ export class Sonority {
   /**
    * How far the centre has wandered from home, and by what interval.
    *
-   * Reported as the shorter way round, so a centre a fifth above home comes
-   * back as a fourth below — that is the correction the gravity knob would
+   * Reported as the shorter way round, so a centre 3/2 above home comes
+   * back as 4/3 below — that is the correction the gravity knob would
    * have to make, and it is the smaller of the two.
    */
   measureDrift(centre) {
@@ -267,7 +267,7 @@ export class Sonority {
    * Which way the music has been travelling on the lattice.
    *
    * A move is the interval from one note to the next. Averaging the recent ones
-   * gives a heading — "it has been walking up in fifths" — which is something a
+   * gives a heading — "it has been walking up by 3/2" — which is something a
    * generator can either follow or deliberately contradict.
    */
   measureDirection(memory) {

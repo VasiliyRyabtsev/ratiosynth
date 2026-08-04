@@ -262,7 +262,7 @@ Both of those work as described. The third thing we expected does not:
   zero. Play only 5/4 and 3/2 and the answer comes back 3/2, not the missing 1/1.
 
   That answer is not wrong — with two notes the root is genuinely ambiguous, and
-  the fifth is a defensible reading. But the implied root does not emerge on its
+  3/2 is a defensible reading. But the implied root does not emerge on its
   own. Two ways out, neither taken yet:
 
   - **Gravity does it already.** Home is an unoccupied point, and turning gravity

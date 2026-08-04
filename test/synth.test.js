@@ -6,7 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { harmonicSeries, makeVoiceModes } from "../src/instrument.js";
-import { toHz, fromFraction, FIFTH } from "../src/ratio.js";
+import { toHz, fromFraction, THREE_OVER_TWO } from "../src/ratio.js";
 
 const SAMPLE_RATE = 48000;
 const BLOCK = 128;
@@ -125,12 +125,12 @@ test("it rings at the partials it was given, and not in between", () => {
 
 test("the ratio model drives the frequency", () => {
   const synth = makeSynth({ drift: 0 });
-  const hz = toHz(FIFTH, 264); // exactly 396
+  const hz = toHz(THREE_OVER_TWO, 264); // exactly 396
   send(synth, { type: "noteOn", id: 1, hz, velocity: 0.9, modes: modes() });
   const audio = render(synth, 1);
 
   assert.equal(hz, 396);
-  // Sharply peaked at the fifth itself, not smeared across its neighbourhood.
+  // Sharply peaked at 3/2 itself, not smeared across its neighbourhood.
   assert.ok(energyAt(audio, 396) > energyAt(audio, 384));
   assert.ok(energyAt(audio, 396) > energyAt(audio, 408));
 });

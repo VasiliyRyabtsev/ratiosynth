@@ -17,8 +17,8 @@ export const UNISON = Object.freeze([]);
 
 /** Common intervals, for readability at call sites. */
 export const OCTAVE = Object.freeze([1]);
-export const FIFTH = Object.freeze([-1, 1]);
-export const MAJOR_THIRD = Object.freeze([-2, 0, 1]);
+export const THREE_OVER_TWO = Object.freeze([-1, 1]);
+export const FIVE_OVER_FOUR = Object.freeze([-2, 0, 1]);
 
 // Drop trailing zeros so equal ratios always have identical arrays.
 function trim(exponents) {
@@ -51,7 +51,7 @@ export function inverse(a) {
   return trim(a.map((e) => -e));
 }
 
-/** Repeat an interval k times. Three fifths up is pow(FIFTH, 3). */
+/** Repeat an interval k times. Three 3/2s up is pow(THREE_OVER_TWO, 3). */
 export function pow(a, k) {
   return trim(a.map((e) => e * k));
 }

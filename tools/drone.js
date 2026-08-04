@@ -24,7 +24,7 @@ import { render, above, rms, decibels, REFERENCE_HZ } from "./render.js";
 
 const SECONDS = 30;
 const UNISON = [];
-const FIFTH = [-1, 1];
+const THREE_OVER_TWO = [-1, 1];
 
 function mulberry(seed) {
   let state = seed >>> 0;
@@ -90,7 +90,7 @@ function strings() {
     console.log(`    ${point.factors.join("·").padEnd(5)} ${String(Math.round(cents(point.ratio))).padStart(4)}c   ${complexity(point.ratio).toFixed(2)} bits`);
   }
 
-  const candidates = [["3/2  (not in the set)", FIFTH], ...set.slice(1).map((p) => [`${p.factors.join("·")}  ${Math.round(cents(p.ratio))}c`, p.ratio])];
+  const candidates = [["3/2  (not in the set)", THREE_OVER_TWO], ...set.slice(1).map((p) => [`${p.factors.join("·")}  ${Math.round(cents(p.ratio))}c`, p.ratio])];
   const header = set.map((p) => String(Math.round(cents(p.ratio))).padStart(7)).join("");
 
   console.log("\n  how near each candidate comes to each melody note, in cents:");

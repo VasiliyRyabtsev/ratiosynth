@@ -86,10 +86,10 @@ test("unison and octave are the smoothest intervals there are", () => {
   assert.ok(narrow > unison * 10, "a narrow interval should be far rougher");
 });
 
-test("the fifth is the smoothest interval that is not a unison or an octave", () => {
-  const fifth = atInterval(702);
+test("3/2 is the smoothest interval that is not a unison or an octave", () => {
+  const pure = atInterval(702);
   for (const cents of [112, 204, 316, 386, 498, 590, 814, 884, 1088]) {
-    assert.ok(fifth < atInterval(cents), `${cents} cents should be rougher than a fifth`);
+    assert.ok(pure < atInterval(cents), `${cents} cents should be rougher than 3/2`);
   }
 });
 
@@ -120,7 +120,8 @@ test("roughness cannot tell 5/4 from 81/64, and is not supposed to", () => {
 
 test("changing the instrument moves where the smooth intervals are", () => {
   // The central claim: tuning and timbre are one problem. Stretch the partials
-  // away from whole-number ratios and the best fifth is no longer 3/2.
+  // away from whole-number ratios and the smoothest point near 700¢ is no
+  // longer 3/2.
   const smoothestNear = (target, options) => {
     let best = Infinity;
     let bestCents = target;
@@ -137,9 +138,9 @@ test("changing the instrument moves where the smooth intervals are", () => {
   assert.equal(smoothestNear(702, { stretchAmount: 0 }), 702);
 
   const stretched = smoothestNear(702, { stretchAmount: 1 });
-  assert.ok(stretched > 715, `stretched fifth moved to ${stretched}, expected well above 702`);
+  assert.ok(stretched > 715, `smoothest point moved to ${stretched}, expected well above 702`);
 
-  // And the just fifth is measurably worse on that instrument.
+  // And 3/2 itself is measurably worse on that instrument.
   assert.ok(atInterval(702, { stretchAmount: 1 }) > atInterval(702, { stretchAmount: 0 }));
 });
 
@@ -167,8 +168,8 @@ test("a triad in tune beats the same triad slightly out", () => {
   const set = modes();
   const chord = (cents) => cents.map((c) => partialsAt(set, REFERENCE * 2 ** (c / 1200)));
 
-  // 4:5:6 exactly, against the same chord with its third fourteen cents sharp
-  // and its fifth two flat — small enough to still read as the same chord, and
+  // 4:5:6 exactly, against the same chord with its 5/4 fourteen cents sharp
+  // and its 3/2 two flat — small enough to still read as the same chord, and
   // the model has to notice anyway. This is the whole reason nothing rounds.
   const inTune = totalRoughness(chord([0, 386.31, 701.96]), { includeSelf: false });
   const off = totalRoughness(chord([0, 400, 700]), { includeSelf: false });

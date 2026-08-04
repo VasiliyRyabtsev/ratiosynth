@@ -49,7 +49,7 @@ export const DEFAULTS = {
 };
 
 const UNISON = [];
-const FIFTH = [-1, 1]; // 3/2
+const THREE_OVER_TWO = [-1, 1]; // 3/2
 const COUNTS = [1, 2, 3, 4, 6, 8];
 
 export class Composer {
@@ -712,7 +712,7 @@ export class Composer {
     // one note a second that was the loudest and by far the most regular event
     // in the music, and it sounded like a metronome, because it was one.
     this.droneNext = Infinity;
-    // Root and fifth, the way a tanpura is strung. The fifth is not taken from
+    // Root and 3/2, the way a tanpura is strung. The 3/2 is not taken from
     // the product set and does not have to be in it — a drone is not melodic
     // material, it is the reference everything else is heard against, and 3/2 is
     // the reference the ear locks onto most readily.
@@ -730,7 +730,7 @@ export class Composer {
     // An octave up puts it at 132, 198 and 264 Hz, inside the music rather than
     // under it, which is where a tanpura sits. At these levels it measures 7 dB
     // below the melody in the band that carries — present, not competing.
-    // The root, and the root again an octave up. No fifth.
+    // The root, and the root again an octave up. No 3/2.
     //
     // A tanpura's second string is not a fifth by law — it is the note the raga
     // leans on, and it is retuned when the raga has no Pa. This set has no Pa:
