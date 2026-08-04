@@ -8,6 +8,7 @@ import { Sonority } from "./sonority.js";
 import { Composer } from "../explore/ratios/compose.js";
 import { LivePlayer } from "../explore/ratios/live.js";
 import { fromFraction, format, cents, complexity } from "./ratio.js";
+import { Field } from "./interference.js";
 
 const engine = new Engine({ referenceHz: 264 });
 const sonority = new Sonority({ memory: 4 });
@@ -561,12 +562,51 @@ window.addEventListener("keyup", (event) => {
   stopNote(entry.pad);
 });
 
+// --- the field ---
+//
+// The same memory the panel below prints as a list, drawn as the interference of
+// the notes in it. See src/field.js for what each wave is and where it comes
+// from. It shares the palette with everything else, read back out of the
+// stylesheet so the colours are written once.
+
+const fieldNote = document.getElementById("fieldnote");
+
+// Named for the panel rather than called `field`, because the readout functions
+// below already use that name for a local formatting helper and one of them
+// would silently shadow this.
+const fieldView = new Field(document.getElementById("field"), {
+  bg: colour("--bg"),
+  crest: colour("--accent"),
+  trough: colour("--hot"),
+});
+
+if (!fieldView.ok) {
+  document.getElementById("field").hidden = true;
+  fieldNote.textContent = "this panel needs WebGL, and this browser is not offering it.";
+}
+
+// No caption. The panel used to print how long the closest pair of sounding
+// notes took to come back round, and it read as noise — it parked on one value
+// for seconds and then leapt, by as much as 45 seconds between one frame and the
+// next, because the pair it described kept being replaced by a different pair.
+// It also described the drawing rather than the music: to read it you had to
+// know already that a note is a wave and that waves slide.
+//
+// The duration is only ever watchable for two notes held by hand, and that is
+// where the page says it — in prose under the bench, once, rather than sixty
+// times a second. The picture is the readout.
+function drawField(reading) {
+  if (!fieldView.ok) return;
+  fieldView.draw(reading.memory, reading.now);
+}
+
 // --- the readout ---
 
 // The two layers are shown separately on purpose: the facts on the bottom row,
 // the reading above them. One is observed, the other is guessed at.
 function drawReading() {
   const reading = sonority.read(now());
+  drawField(reading);
   const { centre, confidence, drift, density, direction } = reading;
 
   const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;

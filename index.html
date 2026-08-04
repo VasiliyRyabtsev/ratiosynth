@@ -69,6 +69,14 @@
       .pad.on { background: #26313a; border-color: var(--accent); color: var(--accent); }
       .pad.on .c { color: var(--accent); }
 
+      /* The canvas keeps the page background rather than the panel's, so that
+         where the waves cancel it reads as the surface underneath and not as a
+         colour of its own. */
+      .field { display: block; width: 100%; height: 200px; border-radius: 4px; background: var(--bg); }
+      .field[hidden] { display: none; } /* display:block above would otherwise win */
+      .fieldnote { color: var(--dim); font-size: 11px; margin-top: 8px; }
+      .fieldnote:empty { display: none; }
+
       .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
       .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); margin: 0 0 10px; font-weight: 600; }
       .panel + .panel { margin-top: 14px; }
@@ -160,6 +168,12 @@
         <div class="pads" id="pads"></div>
 
         <div class="panel">
+          <h2>the field — every note a wave, and where they cross</h2>
+          <canvas class="field" id="field"></canvas>
+          <div class="fieldnote" id="fieldnote"></div>
+        </div>
+
+        <div class="panel">
           <h2>the sonority — what it hears</h2>
           <div class="reading" id="reading"></div>
           <div class="drone" id="drone"></div>
@@ -188,9 +202,14 @@
           the root it sits. how brightly a pad is drawn is the other thing worth
           knowing about it — how simply it relates to that root, so the plain
           ones come forward and the far-flung ones recede. hover a pad for the
-          number. try d then 2, or s then w: each pair is a comma apart — two
-          different ways of reaching almost the same place, which stay
-          stubbornly different, and here stay that way.
+          number. the field above is those same ratios as waves, one each,
+          running the way its prime points and as fine as it is far from home;
+          what you see is where they cross. try d then 2, or s then w: each pair
+          is a comma apart — two different ways of reaching almost the same
+          place, which stay stubbornly different, and here stay that way. hold
+          one of those pairs and watch the field come back round: it takes the
+          better part of a minute, where the root and 3/2 take under two
+          seconds.
         </div>
       </div>
 

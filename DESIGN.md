@@ -1186,3 +1186,153 @@ meant refitting the exponent, which meant rescaling every preset.
 A change that forces two unrelated constants to be re-fitted is a change
 fighting the design rather than following from it. The silences stay until
 something derives them.
+
+## 24. The field
+
+§9 asked for four pictures and got none of them. This is the first: the notes
+drawn as waves, and what you see is where the waves cross.
+
+Each note that is sounding, or is still remembered, is one plane wave. Three
+things about that wave, and all three are read off the ratio. Nothing is chosen.
+
+**Which way it runs.** Each prime gets a direction, at the angle of its own pitch
+class round the octave — the 3 axis points where 3/2 falls, the 5 axis where 5/4
+falls. A ratio's exponents add up to one arrow. This is the lattice, drawn.
+
+**How fine it is.** The length of that arrow. Built on one prime it is exactly the
+ratio's complexity — the same number that shades its pad — so the picture's
+distance and the pad's distance are one measurement rather than two that happen
+to agree. Near home is a broad slow swell; far out is a fine grain. Built on
+several primes the steps point different ways and partly cancel, so the arrow
+comes out shorter, which is the picture saying that a ratio reached along two
+axes is nearer home than the size of its numbers suggests.
+
+**How fast it slides.** One turn a second for every octave above the root, and the
+other way round below it. Two notes slide past each other at the difference, so
+after 1/(difference in octaves) seconds that pair is drawing the same figure
+again, moved along.
+
+That last one is the point of the panel. Since rate is height, the pair that
+takes longest is the pair *closest together in pitch*, and the wait is simply one
+over that gap. An octave takes a second. 1/1 against 3/2 takes 1.7. 5/4 against
+81/64, a comma apart and near enough the same note to the ear at first hearing,
+takes 56. The picture turns an interval into a *duration* — how long you have to
+sit through before two ways of getting to one place admit they are not the same
+place.
+
+Two waves that have come round are drawing the identical figure, moved along: a
+shared phase step across two waves running different ways is exactly a rigid
+translation, since two non-parallel wave vectors make an invertible 2x2. That is
+a test, not a hope. Three or more *moving* waves never repeat at all — their
+rates are logs of whole numbers, so no common period exists and the picture only
+ever comes close.
+
+### The drone keeps one string
+
+The drone is three notes — root, root an octave down, and 3/2 — and it never
+stops, so it was three of the twelve slots and 22% of the picture's amplitude,
+permanently, in a panel whose whole subject is what changes. §4's own readout
+already excludes it from the note list for that reason.
+
+Removing it entirely would have been wrong: it is sounding, and a picture of what
+is in the room should have it. What went instead is the two strings that are
+octaves of the root, and the rule is not a hand-picked ratio but a property —
+`sameClass(ratio, UNISON)`, and only for the drone tag.
+
+The justification is that the picture is already drawn *from* the root: it is the
+origin every arrow is measured out from. A drone string an octave from the root
+redraws the coordinate system. And measuring the three showed those are exactly
+the two that misbehave:
+
+| string | grain | sweeps the panel |
+|---|---|---|
+| 1/1 | 0.00 | not at all — no arrow, so it adds an even wash and nothing else |
+| 1/2 | 1.00 | **once a second**, forever |
+| 3/4 | 3.46 | once every 8.3s |
+
+For comparison the music itself runs at 4.3s for 3/2, 11.4s for 5/4, 35s for
+81/64. So 1/2 was the fastest-moving thing on the panel by four times, and never
+stopped. What survives is 3/4 — the 3/2 the drone is strung for, at a speed that
+sits among the music rather than on top of it. Measured after the change: 0.99
+slots of twelve, 8% of the amplitude.
+
+A melody note on 2/1 is untouched. That is an event; the drone's is a fixture.
+
+### The panel prints nothing
+
+It had a caption, giving that duration for whichever pair of sounding notes was
+closest together. Two things were wrong with it, and only the second was fatal.
+
+It described the drawing rather than the music. To read "the closest pair comes
+back round every 56 seconds" you had to already know that a note is a wave and
+that waves slide, which is a fact about this file, not about what you are
+hearing.
+
+Worse, it read as noise. Simulating a normal two-part run and sampling every
+frame, it parked on one value for seconds at a time and then leapt: 14, 14, 14,
+13, 13, 13, 56, 56, 56, 56, 56, 56, 11, 56, 13, 56 — biggest single-frame jump 45
+seconds. Nothing a viewer could track, because the pair it described kept being
+replaced by a different pair. The duration is only ever watchable for two notes
+held by hand, and that is now said once, in the prose under the bench, rather
+than sixty times a second in a caption.
+
+(A first attempt at that measurement was wrong in a way worth recording: it built
+the whole timeline and *then* sampled the Sonority at earlier times. A note whose
+`endedAt` is still in the future has not begun to fade, so every future note
+showed up at full weight and the memory looked three times its real size. Feed a
+simulated clock forwards, never sideways.)
+
+`longestReturn()` went with it. What survives is the claim, as two tests: that the
+wait is one over the gap, and that a pair which has come round is drawing a
+translated copy. The heading changed too — "what the ratios do to each other" was
+a gesture, where "every note a wave, and where they cross" is the rule for
+reading the picture.
+
+### Octaves count here, and nowhere else
+
+This is the one place in the project where two notes an octave apart are not the
+same thing. Everywhere else identity is the pitch class, because everywhere else
+the question is what a note *is*, and 4/3 is the same thing wherever you put it —
+that is what §4 and `lattice.js` are for. Here the question is what is in the
+room, and a note two octaves up is not the same thing in the room. So 2 takes the
+same rule as every other prime: folded into one octave it lands on the root,
+which gives it an angle of nought and a step of one, and it moves the picture
+like anything else.
+
+It was built the other way first, with the 2s left out of all three, and that is
+worth recording because of how it failed. An octave of the root has no other
+prime in it, so with the 2s left out its arrow has no length — and a wave of no
+length that slides is not a wave sliding, it is the whole panel changing
+brightness at once. Pressing 2/1 strobed at one beat a second. Octave-blind
+direction and octave-aware rate cannot be mixed; the two decisions are one
+decision.
+
+The root itself still draws a wave of no extent that does not move: a flat,
+steady glow. That is not a case being handled, it is what `cos(0·p + 0)` is, and
+it says the right thing. The root agrees with itself everywhere, and everything
+else is a departure from it. Hold the root and the whole field leans bright.
+
+### What is not a fact about the ratios
+
+Two numbers, and they are both about the panel rather than the music.
+
+The **scale** — one bit of complexity is one fringe across the panel's width, so
+3/2 draws two and a half broad bands and 81/64 twelve fine ones. Across the width
+and not the height because the panel is much wider than it is tall, and against
+the short side the finer ratios came out as dozens of fringes crossing a second
+wave, which is plaid, not interference.
+
+The **cap** — twelve waves, loudest first. The shader holds a fixed number and a
+dozen overlapping waves is already past what an eye can separate. What gets
+dropped is the faintest, which is what you could least see.
+
+### Checking it without a browser
+
+The same problem as the roughness model and the pad shading: this cannot be
+verified by looking, from here. So the arithmetic lives in `src/field.js`, which
+is pure and tested in node, and only the drawing lives in `src/interference.js`.
+The fragment shader's sum was re-run in node over a grid and printed as
+characters to confirm the picture has structure rather than being flat, mush, or
+clipped — 4:5:6 came out at 1.33 of a possible 2.00 in contrast, the comma pair
+at 1.98, and eight notes at once at 1.16 without clipping. That is also how the
+fringe scale was settled, and how the strobe above was found.
