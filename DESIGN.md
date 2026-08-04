@@ -72,6 +72,28 @@ them still sounds correctly, it is just harder to place in the picture.
 
 ## 3. No fixed scale
 
+**Most of what follows describes the engine removed in §22.** It is kept because
+it is the reasoning that led to the present one, and because two of the findings
+in it were expensive to get. But it is not a description of what runs. What
+survives is the premise at the top: we do not pick N notes out of infinity,
+nothing is rounded, and the pitch material is derived rather than listed. What
+went with the old engine is the machinery underneath — the two scores, the cost
+curve for the size of a melodic move, the drift and gravity knobs, the harmonic
+field held and then moved, and the sections that swell.
+
+The engine that replaced it fixes the root rather than managing a moving one,
+and takes its pitches from a combination product set that unfolds and folds back
+up again. That is §13 onwards.
+
+Two things below still hold and are worth reading first. The mistake about
+melodic distance is why the current engine scores how far the ear has to jump at
+all — that is `nearness`, its one honest constant. And "neither score is
+something to minimise" was learned again in the new engine, where an entropy
+target that flattened the weights turned the whole choice of move into a uniform
+random walk: a prior that gets overridden whenever it says something is not a
+prior. That one is recorded in `invent()` in `explore/ratios/compose.js` rather
+than here, which is itself a small failure of this file.
+
 We do not pick N notes out of infinity. Instead:
 
 **Each new pitch is chosen by scoring candidates against everything in recent
@@ -197,6 +219,20 @@ the playground**, not rules baked into the engine. Exploring the constraint spac
 is part of the instrument.
 
 ## 4. The Sonority block
+
+**Built and still running, but nothing composing reads it any more.**
+`src/sonority.js` is current: it holds what is sounding, the memory that fades,
+and the estimated centre with its confidence, all as described below. What reads
+it is the panel on the page and the picture in §24. The engine does not —
+`explore/ratios/compose.js` imports `src/ratio.js` and its own `cps.js` and
+nothing else, because a fixed root answers "where is the centre" by construction.
+
+So the claim below that this is where the musical intelligence lives was true of
+the engine removed in §22 and is not true today. §16 is about what that costs and
+what would have to change in the texture before it could be worth having back.
+The estimation still earns its place: it is what the readouts report, and §25
+records that it moves far too often to steer a camera with, which is a fact about
+the estimate and not about the panel.
 
 Choosing pitches against "what's sounding" means information travels *backwards*,
 from the voice pool at the output end to the decision blocks upstream. Almost
@@ -396,6 +432,22 @@ around 10–20%.
 
 ## 7. Rhythm from the same numbers
 
+**The two "Built" notes below belong to the engine removed in §22.** The layer
+periods read off the chord's whole numbers, and the onset patterns spread through
+a longer cycle, went with it.
+
+The idea at the top of the section did not. In the current engine every duration
+is a whole number of one shared unit, and which whole number is drawn in
+proportion to 1/n — so doubling a note is one bit and common, five-quarters is
+four bits and rare, which is the same arithmetic that chooses pitches (§14). The
+parts move at 1, 1/2, 1/3 of each other's speed, which is the harmonic series
+used as a tempo relation. Whole numbers, and the simple ones more often.
+
+What is genuinely missing is the part where the *sounding chord* sets those
+numbers. The rhythm is made of small whole numbers; they are just not the ones
+currently in the air. Restoring that needs the same precondition as §16 — parts
+that strike together often enough for a vertical to exist.
+
 A pitch ratio and a rhythm ratio are the same relationship at different speeds.
 3/2 means one wave cycles three times while the other cycles twice — hundreds of
 times a second, so we hear a chord. Slow the identical relationship to a few
@@ -448,6 +500,25 @@ which stops two parts that happen to share a cycle length from producing the
 identical pattern and locking together.
 
 ## 8. Generating moves, recurrence, and sanity
+
+**Read this as three parts with three different fates.**
+
+*The generator* has never been built. The cellular automaton is still the plan
+and still unwritten; §12 records the one question that has to be answered first,
+which is where its cells would live.
+
+*What recurs* was built twice. The pool of remembered shapes described here
+belonged to the engine removed in §22. Recurrence now works through phrases and
+sections in `explore/ratios/compose.js` — §13, §14 and §18. The claim that made
+both versions possible is unchanged and is the reason either could work: a shape
+is a set of moves rather than a set of pitches, and moving it is exact.
+
+*Density control* is built in part. Register spacing is there — the parts split
+the range between them and it opens out as the piece unfolds. The hard voice cap
+with stealing is there, sixteen voices in the worklet. The roughness budget is
+not, and §16 explains why the roughness machinery was written for this engine and
+then taken out again: at 1684 cents apart the parts barely interfere, so it had
+nothing to choose between.
 
 ### The generator: cellular automata on the lattice
 
@@ -624,17 +695,34 @@ Rough order:
 
 ### Where this stands
 
-Everything through step 8 is built and covered by tests, which run with
-`node --test` and need no framework. It plays, it holds a key for a while and
-modulates, the parts have their own rhythms and lines, shapes recur, and sections
-swell. It is **not yet good enough to listen to for pleasure**, and the verdict
-after the last round was "a little bit better".
+**The list above is the plan as it was written, and steps 3 to 8 were built,
+listened to, and then thrown away with the engine in §22.** They are left as
+written because the order turned out to be the useful part — "structure before
+pictures" is the lesson, and it survived the engine that taught it. What follows
+is the state of the thing today.
 
-The one structural gap known and not yet closed: **every layer shares a single
-instrument**, so the parts blend into a wash and the register separation does far
-less work than it should. Giving each layer its own timbre is the obvious next
-move, and it is also the point where §6's coupling between overtones and tuning
-starts to matter.
+`src/` is the instrument and the ear: ratios, the lattice, the modal resonators,
+roughness, the sonority. It composes nothing. All the composing is three files in
+`explore/ratios/` — a combination product set for the material, a fixed root with
+the root sounding underneath, phrases as fixed transposable objects, variation by
+a single ratio move, a set of notes that unfolds and folds back up, and whatever
+somebody plays taken up as material for the piece to mean. That is §§13 to 23.
+
+Of the four pictures in §9, one exists: the sounding ratios drawn as interfering
+waves, flat on the bench and flown through in the live view (§24, §25). The
+lattice display, the roughness curve, the spectrum and the Lissajous figures are
+not built. Neither is the automaton of §8, or the node editor, which is still
+deliberately last.
+
+Everything is covered by tests that run with `node --test` and need no framework,
+and by the measuring tools in `tools/`, which are the only way anything here gets
+checked — see §12 on what the corpus is and is not for.
+
+It is **still not good enough to listen to for pleasure.** The gap named here
+before — every layer sharing one instrument, so the parts blend into a wash — is
+still open and is still the obvious next move, and it is the same precondition
+§16 and §7 both wait on: parts that are distinct enough to be heard against each
+other at all.
 
 ### On the number of knobs
 
@@ -644,6 +732,12 @@ answer is not fewer knobs — the point of the project is that the constraints a
 adjustable — but **landmarks**. A handful of presets mark the corners that work,
 everything beyond the dozen musical controls folds away, and the full set is one
 checkbox away for when it is wanted.
+
+*Answered by deleting the engine that had them.* §22 records it: five panels
+became one, and what is left is six things a listener could name — how fast, how
+adventurous, how many cents are worth one bit, how long it remembers, how many
+parts, how busy. The presets were rewritten in those terms, because the old ones
+were written in a vocabulary that no longer meant anything.
 
 ### Why rhythm and recurrence moved forward
 
@@ -1337,7 +1431,7 @@ clipped — 4:5:6 came out at 1.33 of a possible 2.00 in contrast, the comma pai
 at 1.98, and eight notes at once at 1.16 without clipping. That is also how the
 fringe scale was settled, and how the strobe above was found.
 
-## 25 Inside the field
+## 25. Inside the field
 
 The page was one thing: a bench, where every parameter is a slider and every
 panel explains what the engine just did. That is the right shape for finding out
