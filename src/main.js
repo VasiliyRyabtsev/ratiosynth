@@ -27,12 +27,25 @@ const now = () => engine.context?.currentTime ?? performance.now() / 1000 - star
 // plays whatever ratio it is handed; these are the ones simple enough to earn a
 // key of their own.
 //
-// The last two rows are here to be heard against the middle one. 81/64 is what
-// you get stacking 3/2 four times, and it is not 5/4 — it misses by a comma,
-// and pressing d then 2 is that comma. Same for 27/16 against 5/3, 32/27 against
-// 6/5, 16/9 against 9/5, and 10/9 against 9/8. Nothing in this project papers
-// over those gaps, so you can hear every one of them.
+// The groups are in the order their keys sit on the keyboard, so the group on the
+// number keys is drawn topmost and each group below it is the letter row under it.
+// Where your eye finds a pad is where your hand finds its key.
+//
+// The number row and the flat side are here to be heard against the bright side.
+// 81/64 is what you get stacking 3/2 four times, and it is not 5/4 — it misses by
+// a comma, and pressing d then 2 is that comma. Same for 27/16 against 5/3, 32/27
+// against 6/5, 16/9 against 9/5, and 10/9 against 9/8. Nothing in this project
+// papers over those gaps, so you can hear every one of them.
 const GROUPS = [
+  {
+    label: "built on 3 alone — 3/2 stacked up",
+    keys: [
+      { fraction: [32, 27], key: "1" },
+      { fraction: [81, 64], key: "2" },
+      { fraction: [27, 16], key: "3" },
+      { fraction: [16, 9], key: "4" },
+    ],
+  },
   {
     label: "the flat side, built on 5",
     keys: [
@@ -67,15 +80,6 @@ const GROUPS = [
       { fraction: [13, 8], key: "b" },
       { fraction: [7, 4], key: "n" },
       { fraction: [11, 6], key: "m" },
-    ],
-  },
-  {
-    label: "built on 3 alone — 3/2 stacked up",
-    keys: [
-      { fraction: [32, 27], key: "1" },
-      { fraction: [81, 64], key: "2" },
-      { fraction: [27, 16], key: "3" },
-      { fraction: [16, 9], key: "4" },
     ],
   },
 ].map((group) => ({
