@@ -1336,3 +1336,139 @@ characters to confirm the picture has structure rather than being flat, mush, or
 clipped — 4:5:6 came out at 1.33 of a possible 2.00 in contrast, the comma pair
 at 1.98, and eight notes at once at 1.16 without clipping. That is also how the
 fringe scale was settled, and how the strobe above was found.
+
+## 25 Inside the field
+
+The page was one thing: a bench, where every parameter is a slider and every
+panel explains what the engine just did. That is the right shape for finding out
+what a knob does and the wrong shape for playing, because you cannot study a
+vocabulary and use your hands at the same time. So there are two views now, one
+button apart. The bench is unchanged. The live view is the whole page given over
+to one picture, the pads, and the little you would still want to read while
+playing.
+
+**The picture is the field panel with the eye put inside it, and that took no new
+arithmetic at all.** A wave's phase from the clock is its rate times the time; its
+phase from a position is that position times how fine it is. Those are the same
+expression, so the second §24's panel animates in is a third direction in space,
+at the scale the two already share. Hand a wave the vector it has always had —
+`(x, y, rate)` — and sample the sum at `(x, y, t)`, and you have the panel at
+time `t`, exactly. Not approximately; it is the same sum written twice, and there
+are two tests that say so.
+
+Everything else follows from that rather than being chosen:
+
+- **The speed is one unit a second**, forward. At any other speed what is in
+  front of the eye is not what the panel would be showing.
+- **§24's durations become distances.** The wait for two notes to come back round
+  is how far ahead the figure repeats, so the comma pair is not a minute of
+  staring but a long tunnel, and 3/2 is a short one. Measured, the comma pair's
+  picture moves at a fifth the speed of the hexany's.
+- **What is ahead is the next few seconds of the panel**, in perspective, about
+  three and a half of them.
+
+**The root is fog.** §24 keeps a wave with no extent deliberately — the root
+agrees with itself everywhere, so it draws an even wash, and you can see past a
+wash. Inside a solid the same wave fills every point equally, every ray
+saturates, and the picture goes blind: measured, every set containing 1/1 came
+out at a contrast of 0.00 against a possible 1.00. This is §24's strobe from the
+other side, and it has the same answer. A thing with no extent has nowhere to be,
+so the root lights the space instead of filling it, which is the same sentence
+about it read in three dimensions. Hold the root and the corridor glows.
+
+**And the panel's own curve was wrong here, which was worth finding.** §24 lifts
+the shallow ground with a 0.65 power, because on a flat picture that is where the
+interesting part is. Used as a *density* the same curve fills space: measured, the
+whole march turned to fog and contrast fell to 0.03. A solid has to be mostly
+empty or you cannot see into it, so the curve goes the other way — only where the
+waves really agree. Crests are what there is and troughs are what you fly along,
+which is still the panel's reading of the sign, since where the waves cancel it
+already shows the page underneath.
+
+**Some ratios cannot be drawn, and they fade rather than lie.** A ray samples at
+intervals, and a wave whose fringes are closer together than that gap cannot be
+sampled honestly — drawn anyway it becomes sparkle unrelated to the music. So it
+fades out instead. Everything in the engine's own set is comfortably clear of the
+limit; only the far-flung pads reach it, and 81/64, the most remote thing on the
+bench, sits right on it and comes out faint. That is the honest answer rather
+than a lucky one.
+
+### The camera made people dizzy
+
+The eye's forward motion is forced, but where it sits sideways is not, and that
+freedom was spent on having it ease toward wherever §4 estimates the tonal centre
+to be — so the picture would move with the harmony instead of running on rails.
+It made people dizzy, and measuring it says plainly why.
+
+- The centre is not a slow-moving thing. Over five minutes of the engine playing
+  itself it **changes 77 times, once every 3.9 seconds**, because §4's estimate
+  lands on whichever sounding note makes everything simplest and that keeps
+  changing — which §4 already says, and which is fine for a readout and ruinous
+  for a camera.
+- Each change is a long way. The hexany's members sit 1.7 to 3.7 units from the
+  root on the picture, so easing toward one over the memory time starts the eye
+  sliding sideways at up to **0.92 units a second against a forward speed of
+  1.00**. It is very nearly strafing as fast as it flies, then decelerating, then
+  swerving again four seconds later.
+
+Repeated unpredictable sideways acceleration is how you make somebody sick. So
+the eye sits on the root's axis and does not move, which is not the absence of a
+decision but the right one: §24 draws the whole picture *from* the root — it is
+the origin every arrow is measured out from — and under this engine every note
+means its ratio to it. Nothing was lost, because what makes the picture move is
+the waves changing, and they change on every note.
+
+Two smaller things went with it, both aimed at the same complaint.
+
+**The march starts a little ahead of the eye.** What is nearest always crosses
+the view quickest, and the eye is inside the solid, so the material it is
+standing in was both meaninglessly magnified and the fastest-sweeping thing on
+screen. Starting at eight tenths of a unit costs a little of the view and settles
+most of the flicker: the share of each frame's change that is the whole frame
+brightening and dimming together falls from **0.15 to 0.02**, and contrast rises
+from 0.74 to 0.86.
+
+**And the lens came back in.** It had been opened wide to stop the structure
+arriving as clouds, but width buys sharpness by stretching the edges of the view,
+which is exactly where the eye reads speed from. A near plane buys the same
+sharpness without that, so with it the lens returned to about ninety degrees and
+the pictures measured *better* rather than worse — the comma pair went from 0.44
+to 0.67 in contrast.
+
+**What is not a fact about the ratios**, on the same terms as §24: how far a ray
+steps, how far it goes and where it starts; how solid a crest is, which is one
+number and not two, because setting brightness equal to it pins the brightest
+possible ray at exactly one so nothing can blow past; how hard the curve is; how
+much the root glows; and how wide the lens is. That last one is §24's fringe
+scale being re-chosen for a view of a different shape. A page is not a strip.
+
+One bug worth recording because it will happen again. These constants are folded
+into the shader source as text, and `${2.0}` in a template comes out as `"2"` —
+which GLSL will not take as a float, because it has no implicit conversion from
+int. Setting the lens to a round number stopped the whole view compiling. Every
+float that goes into the source now goes through a helper that keeps its decimal
+point, since the alternative is a rule that holds only while nobody picks a round
+number.
+
+All of it was settled the way §24 settled the panel: the march re-run in node
+over the sets the engine actually produces, then in a headless browser reading
+the pixels back. It lands at a mean of 0.17 to 0.35 with contrast 0.36 to 0.50,
+nothing blown and nothing empty, which is dark enough to read text over.
+
+**The live view shows less on purpose.** Where the music thinks it is and how
+sure of that, how far through unfolding, what is sounding, and the drone on its
+own line for §19's reason. No vocabulary, no parts, no partials, and no pinning —
+those are for understanding what the engine did. Pinning is the one control
+§18 argues is worth having, and it stays on the bench, where you can see the
+shape you are pinning.
+
+**The pads are the same elements, moved.** Not a second set styled differently:
+the very same buttons, reparented, so every handler, the map of what is held and
+the keyboard keep working and there is only ever one pad per ratio to get out of
+step. They are told to say less over a picture — the cents and the row headings
+are reading matter.
+
+Marching costs far more than slicing, so the view watches its own frame times and
+gives up resolution rather than smoothness, and only ever downwards: climbing back
+as soon as it is comfortable makes it oscillate between two resolutions, which is
+worse than the lower one.

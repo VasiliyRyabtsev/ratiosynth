@@ -40,6 +40,12 @@
 // left out its arrow has no length — and a wave of no length that slides is not
 // a wave sliding, it is the whole panel flashing. Pressing 2/1 strobed at one
 // beat a second. Giving the octave its step is what makes the rate safe to vary.
+//
+// The last of the three is not really a fourth kind of thing. How fast a wave
+// slides and how fine it is are the same quantity read along different
+// directions, so the second the panel animates in is a third direction in space
+// — see `fieldAt` at the foot of the file. That is the whole of the live view:
+// the panel is a slice, and flying forward at one unit a second is watching it.
 
 import { PRIMES, UNISON, cents, sameClass } from "./ratio.js";
 
@@ -145,4 +151,86 @@ export function wavesFrom(memory, limit = 12) {
  */
 export function phaseAt(wave, seconds) {
   return (((wave.rate * seconds * TAU) % TAU) + TAU) % TAU;
+}
+
+/**
+ * The same sum, at a point in the solid the panel is a slice of.
+ *
+ * A wave's phase at time `t` is `rate × t`, and its phase at position `x` is
+ * `x` times how fine it is. Those are the same expression, so **the second the
+ * panel is animating in is a third direction in space**, at the scale the two
+ * already share: one panel width across is one second along. Give a wave the
+ * vector `(x, y, rate)` and sample the sum at `(x, y, t)` and you have the panel
+ * at time `t`, exactly — no new axis had to be invented and no number chosen,
+ * because the rate was already a length in disguise.
+ *
+ * What that buys is a thing you can move through rather than watch. Flying
+ * forward at one unit a second holds the panel still relative to the eye, so
+ * everything the picture does under the flight is what it was going to do
+ * anyway; and looking ahead is looking at the next few seconds of it. §24's
+ * durations become distances — the wait for two notes to come back round is how
+ * far away the next repeat of the figure is, so a comma is not a minute of
+ * staring but a long tunnel.
+ *
+ * Normalised by the amplitude present the way the shader normalises it, so this
+ * and the picture cannot disagree.
+ */
+export function fieldAt(waves, x, y, z) {
+  let sum = 0;
+  let total = 0;
+  for (const wave of waves) {
+    sum += wave.amp * Math.cos(TAU * (wave.x * x + wave.y * y + wave.rate * z));
+    total += wave.amp;
+  }
+  return sum / Math.max(total, 1);
+}
+
+/**
+ * How fine a wave is in the solid: the length of its full three-part vector.
+ *
+ * The drawing needs it to know what it cannot draw. A wave whose fringes are
+ * closer together than the gap between two samples along a ray cannot be
+ * sampled honestly, and drawing it anyway turns it into sparkle that has
+ * nothing to do with the music.
+ */
+export function grainOf(wave) {
+  return Math.hypot(wave.x, wave.y, wave.rate);
+}
+
+/**
+ * The same waves, sorted into what the solid can hold and what it cannot.
+ *
+ * A wave with no extent has nowhere to be. On the panel that is an even wash and
+ * you can see past it — §24 keeps it deliberately, because the root agreeing
+ * with itself everywhere is a true thing to draw. Inside a solid the same wave
+ * is fog: it fills every point equally, so every ray saturates and the picture
+ * goes blind. Measured, every set containing 1/1 came out at a contrast of 0.00.
+ *
+ * That is the strobe again, from the other side. §24 found that a wave of no
+ * length which *slides* is not a wave sliding but the whole panel flashing, and
+ * gave the octave its step to fix it. This is the remaining case: the root
+ * itself, whose wave has no length and does not slide either. It cannot be a
+ * thing in a picture you move through.
+ *
+ * So it is not dropped and not drawn — it lights the space instead of filling
+ * it, which is the same sentence read in three dimensions. `wash` is how much of
+ * what is sounding is root, and the drawing spends it on the empty space rather
+ * than on the crests. Hold the root and the corridor glows.
+ *
+ * `total` divides the sum, and never by less than one note's worth, so a single
+ * fading note fades instead of blooming back to full contrast on its way out.
+ * That is the panel's rule and it is here for the panel's reason.
+ */
+export function solidFrom(memory, limit = 8) {
+  const all = wavesFrom(memory, limit);
+  const waves = all.filter((wave) => grainOf(wave) > 0);
+
+  const carried = all.reduce((sum, wave) => sum + wave.amp, 0);
+  const drawn = waves.reduce((sum, wave) => sum + wave.amp, 0);
+
+  return {
+    waves,
+    total: Math.max(1, drawn),
+    wash: carried > 0 ? (carried - drawn) / carried : 0,
+  };
 }

@@ -9,6 +9,7 @@ import { Composer } from "../explore/ratios/compose.js";
 import { LivePlayer } from "../explore/ratios/live.js";
 import { fromFraction, format, cents, complexity } from "./ratio.js";
 import { Field } from "./interference.js";
+import { Flight } from "./flight.js";
 
 const engine = new Engine({ referenceHz: 264 });
 const sonority = new Sonority({ memory: 4 });
@@ -547,6 +548,14 @@ const byKey = new Map(SCALE.map((entry) => [entry.key, entry]));
 
 window.addEventListener("keydown", (event) => {
   if (event.repeat || event.metaKey || event.ctrlKey) return;
+
+  // A view that covers the whole page needs a way out that does not involve
+  // finding a button.
+  if (event.key === "Escape" && performing) {
+    perform(false);
+    return;
+  }
+
   const entry = byKey.get(event.key.toLowerCase());
   if (!entry) return;
   event.preventDefault();
@@ -600,13 +609,105 @@ function drawField(reading) {
   fieldView.draw(reading.memory, reading.now);
 }
 
+// --- the live view ---
+//
+// The bench is for finding out what a parameter does. This is for playing: the
+// same waves with the eye inside them, the pads, and the little about the state
+// you would still want while your hands are busy. Nothing here is a second way
+// of doing anything — the pads are the very same elements, moved.
+
+const stage = document.getElementById("stage");
+const pads = document.getElementById("pads");
+const dock = document.getElementById("dock");
+
+// Where the pads go back to. Remembered rather than searched for, because the
+// bench may grow another panel between them and the field.
+const padsHome = pads.parentNode;
+const padsAfter = pads.nextSibling;
+
+let performing = false;
+let flightView = null;
+
+/**
+ * Built the first time it is wanted, not on load.
+ *
+ * It is a second WebGL context and a shader that costs more to compile than the
+ * panel's, and most visits to the bench never ask for it.
+ */
+function flight() {
+  if (!flightView) {
+    flightView = new Flight(document.getElementById("flight"), {
+      bg: colour("--bg"),
+      crest: colour("--accent"),
+      trough: colour("--hot"),
+    });
+  }
+  return flightView;
+}
+
+function perform(wanted) {
+  performing = wanted;
+  document.body.classList.toggle("live", wanted);
+  (wanted ? dock : padsHome).insertBefore(pads, wanted ? null : padsAfter);
+
+  if (wanted && !flight().ok) {
+    document.getElementById("liveRead").innerHTML =
+      `<div>this view needs WebGL, and this browser is not offering it.</div>`;
+  }
+}
+
+/**
+ * What is worth reading while playing, which is much less than the bench shows.
+ *
+ * No vocabulary, no parts, no partials: those are for understanding what the
+ * engine did, and you cannot study them and play at the same time. What is left
+ * is where the music thinks it is, how sure of that it is, how far through
+ * unfolding, and what is actually sounding.
+ */
+function drawLive(reading, clock) {
+  if (!flightView?.ok) return;
+  flightView.draw(reading.memory, reading.now, clock);
+
+  const shape = rootComposer.describe();
+  const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
+  const bar = (amount) =>
+    `<span class="conf"><span style="width:${(amount * 100).toFixed(0)}%"></span></span>`;
+
+  document.getElementById("liveRead").innerHTML = [
+    field("centre", reading.centre ? `<span class="big">${format(reading.centre)}</span>` : "—"),
+    reading.centre ? field("sure", bar(reading.confidence)) : "",
+    field("notes in play", `${shape.admitted}/${shape.of}`),
+    field("unfolded", bar(shape.progress)),
+  ].join("");
+
+  // The drone apart from the rest, for §19's reason: it never stops, so listing
+  // it among the notes that change buries them.
+  const drone = reading.memory.filter((entry) => entry.tag === "drone" && entry.sounding);
+  const notes = reading.memory.filter((entry) => entry.tag !== "drone");
+
+  document.getElementById("liveSounding").innerHTML = [
+    drone.length ? `<span class="quiet">drone ${drone.map((e) => format(e.ratio)).join(" + ")}</span>` : "",
+    ...notes.map(
+      (entry) =>
+        `<span class="${entry.sounding ? "one" : "gone"}">${format(entry.ratio)}</span>`,
+    ),
+  ].join("");
+}
+
+document.getElementById("perform").addEventListener("click", () => {
+  // A click is a gesture, and it is the only thing audio can start from — so
+  // arriving here means arriving ready to play rather than needing one more
+  // press to find that out.
+  ensureStarted();
+  perform(true);
+});
+document.getElementById("leave").addEventListener("click", () => perform(false));
+
 // --- the readout ---
 
 // The two layers are shown separately on purpose: the facts on the bottom row,
 // the reading above them. One is observed, the other is guessed at.
-function drawReading() {
-  const reading = sonority.read(now());
-  drawField(reading);
+function drawBench(reading) {
   const { centre, confidence, drift, density, direction } = reading;
 
   const field = (label, value) => `<div><span class="lbl">${label}</span>${value}</div>`;
@@ -668,6 +769,18 @@ function drawReading() {
     .join("");
 
   drawShape();
+}
+
+// One clock, one read of the sonority, and only the view you are looking at gets
+// drawn. The flight costs far more than the panel, and the bench's readout is a
+// page of innerHTML that nobody is looking at while performing.
+function drawReading(clock = 0) {
+  const reading = sonority.read(now());
+  if (performing) drawLive(reading, clock);
+  else {
+    drawField(reading);
+    drawBench(reading);
+  }
   requestAnimationFrame(drawReading);
 }
 
