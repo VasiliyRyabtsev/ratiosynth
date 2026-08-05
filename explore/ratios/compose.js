@@ -105,6 +105,12 @@ export class Composer {
     // decided by `nearness` — the cents worth one bit. No new number.
     this.admitted = Math.min(this.order.length, this.openingSize());
     this.settled = 0;
+    // Which words of notes the piece has stated, ignoring how long the notes
+    // were held. This is what decides whether it has said something new; see
+    // `advance`. It survives a fold-back — a second unfolding is over material
+    // the piece already has — but not a change of set, where the old words are
+    // not words any more.
+    this.saidWords = new Map();
   }
 
   /** The fewest of the simplest notes that have a step between them. */
@@ -536,8 +542,23 @@ export class Composer {
     // still at one — and every one of those statements reset the counter.
     // Measured, one run in three never finished unfolding in an hour, and the
     // engine was calling its most repetitive stretches unsettled.
+    //
+    // And it is about the *notes*, not the phrase. A phrase is named by its
+    // notes and its rhythm, because two rhythms over the same notes really are
+    // two phrases — but a variation changes the rhythm alone about half the
+    // time, so half of everything the engine invents was arriving here as
+    // something new to say and setting the counter back to nought. What this
+    // gate decides is whether to admit another *note*, and a fresh rhythm is no
+    // evidence either way. Measured, the counter reached 53 of the 64 it needed
+    // and fell back, so the opening stage was consuming the whole of the first
+    // eight minutes: the vocabulary sat at four notes and nine words of them,
+    // and the shapes panel showed the same word up to four times over with only
+    // the durations differing.
     phrase.said = (phrase.said ?? 0) + 1;
-    this.settled = phrase.said > 1 ? this.settled + 1 : 0;
+    const word = key(phrase.points);
+    const saidBefore = this.saidWords.get(word) ?? 0;
+    this.saidWords.set(word, saidBefore + 1);
+    this.settled = saidBefore > 0 ? this.settled + 1 : 0;
 
     const fade = Math.exp(-1 / Math.max(1, this.params.memory));
     for (const known of this.phrases.values()) {

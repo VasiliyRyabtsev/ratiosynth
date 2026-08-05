@@ -1123,6 +1123,39 @@ unfolded at all was close to a coin toss. It now counts statements of a phrase
 that has been stated before, which is what the words always meant. All three
 seeds now unfold, in the same order, at comparable times.
 
+**And it counts notes, not phrases.** A phrase is named by its notes *and* its
+rhythm, because two rhythms over the same notes really are two phrases — that is
+right everywhere else, and it is wrong here. A variation changes the rhythm alone
+about half the time, so half of everything the engine invented was arriving at
+this counter as something new to say and setting it back to nought. What the gate
+decides is whether to admit another *note*, and a fresh rhythm is no evidence
+either way.
+
+Measured, the counter was reaching 53 of the 64 it needed and falling back, so
+the opening stage was consuming the whole of the first eight minutes: four notes
+in play and nine words of them, and the shapes panel showing one word up to four
+times over with only the durations differing. Counting a statement as settled
+when its *notes* have been stated before, over eight seeds: at eight minutes the
+alphabet goes 4.1 → 4.6 notes and the vocabulary 9.0 → 10.9 words, and the twelve
+rows of the shapes panel hold 7.4 → 8.5 distinct words, with the largest run of
+same-notes-different-rhythm falling from 3.9 rows to 3.1. At an hour it is
+45.5 → 46.3 words, so this is not more material in the end — it is the same
+material arriving sooner.
+
+The alternative was to shorten the threshold itself, and it is worth recording
+why not. Re-basing the cube on the stage rather than on the notes in play —
+1, 8, 27 instead of 64, 125, 216 — gives a slightly wider vocabulary at eight
+minutes, and costs 17.6 fold-backs per half hour against 0.3. A fold-back every
+hundred seconds is not an event any more. The counter was miscounting; the
+threshold was not wrong.
+
+The one real cost is that the piece is about 7% busier, 0.71 → 0.76 notes a
+second at eight minutes, which follows from having more notes in play sooner. The
+step and leap shares do not move: over twelve seeds, steps 53.7 → 53.1 and leaps
+18.5 → 18.8, against a seed-to-seed spread of ±15 and ±12. Three seeds showed a
+five-point drop in steps, and twelve seeds show that was noise — a caution about
+`tools/ratios.js`, which runs three.
+
 **Then the fold-back is the other branch of the same test.** Settling long
 enough means the piece has run out of things to say with what it has. If there
 is a note left to admit, admit it. If there is not — everything is in play and
