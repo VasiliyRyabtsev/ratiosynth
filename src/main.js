@@ -7,7 +7,10 @@ import { harmonicSeries } from "./instrument.js";
 import { Sonority } from "./sonority.js";
 import { Composer } from "../explore/ratios/compose.js";
 import { LivePlayer } from "../explore/ratios/live.js";
-import { fromFraction, format, cents, complexity } from "./ratio.js";
+import {
+  fromFraction, format, cents, complexity, limit, mul, pow,
+  OCTAVE, THREE_OVER_TWO, FIVE_OVER_FOUR,
+} from "./ratio.js";
 import { Field } from "./interference.js";
 import { Flight } from "./flight.js";
 
@@ -28,10 +31,15 @@ const now = () => engine.context?.currentTime ?? performance.now() / 1000 - star
 // plays whatever ratio it is handed; these are the ones simple enough to earn a
 // key of their own.
 //
-// The number row and the flat side are here to be heard against the bright side.
-// 81/64 is what you get stacking 3/2 four times, and it is not 5/4 — pressing d
-// then 2 is that comma. Same for 27/16 against 5/3, 32/27 against 6/5, 16/9
-// against 9/5, and 10/9 against 9/8.
+// What separates the two middle rows is which way the 5 goes: multiplying by it
+// gives the brighter of a pair, dividing by it the flatter. Both rows are full
+// of fives either way, so a heading naming the prime would say nothing — they
+// say how a row sounds, and the lattice layout draws the rest.
+//
+// The number row and the q row are here to be heard against the home row. 81/64
+// is what you get stacking 3/2 four times, and it is not 5/4 — pressing d then 2
+// is that comma. Same for 27/16 against 5/3, 32/27 against 6/5, 16/9 against
+// 9/5, and 10/9 against 9/8.
 const GROUPS = [
   {
     label: "built on 3 alone — 3/2 stacked up",
@@ -43,7 +51,7 @@ const GROUPS = [
     ],
   },
   {
-    label: "the flat side, built on 5",
+    label: "the flat side",
     keys: [
       { fraction: [16, 15], key: "q" },
       { fraction: [10, 9], key: "w" },
@@ -54,7 +62,7 @@ const GROUPS = [
     ],
   },
   {
-    label: "the bright side, built on 5",
+    label: "the bright side",
     keys: [
       { fraction: [1, 1], key: "a" },
       { fraction: [9, 8], key: "s" },
@@ -331,6 +339,10 @@ function drawPartials(modes) {
 
 const held = new Map(); // pad element -> voice id
 
+// A key lets go of the pad it pressed, not of whatever it would mean now.
+// Rearranging the pads with a finger down would otherwise strand the note.
+const holding = new Map(); // physical key -> the pad it put down
+
 // There is no way to leave a pad down, and that is deliberate.
 // The keyboard can hold as many pads as you have fingers, and if what you want
 // is sound going on while your hands are elsewhere, that is the button at the
@@ -369,41 +381,227 @@ function shade(pad, remoteness) {
   pad.style.setProperty("--pad-bg", mix(bg, colour("--panel"), 0.2 + near * 0.8));
 }
 
-function buildPads() {
-  const container = document.getElementById("pads");
+function makePad(entry) {
+  const pad = document.createElement("button");
+  pad.className = "pad";
+  pad.innerHTML = `<div class="r"></div><div class="c"></div><div class="k"></div>`;
 
+  pad.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    pressEntry(entry, event);
+  });
+  pad.addEventListener("pointerup", () => release(pad));
+  pad.addEventListener("pointerleave", () => release(pad));
+  pad.addEventListener("pointercancel", () => release(pad));
+
+  entry.pad = pad;
+  return pad;
+}
+
+function padLabel(text) {
+  const label = document.createElement("div");
+  label.className = "padrow-label";
+  label.textContent = text;
+  return label;
+}
+
+// What a pad plays and which key reaches it both follow from how the pads are
+// arranged, so both are settled as they are placed rather than fixed to the pad.
+let byKey = new Map();
+
+/** What a pad says it is — redrawn under a held octave key. */
+function face(entry, ratio) {
+  const remoteness = complexity(ratio);
+  shade(entry.pad, remoteness);
+  entry.pad.title = `${format(ratio)} — complexity ${remoteness.toFixed(1)}`;
+  entry.pad.querySelector(".r").textContent = format(ratio);
+  entry.pad.querySelector(".c").textContent = `${cents(ratio).toFixed(0)}¢`;
+}
+
+function place(entry, ratio, key) {
+  entry.playing = ratio;
+  face(entry, ratio);
+  entry.pad.querySelector(".k").textContent = key ?? "";
+  if (key) byKey.set(key, entry);
+}
+
+/** One row per keyboard row, in the order the keys sit under your hands. */
+function layoutAsRows(container) {
   for (const group of GROUPS) {
     const row = document.createElement("div");
     row.className = "padrow";
-
-    const label = document.createElement("div");
-    label.className = "padrow-label";
-    label.textContent = group.label;
-    container.append(label, row);
-
+    container.append(padLabel(group.label), row);
     for (const entry of group.keys) {
-      const remoteness = complexity(entry.ratio);
-      const pad = document.createElement("button");
-      pad.className = "pad";
-      shade(pad, remoteness);
-      pad.title = `${format(entry.ratio)} — complexity ${remoteness.toFixed(1)}`;
-      pad.innerHTML = `
-        <div class="r">${format(entry.ratio)}</div>
-        <div class="c">${cents(entry.ratio).toFixed(0)}¢</div>
-        <div class="k">${entry.key}</div>`;
-
-      pad.addEventListener("pointerdown", (event) => {
-        event.preventDefault();
-        press(pad, entry.ratio);
-      });
-      pad.addEventListener("pointerup", () => release(pad));
-      pad.addEventListener("pointerleave", () => release(pad));
-      pad.addEventListener("pointercancel", () => release(pad));
-
-      entry.pad = pad;
-      row.append(pad);
+      place(entry, entry.ratio, entry.key);
+      row.append(entry.pad);
     }
   }
+}
+
+// The other way to arrange the same pads: each one at the point it occupies,
+// counted in 3s across and 5s up, which is how ratio.js already stores it.
+// Only 3 and 5 get an axis, so anything using 7, 11 or 13 sits apart. DESIGN §9
+// has what the picture is for and why it is worth two arrangements.
+const fifths = (entry) => entry.ratio[1] ?? 0;
+const thirds = (entry) => entry.ratio[2] ?? 0;
+
+// A square at a across and b up, in the octave that makes every line climb from
+// left to right and every column from bottom to top. 2/1 is no square at all:
+// it is 1/1 played an octave up, which is what the shift key is for.
+const at = (across, up) => mul(pow(THREE_OVER_TWO, across), pow(FIVE_OVER_FOUR, up));
+
+/** A count of a prime as an axis label: -2, 0, +3. */
+const signed = (n) => (n > 0 ? `+${n}` : `${n}`);
+
+// One keyboard row per line of the grid, one key per column, with 1/1 under the
+// left index finger and the off-plane seven on the number row.
+//
+// Each line names the square its first key belongs to. Counted from the leftmost
+// pad instead, adding one further out would slide a whole line of the keyboard.
+const LATTICE_KEYS = new Map([
+  [1, { from: -2, keys: ["w", "e", "r", "t", "y"] }],
+  [0, { from: -3, keys: ["a", "s", "d", "f", "g", "h", "j", "k"] }],
+  [-1, { from: -1, keys: ["c", "v", "b", "n"] }],
+]);
+const OFF_PLANE_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+function latticeKey(across, up) {
+  const line = LATTICE_KEYS.get(up);
+  return line?.keys[across - line.from];
+}
+
+function layoutAsLattice(container) {
+  const pureOctave = (entry) => limit(entry.ratio) === 2;
+  const plane = SCALE.filter((entry) => limit(entry.ratio) <= 5 && !pureOctave(entry));
+  const beyond = SCALE.filter((entry) => limit(entry.ratio) > 5);
+
+  const left = Math.min(...plane.map(fifths));
+  const right = Math.max(...plane.map(fifths));
+  const top = Math.max(...plane.map(thirds));
+  const bottom = Math.min(...plane.map(thirds));
+
+  const grid = document.createElement("div");
+  grid.className = "padlattice";
+  // One column per 3/2 step. The stylesheet puts the row's number before them,
+  // and the first line of the grid is the numbers along the top.
+  grid.style.setProperty("--cols", right - left + 1);
+
+  const corner = padLabel("");
+  corner.classList.add("padcorner");
+  corner.innerHTML = `<div>3s &rarr;</div><div>5s &darr;</div>`;
+  corner.style.gridArea = "1 / 1";
+  grid.append(corner);
+
+  for (let count = left; count <= right; count++) {
+    const head = padLabel(signed(count));
+    head.classList.add("padhead");
+    head.style.gridArea = `1 / ${count - left + 2}`;
+    grid.append(head);
+  }
+
+  for (let count = top; count >= bottom; count--) {
+    const name = padLabel(signed(count));
+    name.classList.add("padaxis");
+    name.style.gridArea = `${top - count + 2} / 1`;
+    grid.append(name);
+  }
+
+  for (const entry of plane) {
+    const across = fifths(entry);
+    const up = thirds(entry);
+    const column = across - left;
+    const row = top - up;
+    const cell = document.createElement("div");
+    cell.className = "padcell";
+    cell.style.gridArea = `${row + 2} / ${column + 2}`;
+    place(entry, at(across, up), latticeKey(across, up));
+    cell.append(entry.pad);
+    grid.append(cell);
+  }
+  container.append(grid);
+
+  const strip = document.createElement("div");
+  strip.className = "padrow";
+  container.append(padLabel("off the plane — 7, 11 and 13 have no axis here"), strip);
+  beyond
+    .sort((a, b) => cents(a.ratio) - cents(b.ratio))
+    .forEach((entry, i) => {
+      place(entry, entry.ratio, OFF_PLANE_KEYS[i]);
+      strip.append(entry.pad);
+    });
+}
+
+// Which way round the pads are is a view, so it survives the trip into the live
+// view and back: the elements never change, only what holds them.
+let lattice = false;
+
+function layoutPads() {
+  const container = document.getElementById("pads");
+  byKey = new Map();
+  container.replaceChildren();
+  (lattice ? layoutAsLattice : layoutAsRows)(container);
+
+  // A pad with no place in the new arrangement would be left sounding with
+  // nothing on screen to let go of.
+  for (const entry of SCALE) if (!entry.pad.isConnected) release(entry.pad);
+
+  // Placing wrote every face from its own ratio, losing the two that are not it:
+  // under a held octave key, and on a pad already sounding.
+  drawFaces();
+}
+
+function buildPads() {
+  for (const entry of SCALE) makePad(entry);
+  layoutPads();
+
+  const button = document.getElementById("padlayout");
+  const what = document.getElementById("padwhat");
+  const rowsWhat = what.textContent;
+
+  button.addEventListener("click", () => {
+    lattice = !lattice;
+    layoutPads();
+    button.textContent = lattice ? "lay the pads out by hand" : "lay the pads out by ratio";
+    what.textContent = lattice
+      ? "a step right is a whole 3/2 and a step up a whole 5/4, so pitch climbs with the numbers and the grid spans about four octaves · your hands sit the same way, a line of the grid on a line of the keyboard"
+      : rowsWhat;
+  });
+}
+
+// Shift lifts a press an octave and alt drops it. Not ctrl, the obvious partner
+// for shift: the browser has taken it with w, t, n and the number row, all live
+// keys here, and acts on them before the page sees them.
+function octaveShift(event) {
+  if (event.ctrlKey || event.metaKey) return 0;
+  return event.shiftKey ? 1 : event.altKey ? -1 : 0;
+}
+
+function pressEntry(entry, event) {
+  // A refused press must record nothing, or a pad held by the mouse and struck
+  // again by its key under an octave modifier would claim a note it is not
+  // sounding.
+  if (held.has(entry.pad)) return;
+  entry.started = mul(entry.playing, pow(OCTAVE, octaveShift(event)));
+  press(entry.pad, entry.started);
+}
+
+// An octave key moves the whole keyboard, so every pad says what it would play
+// now. A pad already down keeps the face of its note, which did not move.
+let octave = 0;
+
+function drawFaces() {
+  for (const entry of SCALE) {
+    if (!entry.pad.isConnected) continue;
+    face(entry, held.has(entry.pad) ? entry.started : mul(entry.playing, pow(OCTAVE, octave)));
+  }
+}
+
+function showOctave(shift) {
+  if (shift === octave) return;
+  octave = shift;
+  document.body.classList.toggle("octave-up", shift > 0);
+  document.body.classList.toggle("octave-down", shift < 0);
+  drawFaces();
 }
 
 // A pad going down and coming up. One pair for both ways in, a pointer and a
@@ -417,10 +615,12 @@ function press(pad, ratio) {
 function release(pad) {
   pad.classList.remove("on");
   stopNote(pad);
+  drawFaces(); // it is free to show what it would play again
 }
 
 /** Let go of everything. */
 function releaseAll() {
+  holding.clear();
   for (const pad of document.querySelectorAll(".pad.on")) release(pad);
 }
 
@@ -575,9 +775,20 @@ document.getElementById("panic").addEventListener("click", () => {
 
 // --- keyboard ---
 
-const byKey = new Map(SCALE.map((entry) => [entry.key, entry]));
+// Which key it is, by where it sits rather than by what it types: a modifier
+// changes what a key produces — shift on the number row, alt on a Mac — and none
+// of that should change which pad your finger is on.
+function physicalKey(event) {
+  const code = event.code ?? "";
+  if (code.startsWith("Key")) return code.slice(3).toLowerCase();
+  if (code.startsWith("Digit")) return code.slice(5);
+  if (code === "Comma") return ",";
+  return event.key.toLowerCase();
+}
 
 window.addEventListener("keydown", (event) => {
+  // Neither ctrl nor cmd plays anything here, so their combinations are left to
+  // the browser rather than swallowed to no purpose.
   if (event.repeat || event.metaKey || event.ctrlKey) return;
 
   // A view that covers the whole page needs a way out that does not involve
@@ -587,16 +798,28 @@ window.addEventListener("keydown", (event) => {
     return;
   }
 
-  const entry = byKey.get(event.key.toLowerCase());
+  const key = physicalKey(event);
+  const entry = byKey.get(key);
   if (!entry) return;
   event.preventDefault();
-  press(entry.pad, entry.ratio);
+  holding.set(key, entry.pad);
+  pressEntry(entry, event);
 });
 
 window.addEventListener("keyup", (event) => {
-  const entry = byKey.get(event.key.toLowerCase());
-  if (entry) release(entry.pad);
+  const key = physicalKey(event);
+  const pad = holding.get(key);
+  if (!pad) return;
+  holding.delete(key);
+  release(pad);
 });
+
+// The octave keys are held rather than pressed, so they are watched on their own
+// account. Losing the window with one down would leave the pads lying.
+const watchOctave = (event) => showOctave(octaveShift(event));
+window.addEventListener("keydown", watchOctave);
+window.addEventListener("keyup", watchOctave);
+window.addEventListener("blur", () => showOctave(0));
 
 // --- the field ---
 //

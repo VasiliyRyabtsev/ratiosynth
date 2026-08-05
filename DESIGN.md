@@ -462,6 +462,88 @@ see two colours stacked on one line. The core idea of the project, as a picture.
 loop. In tune it holds still; slightly out it slowly rotates; out of tune it's a
 mess. An exactness meter that is also beautiful.
 
+### The pads are the lattice
+
+The first of those exists on the bench, standing still rather than lit up as the
+music walks. A button rearranges the pads between the two things they are: rows
+under your hands, and points in the grid. The elements themselves never change,
+only what holds them, so a note being held survives the switch.
+
+Both axes are numbered by how many of the prime a pad carries, so the square that
+holds 5/3 in the rows is at -1 across and +1 up. That is not a scheme invented for
+the picture: it is the pitch as §2 stores it, one number per prime, read straight
+off the array. The columns have a ceiling as well as a floor, because a grid
+stretched to fill a wide window stops looking like a grid.
+
+Laid out by ratio, the pads answer a question the rows could not. A keyboard row
+cuts across the grid — the flat side is one line of it, and the bright side is
+two, since five of the eight pads on the home row have no 5 in them at all and
+sit on the middle line with the number row. That is why the two middle rows
+cannot be told apart by naming a prime: both are built on 5, and what separates
+them is which way the 5 points. Multiplying by 5 rises and gives the brighter of
+a pair, dividing by 5 falls and gives the flatter one, which is why 6/5 is 3/2
+with a 5/4 taken off it. A heading cannot carry that; a picture can, so the
+headings say only how a row sounds.
+
+Only 3 and 5 get an axis, so anything using 7, 11 or 13 is off the plane entirely
+and sits apart from the grid rather than being forced onto it. That is worth
+showing rather than tidying away.
+
+**The keys follow the pads.** A grid you cannot play is a diagram, so each line
+of the lattice takes a line of the keyboard and each column takes a key along it:
+1/1 falls under the left index finger, the line above it lands on `w e r t y`,
+the line below on `c v b n`, and the seven with no place on the plane take the
+number row. The stagger of a typing keyboard turns out to be close enough to a
+lattice that the columns agree both on the screen and under the hand.
+
+This gives a key two meanings, one per arrangement, and that is a hazard where
+notes are held rather than triggered: rearranging the pads with a finger down
+strands the note, because the key means a different pad by the time it comes up.
+So a key releases *the pad it pressed*, remembered from when it went down, and
+never whatever it would mean now.
+
+**An octave is not a place in the grid.** Shift lifts a press by an octave and
+alt drops it. That settles what to do about 2/1: it is 1/1 played higher, not a
+point of its own, so the lattice leaves it out and the rows keep it. Ctrl is the
+obvious partner for shift and is not used, because the browser has already taken
+it with w, t, n and the number row — all live keys here — and acts on those
+before the page sees them. A modifier that works on part of the keyboard is worse
+than one that works on none of it.
+
+**Which octave each square is played in.** Everywhere else on the bench a pad is
+folded into the octave above the root, and folding is what scrambles a line:
+stepping by 3/2 along the middle line and folding gives 0, 702, 204, 906 and 408
+cents, which climbs and drops and climbs. Unfolded — a whole 3/2 for a step
+across and a whole 5/4 for a step up, so a square at *a* across and *b* up is
+exactly (3/2)^a * (5/4)^b — every line climbs from left to right and every column
+from bottom to top. The grid then spans 4.1 octaves, from 8/27 at -2106 cents to
+81/16 at +2808.
+
+This admits the prime 2 to a picture that is otherwise about 3 and 5, which is
+the cost and is worth it: the grid stops being a diagram of relationships and
+becomes an instrument with register, where where a pad sits is where it sounds.
+The 2 decides nothing but which octave.
+
+Rendered at the corners, the resonator holds up across that span: -3.0 dB at the
+top right against 1/1, and the bottom, at 39 Hz with the octave key, is if
+anything slightly louder. The top thins rather than aliasing, because the
+processor already drops partials that reach the sampling limit, and by 2673 Hz it
+has lost enough of them to sit 7.7 dB down. That is an instrument running out of
+range, which is what one should do.
+
+Holding an octave key moves the whole keyboard, so the whole keyboard says so:
+every pad redraws with the ratio and the distance it would play now, and all of
+them take a colour wash — up in the accent, down in the warm one. The wash is
+laid over each pad's own background rather than replacing it, so how simply a
+ratio relates to the root can still be read underneath, and it is the cue that
+survives into §25's view, where the distances are hidden.
+
+A pad already down keeps the face of the note it is sounding while its neighbours
+move, because that note did not move. So the pad that lights is the one under
+your finger, and it says what it is playing; the ones around it say what they
+would play. Those being allowed to differ is the point rather than a sloppiness —
+a pad is a place, and the octave is a way of playing it.
+
 ## 10. How it runs
 
 Live and steerable — processes run continuously and are steered in real time,
