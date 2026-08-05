@@ -2,8 +2,7 @@
 //
 // `Composer.perform` generates a whole stretch at once, which is right for
 // measuring and useless for listening. This walks the same parts forward against
-// wall time so the thing can be heard and steered while it runs — which was
-// always the point, and which it had never actually done.
+// wall time so the thing can be heard and steered while it runs.
 
 export class LivePlayer {
   constructor({ composer, now, play, release }) {
@@ -17,12 +16,10 @@ export class LivePlayer {
     this.origin = 0;
     this.holding = [];
     // No lookahead. Playing a note early because the timer is about to fire
-    // scatters onsets across a window wider than the grid itself — measured, it
-    // took a rhythm that was 100% on the grid offline down to 0% live, which is
-    // to say it destroyed the beat entirely while every offline number stayed
-    // perfect. A note is played on the first tick at or after its time, so it is
-    // always slightly late and never early, and the lateness is smaller than the
-    // ear resolves.
+    // scatters onsets across a window wider than the grid itself, which destroys
+    // the beat while every offline measurement stays perfect. A note is played
+    // on the first tick at or after its time, so it is always slightly late and
+    // never early, by less than the ear resolves.
     this.interval = 8; // ms between ticks: the worst lateness any note can have
   }
 
@@ -53,8 +50,6 @@ export class LivePlayer {
   }
 
   tick() {
-    // Nothing thrown in here may be allowed to stop the music silently.
-    //
     // A timer callback that throws leaves the page looking exactly like a page
     // where somebody pressed stop: no sound, no error, no clue. Whatever went
     // wrong with one tick, the next one gets a fresh try, and the problem says
@@ -92,8 +87,6 @@ export class LivePlayer {
       if (!event) break;
 
       // Whether to sound this note is the composer's decision if it made one.
-      // The fixed-root engine decides it once per phrase, because rolling it per
-      // note punched holes in phrases and no phrase came out twice the same.
       const mute = event.mute !== undefined ? event.mute : this.composer.random() >= this.composer.params.density;
       if (!mute) {
         const id = this.play(event.ratio, event.velocity, event.tag);
@@ -105,9 +98,7 @@ export class LivePlayer {
     }
 
     // The drone, if this composer has one. It is not accompaniment: without a
-    // sounding root the ratios have nothing to be ratios *of*, and the whole
-    // reason a step is allowed to be an ugly number is that nobody is hearing it
-    // as an interval — they are hearing each note against the root.
+    // sounding root the ratios have nothing to be ratios *of*.
     if (this.composer.droneDue) {
       const drone = this.composer.droneDue(at);
       if (drone) {
@@ -115,8 +106,8 @@ export class LivePlayer {
           const id = this.play(voice.ratio, voice.velocity, voice.tag, { sustain: voice.sustain ?? 0.5 });
           if (id !== null && id !== undefined) {
             // Held until the piece stops. Releasing a drone kills its sustain,
-            // which is the whole of it, so it can only be renewed by striking it
-            // again — and a strike on a fixed period is a metronome.
+            // and it could then only be renewed by striking it again — which on
+            // a fixed period is a metronome.
             this.holding.push({ id, until: Infinity });
           }
         }

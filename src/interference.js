@@ -1,9 +1,8 @@
 // The field panel — src/field.js worked out on the GPU.
 //
 // One fragment shader, one triangle covering the panel, and a dozen waves handed
-// in as uniforms every frame. The arithmetic per pixel is a sum of cosines, which
-// is small enough that the whole thing costs nothing and honest enough that the
-// picture really is the sum of the waves rather than an impression of one.
+// in as uniforms every frame. The arithmetic per pixel is a sum of cosines, so
+// the picture really is the sum of the waves rather than an impression of one.
 
 import { wavesFrom, phaseAt } from "./field.js";
 
@@ -16,12 +15,8 @@ const MAX_WAVES = 12;
 // One bit of complexity becomes one fringe across the width of the panel,
 // whatever that width happens to be. So 3/2 draws two and a half broad bands and
 // 81/64 draws twelve fine ones, and it is the same picture on a phone as on a
-// desk.
-//
-// Across the width rather than the height, because the panel is much wider than
-// it is tall: measured against the short side, the finer ratios came out as
-// dozens of fringes crossing a second wave, which is plaid rather than
-// interference.
+// desk. Across the width rather than the height, because the panel is much wider
+// than it is tall and against the short side the finer ratios come out as plaid.
 const FRINGE = Math.PI * 2;
 
 const VERTEX = `
@@ -31,11 +26,9 @@ void main() { gl_Position = vec4(aCorner, 0.0, 1.0); }
 
 // A wave is packed as (x, y, phase, amplitude). Position is measured out from
 // the centre in widths, so the picture keeps its proportions and its centre
-// whatever size the panel is.
-//
-// The crest colour and the trough colour are the two accents of the page, so
-// where waves reinforce reads warm or cool depending on which way, and the
-// nodal lines where they cancel fall back to the page's own background.
+// whatever size the panel is. Crest and trough are the page's two accents, so
+// where waves reinforce reads warm or cool depending on which way, and the nodal
+// lines where they cancel fall back to the background.
 const FRAGMENT = `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -114,8 +107,8 @@ export class Field {
       }
       gl.useProgram(program);
 
-      // One triangle big enough to cover the panel, which needs no index buffer
-      // and no second pass over the diagonal that two triangles share.
+      // One triangle big enough to cover the panel: no index buffer, and no
+      // second pass over the diagonal that two triangles would share.
       const buffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);

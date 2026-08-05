@@ -1,58 +1,36 @@
-// The live view — the same waves, marched through instead of sliced.
+// The live view — the same waves, marched through instead of sliced. DESIGN §25.
 //
-// There is no arithmetic here that the panel does not already have, and that is
-// the point of the view rather than a saving. A wave's phase from the clock is
-// `rate × t` and its phase from a position is that position times how fine it
-// is; those are one expression, so the second the panel animates in is a third
-// direction in space. Give a wave the vector `(x, y, rate)` — which is what
-// `wavesFrom` has always handed back — and the solid at `z = t` is the panel at
-// time `t`, exactly. See `fieldAt` in src/field.js, and the test that pins it.
+// There is no arithmetic here that the panel does not already have. A wave's
+// phase from the clock is `rate × t` and its phase from a position is that
+// position times how fine it is; those are one expression, so the second the
+// panel animates in is a third direction in space. Give a wave the vector
+// `(x, y, rate)` — which is what `wavesFrom` has always handed back — and the
+// solid at `z = t` is the panel at time `t`, exactly. See `fieldAt` in
+// src/field.js, and the test that pins it.
 //
 // So the flight is not a second picture of the music. It is the same picture
-// with the eye put inside it.
-//
-// Three things follow, none of them chosen:
+// with the eye put inside it. Three things follow, none of them chosen:
 //
 //   the speed        One unit a second, forward. Any other speed and what is in
 //                    front of the eye is not what the panel would be showing.
-//                    It also means §24's durations are distances: the wait for
-//                    two notes to come back round is how far ahead the figure
-//                    repeats, so a comma is not a minute of staring but a long
-//                    tunnel, and 3/2 is a short one.
+//                    It also makes §24's durations distances: the wait for two
+//                    notes to come back round is how far ahead the figure
+//                    repeats, so a comma is a long tunnel and 3/2 a short one.
 //
 //   what is ahead    The next few seconds of the panel, in perspective. The
 //                    depth marched is about three and a half seconds of it.
 //
 //   where the eye is On the root's own axis, and not moving. §24 draws the whole
-//                    picture *from* the root — it is the origin every arrow is
-//                    measured out from — and under this engine every note means
-//                    its ratio to it, so that axis is where the eye belongs.
+//                    picture *from* the root, and under this engine every note
+//                    means its ratio to it, so that axis is where the eye
+//                    belongs. Easing it towards the estimated tonal centre made
+//                    people dizzy: the centre changes every four seconds or so,
+//                    and each change strafed the eye sideways nearly as fast as
+//                    it flies forward.
 //
-//                    It was built the other way first, with the eye easing
-//                    towards wherever the tonal centre was estimated to be, and
-//                    that made people dizzy. Measured, and the numbers are not
-//                    close: over five minutes of the engine playing itself the
-//                    centre changes 77 times, once every 3.9 seconds, because
-//                    §4's estimate lands on whichever sounding note makes
-//                    everything simplest and that keeps changing. Each change
-//                    starts the eye sliding sideways at up to 0.92 units a
-//                    second against a forward speed of 1.00 — very nearly
-//                    strafing as fast as it flies — and then it decelerates and
-//                    swerves again four seconds later. Repeated unpredictable
-//                    sideways acceleration is the recipe for making somebody
-//                    sick, and it bought nothing that the waves changing does
-//                    not already do.
-//
-//   the root         A wave with no extent has nowhere to be. On the panel that
-//                    is an even wash you can see past; in a solid it is fog, and
-//                    it blinds everything. Measured, every set containing 1/1
-//                    came out uniformly saturated — the same failure as §24's
-//                    strobe, which was also a wave with no length being asked to
-//                    do something a wave does. So the root lights the space
-//                    instead of filling it, which is §24's own sentence about it
-//                    ("the root agrees with itself everywhere") read in three
-//                    dimensions. Hold the root and the corridor you are flying
-//                    down glows; it never becomes solid.
+// The root itself has no extent, so in a solid it is fog and blinds everything.
+// It lights the space instead of filling it — §24's "the root agrees with itself
+// everywhere" read in three dimensions. Hold the root and the corridor glows.
 
 import { solidFrom, grainOf } from "./field.js";
 
@@ -63,26 +41,19 @@ const MAX_WAVES = 8;
 // How far a ray steps, and how many times. Their product is how far ahead you
 // can see: three and a half units, which is three and a half seconds of panel.
 //
-// The step is what decides which ratios can be drawn at all. A wave whose
-// fringes are closer together than the gap between two samples cannot be sampled
-// honestly, and drawn anyway it becomes sparkle that has nothing to do with the
-// music — so it fades out instead, which is the `visible` term below. At this
-// step everything the engine's own set contains is comfortably sampled (the
-// finest, 5/4, has fringes five times the gap) and only the far-flung pads reach
-// the limit: 81/64, the most remote thing on the bench, sits right on it and
-// comes out faint. That is the honest answer rather than a lucky one.
+// The step is what decides which ratios can be drawn at all: a wave finer than
+// the gap between two samples cannot be sampled honestly, so it fades out
+// instead — the `visible` term below. At this step everything the engine's own
+// set contains is comfortably sampled, and only the far-flung pads reach the
+// limit and come out faint.
 const STEP = 0.05;
 const STEPS = 70;
 
-// How far ahead the march starts.
-//
-// The eye is inside the solid, and the material it is standing in is both
-// meaninglessly magnified and the fastest-sweeping thing in the picture — what
-// is nearest always crosses the view quickest. Looking at the field rather than
-// through the part you are standing in costs a little of the view and settles
-// most of the flicker: measured, the share of each frame's change that is the
-// whole frame brightening and dimming together falls from 0.15 to 0.02, and
-// contrast rises from 0.74 to 0.86.
+// How far ahead the march starts. The eye is inside the solid, and the material
+// it is standing in is both meaninglessly magnified and the fastest-sweeping
+// thing in the picture — what is nearest always crosses the view quickest.
+// Looking at the field rather than through the part you are standing in costs a
+// little of the view and settles most of the flicker.
 const NEAR = 0.8;
 
 // Settled by looking — see the note at the foot of the file.
@@ -94,8 +65,7 @@ const WIDEN = 2.0;
  * `${2.0}` in a template comes out as "2", and GLSL ES has no implicit
  * conversion from int to float — so `const float WIDEN = 2;` does not compile
  * and the whole view fails to start. Every float folded into the source below
- * goes through here, because the alternative is a rule that only holds while
- * nobody picks a round number.
+ * goes through here.
  */
 const glsl = (value) => (Number.isInteger(value) ? value.toFixed(1) : String(value));
 
@@ -104,10 +74,9 @@ attribute vec2 aCorner;
 void main() { gl_Position = vec4(aCorner, 0.0, 1.0); }
 `;
 
-// The numbers in here that are not facts about the ratios are the same three
-// kinds §24 lists for the panel, and they were settled the same way — by running
-// the march in node over the sets the music actually produces and reading off
-// the contrast. See the note at the foot of this file.
+// The numbers in here that are not facts about the ratios were settled by
+// running the march in node over the sets the music actually produces and
+// reading off the contrast. See the note at the foot of this file.
 const FRAGMENT = `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -135,28 +104,19 @@ const float STEP = ${glsl(STEP)};
 // and nothing can blow past it.
 const float SOLIDITY = 1.8;
 
-// Only where the waves really agree. The panel's own curve is a 0.65 power,
-// which lifts the shallow ground so a flat picture shows it — but as a *density*
-// that fills space, and measured it turned the whole march into fog: every ray
-// saturated and contrast fell to 0.03. A solid has to be mostly empty or you
+// Only where the waves really agree. The panel's own 0.65 power lifts the
+// shallow ground so a flat picture shows it, but as a *density* that fills space
+// it turns the whole march into fog. A solid has to be mostly empty or you
 // cannot see into it, so the curve goes the other way.
 const float HARDNESS = 3.0;
 
 // How much the root lights the space it cannot fill.
 const float WASH = 0.25;
 
-// How wide the lens is. The panel is what you would see one unit ahead through a
-// lens of one; a page is not a strip and holds a good deal more than a strip's
-// worth, and at one the same structure simply arrived magnified until it was
-// clouds. This is the panel's own fringe scale being re-chosen for a view of a
-// different shape, and it is the same kind of number: it changes how much of the
-// picture you are looking at, and nothing about the picture.
-//
-// It was wider still until the near plane arrived. Width and a near plane buy
-// the same sharpness, and width buys it by stretching the edges of the view,
-// which is where the eye reads speed from — so with the near plane doing that
-// work the lens came back to about ninety degrees, and the pictures measured
-// *better* rather than worse: the comma pair went from 0.44 to 0.67 in contrast.
+// How wide the lens is: the panel's own fringe scale, re-chosen for a view of a
+// different shape. It changes how much of the picture you are looking at and
+// nothing about the picture. At one, the same structure arrives magnified until
+// it is clouds.
 const float WIDEN = ${glsl(WIDEN)};
 
 // Where the march begins, ahead of the eye.
@@ -199,10 +159,8 @@ void main() {
 
     // The two accents still mean how strongly the waves agree: the edge of a
     // crest is cool, its core runs warm. Mixed on the hardened figure and not
-    // the raw height, because half of every crest is above the halfway mark and
-    // mixing on that put the warm accent over almost the whole picture — the
-    // cool one had effectively gone. Warm is now what a crest reaches at its
-    // centre, which is what it was meant to be.
+    // the raw height, because half of every crest is above the halfway mark, so
+    // mixing on that puts the warm accent over almost the whole picture.
     lit += mix(uCrest, uTrough, solid) * solid * through * STEP * SOLIDITY;
     through *= exp(-SOLIDITY * solid * STEP);
 
@@ -325,16 +283,15 @@ export class Flight {
   /**
    * Draw what is remembered.
    *
-   * The eye takes no arguments. It sits on the root's axis and moves forward at
-   * the clock — both forced, and see the head of the file for what happened when
-   * the sideways part was allowed to be a choice.
+   * The eye takes no arguments: it sits on the root's axis and moves forward at
+   * the clock, both forced. See the head of the file.
    */
   draw(memory, seconds, clock = 0) {
     this.keepUp(clock);
     this.resize();
 
     // The sorting is arithmetic and lives in src/field.js, where node can test
-    // it. Only the drawing is here — the same division §24 made for the panel.
+    // it. Only the drawing is here.
     const { waves, total, wash } = solidFrom(memory, MAX_WAVES);
 
     this.packed.fill(0);
@@ -361,25 +318,16 @@ export class Flight {
 
 // Checking it without a browser, the same way §24 checked the panel.
 //
-// The march was re-run in node over the sets the engine actually produces, and
+// The march is re-run in node over the sets the engine actually produces, and
 // the constants above are where the contrast came out best across all of them at
-// once. With hardness 3 and solidity 2.5, against a possible 0.00–1.00:
+// once — from 0.75 for the hexany opening down to 0.38 for the drone alone,
+// which is one quiet note and correctly dim. Two failures were found this way
+// rather than by looking, and both are recorded above: the fog the root made,
+// and the panel's own 0.65 curve flattening the march when used as a density.
 //
-//   the hexany opening   0.28–1.03, contrast 0.75, nothing blown, nothing empty
-//   4:5:6                0.28–1.03, contrast 0.75
-//   the comma pair       0.11–0.82, contrast 0.71
-//   playing, with drone  0.24–0.96, contrast 0.72
-//   eight at once        0.16–0.71, contrast 0.55
-//   the drone alone      0.07–0.46, contrast 0.38 — one quiet note, correctly dim
-//
-// Two failures were found this way rather than by looking, and both are recorded
-// above: the fog the root made, and the panel's own 0.65 curve flattening the
-// march to a contrast of 0.03 when used as a density.
-//
-// The motion was measured too, because §24's strobe was exactly a picture that
+// The motion is measured too, because §24's strobe was exactly a picture that
 // changed all at once instead of streaming. Between two moments a tenth of a
 // second apart, pixels move by 0.04 while the frame as a whole shifts by 0.015,
 // so most of what changes is structure going past. The root alone does not move
-// at all, which is right and is the same sentence as before. And the comma pair
-// moves at a fifth the speed of the hexany, which is the long tunnel turning up
-// in the measurement rather than in the prose.
+// at all, and the comma pair moves at a fifth the speed of the hexany — the long
+// tunnel turning up in the measurement rather than in the prose.

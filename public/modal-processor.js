@@ -162,17 +162,13 @@ class ModalProcessor extends AudioWorkletProcessor {
       voice.driftRate[i] = this.params.driftRate * (0.5 + Math.random());
     }
 
-    // The strike, in two parts.
-    //
-    // A sharp hit, which contains every frequency in equal measure and so
-    // excites every partial by a predictable amount. Then a burst of noise
-    // that fades over a few milliseconds, for the scrape and rattle of contact.
-    //
-    // The hit has to be there. Noise alone sounds right but is wildly
-    // inconsistent: these resonators are extremely narrow, so how hard each
-    // one gets pushed depends on what the noise happened to contain at exactly
-    // that frequency — which made the same note come out five times louder on
-    // one strike than the next.
+    // The strike, in two parts: a sharp hit, which contains every frequency in
+    // equal measure and so excites every partial by a predictable amount, then a
+    // burst of noise fading over a few milliseconds for the scrape and rattle of
+    // contact. The hit has to be there — these resonators are extremely narrow,
+    // so with noise alone how hard each one gets pushed depends on what the noise
+    // happened to contain at exactly that frequency, and the same note comes out
+    // five times louder on one strike than the next.
     const noise = this.params.noise;
     voice.impulse = IMPULSE_LEVEL * (1 - 0.5 * noise);
     voice.strikeEnv = noise;
@@ -185,9 +181,7 @@ class ModalProcessor extends AudioWorkletProcessor {
     voice.lowpassCoef = 1 - Math.exp((-2 * Math.PI * cutoff) / sampleRate);
     // Per note, falling back to the global setting. A drone has to keep
     // sounding, and with one global sustain of zero every note is a struck
-    // resonator that decays — which made the drone a low bell hit every four
-    // seconds and buried under everything, rather than the reference the whole
-    // design leans on.
+    // resonator that decays.
     voice.sustainLevel = (sustain ?? this.params.sustain) * velocity;
   }
 
@@ -254,9 +248,9 @@ class ModalProcessor extends AudioWorkletProcessor {
       const b0 = voice.b0[i];
       if (b0 === 0) continue;
 
-      // Nudge the partial off its exact frequency by a fraction of a cent,
-      // recomputed once per block. Cheap, and it is the difference between a
-      // sound that breathes and a sound that sits still.
+      // Nudge the partial off its exact frequency by a fraction of a cent, once
+      // per block. It is the difference between a sound that breathes and a
+      // sound that sits still.
       let a1 = voice.a1[i];
       if (driftDepth !== 0) {
         const phase = voice.driftPhase[i] + voice.driftRate[i] * blockTime * 2 * Math.PI;

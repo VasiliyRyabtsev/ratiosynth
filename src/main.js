@@ -21,21 +21,17 @@ const now = () => engine.context?.currentTime ?? performance.now() / 1000 - star
 
 // What you can play by hand. Grouped, one group per keyboard row, because a flat
 // list of two dozen fractions says nothing about how they relate — and the
-// relations are the whole point. Within a row the ratios climb.
+// relations are the whole point. Within a row the ratios climb, and the rows are
+// drawn in the order their keys sit on the keyboard.
 //
 // This is not a scale in the sense of a set you must stay inside. The engine
 // plays whatever ratio it is handed; these are the ones simple enough to earn a
 // key of their own.
 //
-// The groups are in the order their keys sit on the keyboard, so the group on the
-// number keys is drawn topmost and each group below it is the letter row under it.
-// Where your eye finds a pad is where your hand finds its key.
-//
 // The number row and the flat side are here to be heard against the bright side.
-// 81/64 is what you get stacking 3/2 four times, and it is not 5/4 — it misses by
-// a comma, and pressing d then 2 is that comma. Same for 27/16 against 5/3, 32/27
-// against 6/5, 16/9 against 9/5, and 10/9 against 9/8. Nothing in this project
-// papers over those gaps, so you can hear every one of them.
+// 81/64 is what you get stacking 3/2 four times, and it is not 5/4 — pressing d
+// then 2 is that comma. Same for 27/16 against 5/3, 32/27 against 6/5, 16/9
+// against 9/5, and 10/9 against 9/8.
 const GROUPS = [
   {
     label: "built on 3 alone — 3/2 stacked up",
@@ -214,14 +210,10 @@ buildKnobs(document.getElementById("rootKnobs"), rootKnobs, () => applyRootParam
 // --- landmarks ---
 //
 // Not shortcuts so much as landmarks. The parameter space is enormous and most
-// of it does not sound like anything; these are the corners that do.
-//
-// They used to sit under the transport behind the words "start from", which was
-// wrong twice over: they are not a start — nothing stops you jumping to one an
-// hour in — and they were nowhere near the sliders they move. They now sit on
-// top of those sliders, and the one you are standing on stays marked until a
-// slider moves off it, so the panel says where you are and not only where you
-// could go.
+// of it does not sound like anything; these are the corners that do. They sit on
+// top of the sliders they move, and the one you are standing on stays marked
+// until a slider moves off it, so the panel says where you are and not only
+// where you could go.
 
 const PRESETS = {
   settled: {
@@ -339,19 +331,15 @@ function drawPartials(modes) {
 
 const held = new Map(); // pad element -> voice id
 
-// There is no way to leave a pad down, and that is deliberate. See DESIGN §26:
-// the two chord buttons that used to be here were answering "a mouse has one
-// pointer", a latch answered it more generally, and both were answering a
-// question the page had already answered twice — the keyboard is right there
-// and can hold as many pads as you have fingers, and if what you want is sound
-// going on while your hands are elsewhere, that is the button at the top left.
+// There is no way to leave a pad down, and that is deliberate — see DESIGN §26.
+// The keyboard can hold as many pads as you have fingers, and if what you want
+// is sound going on while your hands are elsewhere, that is the button at the
+// top left.
 
 // A pad carries two facts, and they are not the same kind of fact. How far up it
 // is, in cents, is a position — so it is printed, and the pads are ordered by it.
-// How simply it relates to the root is not a position at all, and printing it
-// next to the cents invited reading it as a second kind of height. So it is drawn
-// instead: the simpler the ratio, the brighter the pad. Near home is legible from
-// across the room, far out on the lattice fades towards the background.
+// How simply it relates to the root is not a position at all, so it is drawn
+// instead: the simpler the ratio, the brighter the pad.
 //
 // The ceiling below is a display scale and nothing else — no part of the music
 // reads it. It only has to keep the faintest pad readable. 81/64 is the most
@@ -449,19 +437,12 @@ function stopNote(pad) {
   if (id != null) releaseNote(id);
 }
 
-// Audio can only start from a gesture, and any pad counts as one, so every
-// entry point goes through here.
+// Audio can only start from a gesture, and every control here is a gesture, so
+// there is no button for it — every entry point goes through `ensureStarted`.
 //
-// There was a button for this. It was the first thing in the row, it was pressed
-// exactly once, and then it vanished and shifted everything after it sideways —
-// so the one press it taught you was a press you would never make again, at a
-// place that then stopped existing. It never had a job either: every other
-// control here is also a gesture, so the browser was already going to let the
-// sound start.
-//
-// What is left is the fact, in a slot that always holds one line: asleep, and
-// then what 1/1 is in Hz, which is the one number this page otherwise never
-// prints and the one place where ratios turn into frequencies.
+// The slot always holds one line: asleep, and then what 1/1 is in Hz, which is
+// the one number this page otherwise never prints and the one place where ratios
+// turn into frequencies.
 const status = document.getElementById("status");
 const showStatus = () => {
   status.innerHTML = engine.running
@@ -499,16 +480,12 @@ function releaseNote(id) {
 
 // --- what the player plays becomes material ---
 //
-// Two things were wrong with pads and the engine running together. Nothing the
-// player did reached the music — it went into the sonority and no further — and
-// both were sounding at once, which is not an accompaniment, it is two things
-// making music in the same room without listening.
-//
-// So: while a note is being played the parts hold back, and once the playing
+// While a note is being played the parts hold back — two things sounding at once
+// without listening to each other is not an accompaniment — and once the playing
 // stops the phrase is handed to the engine as a shape, pinned. From there the
-// machinery that already exists does the rest — a pinned shape is at distance
+// machinery that already exists does the rest: a pinned shape is at distance
 // nought from wherever the music is, so the piece takes it up, varies it by one
-// ratio at a time and keeps coming back to it.
+// ratio at a time and keeps coming back to it. DESIGN §21.
 
 let heard = [];
 let settle = null;
@@ -563,8 +540,7 @@ function applyRootParams() {
 
 // The two captions are the two directions of the same handover, which is what
 // this button is: the parts hold back while you play (§21), so the instrument is
-// never taken from you, it is lent. "stop" was the old off-caption and it sat
-// next to a button that also said stop.
+// never taken from you, it is lent.
 async function toggleAuto() {
   const button = document.getElementById("auto");
 
@@ -586,9 +562,9 @@ async function toggleAuto() {
 
 document.getElementById("auto").addEventListener("click", toggleAuto);
 
-// "stop all" did not say what it stops, and it does more than stop: it cuts what
-// is sounding, hands the instrument back, and clears what the ear is holding, so
-// the reading and the field start again from nothing.
+// More than a stop: it cuts what is sounding, hands the instrument back, and
+// clears what the ear is holding, so the reading and the field start again from
+// nothing.
 document.getElementById("panic").addEventListener("click", () => {
   releaseAll();
   held.clear();
@@ -645,16 +621,9 @@ if (!fieldView.ok) {
   fieldNote.textContent = "this panel needs WebGL, and this browser is not offering it.";
 }
 
-// No caption. The panel used to print how long the closest pair of sounding
-// notes took to come back round, and it read as noise — it parked on one value
-// for seconds and then leapt, by as much as 45 seconds between one frame and the
-// next, because the pair it described kept being replaced by a different pair.
-// It also described the drawing rather than the music: to read it you had to
-// know already that a note is a wave and that waves slide.
-//
-// The duration is only ever watchable for two notes held by hand, and that is
-// where the page says it — in prose under the bench, once, rather than sixty
-// times a second. The picture is the readout.
+// No caption: the picture is the readout. How long a pair of notes takes to come
+// back round is only watchable for two notes held by hand, and the page says
+// that in prose under the bench, once, rather than sixty times a second.
 function drawField(reading) {
   if (!fieldView.ok) return;
   fieldView.draw(reading.memory, reading.now);
@@ -662,7 +631,7 @@ function drawField(reading) {
 
 // --- the live view ---
 //
-// The bench is for finding out what a parameter does. This is for playing: the
+// The bench is for finding out what a parameter does; this is for playing. The
 // same waves with the eye inside them, the pads, and the little about the state
 // you would still want while your hands are busy. Nothing here is a second way
 // of doing anything — the pads are the very same elements, moved.
@@ -709,11 +678,9 @@ function perform(wanted) {
 
 /**
  * What is worth reading while playing, which is much less than the bench shows.
- *
- * No vocabulary, no parts, no partials: those are for understanding what the
- * engine did, and you cannot study them and play at the same time. What is left
- * is where the music thinks it is, how sure of that it is, how far through
- * unfolding, and what is actually sounding.
+ * No vocabulary, no parts, no partials — you cannot study those and play at the
+ * same time. What is left is where the music thinks it is, how sure of that it
+ * is, how far through unfolding, and what is actually sounding.
  */
 function drawLive(reading, clock) {
   if (!flightView?.ok) return;
@@ -731,8 +698,8 @@ function drawLive(reading, clock) {
     field("unfolded", bar(shape.progress)),
   ].join("");
 
-  // The drone apart from the rest, for §19's reason: it never stops, so listing
-  // it among the notes that change buries them.
+  // The drone apart from the rest: it never stops, so listing it among the notes
+  // that change buries them.
   const drone = reading.memory.filter((entry) => entry.tag === "drone" && entry.sounding);
   const notes = reading.memory.filter((entry) => entry.tag !== "drone");
 
@@ -793,16 +760,10 @@ function drawBench(reading) {
 
   document.getElementById("reading").innerHTML = bits.join("");
 
-  // The drone apart from the rest.
-  //
-  // It belongs in the reading — it is sounding, and under the fixed-root engine
-  // every other note means its ratio to it, so a reading that hid it would be
-  // describing a harmony that is not the one in the room. But it is a constant,
-  // and listing a constant among the variables buries the variables: the drone
-  // never stops, so it was most of the panel most of the time, and the notes
-  // that were actually moving were hard to pick out of it.
-  //
-  // So it is shown, once, on its own line, and what changes is shown below.
+  // The drone apart from the rest. It belongs in the reading — every other note
+  // means its ratio to it — but it is a constant, and listing a constant among
+  // the variables buries the variables. So it is shown once, on its own line,
+  // and what changes is shown below.
   const drone = reading.memory.filter((entry) => entry.tag === "drone" && entry.sounding);
   document.getElementById("drone").innerHTML = drone.length
     ? `drone <b>${drone.map((entry) => format(entry.ratio)).join(" + ")}</b>`
@@ -838,16 +799,11 @@ function drawReading(clock = 0) {
 /**
  * The shapes panel, updated in place rather than rebuilt.
  *
- * This is not an optimisation. The panel was being written with innerHTML on
- * every animation frame, which destroys and recreates every row sixty times a
- * second — and a browser only fires a click when the press and the release
- * happen on the same element. The row was always gone by the time the button
- * came up, so the click landed on the container instead, `closest(".shape")`
- * found nothing, and pinning silently did nothing at all. In either engine, for
- * as long as the feature has existed.
- *
- * Keeping the elements and changing their attributes fixes it. Moving a node is
- * safe; replacing it is not.
+ * Not an optimisation. Rewriting it with innerHTML on every animation frame
+ * destroys and recreates every row sixty times a second, and a browser only
+ * fires a click when the press and the release land on the same element — so
+ * pinning silently did nothing at all. Moving a node is safe; replacing it is
+ * not.
  */
 function renderShapes(items) {
   const container = document.getElementById("gestures");
@@ -873,14 +829,11 @@ function renderShapes(items) {
 }
 
 /**
- * The same panel for the fixed-root engine.
- *
- * Its vocabulary is the thing worth seeing — the whole claim of that engine is
- * that it has one and comes back to it — so the shapes list is its phrases,
- * strongest first, with the notes each one moves through and how long they are
- * held. Clicking still pins, and pinning still means the same thing: this shape
- * stops fading, and it becomes as likely to be played as whatever the music
- * meant to play, wherever it is.
+ * The engine's vocabulary, which is the thing worth seeing — its whole claim is
+ * that it has one and comes back to it. Phrases strongest first, with the notes
+ * each moves through and how long they are held. Clicking pins: the shape stops
+ * fading, and becomes as likely to be played as whatever the music meant to
+ * play, wherever it is.
  */
 function drawShape() {
   const shape = rootComposer.describe();
@@ -919,10 +872,9 @@ function drawShape() {
 }
 
 // On press, not on click. A click needs the press and the release to land on the
-// same element, which is one more thing that has to hold in a panel that is
-// redrawn continuously; pressing is decided the moment it happens and there is
-// nothing left to go wrong. It also feels quicker, which is the point of a
-// control you are meant to use while listening.
+// same element, which is one more thing that has to hold in a panel redrawn
+// continuously. It also feels quicker, which is the point of a control you are
+// meant to use while listening.
 document.getElementById("gestures").addEventListener("pointerdown", (event) => {
   const shape = event.target.closest(".shape");
   if (!shape) return;

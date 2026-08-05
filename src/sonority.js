@@ -1,9 +1,10 @@
 // The Sonority — what the music currently is, and what that seems to mean.
+// DESIGN §4.
 //
 // This is the one place information travels backwards: the voices tell it what
-// they are doing, and the processes that decide what to play next read it. It
-// is an object you make and hold, not a hidden global, and you can have several
-// — a bass layer can track only itself while an upper layer tracks everything.
+// they are doing, and the processes that decide what to play next read it. It is
+// an object you make and hold, not a hidden global, so a bass layer can track
+// only itself while an upper layer tracks everything.
 //
 // It holds two layers, deliberately separated:
 //
@@ -12,11 +13,6 @@
 //   the reading  where the tonal centre seems to be, how far pitch has drifted,
 //                how dense it is, which way it has been heading. Inferred, and
 //                allowed to be uncertain.
-//
-// The cycle — a note is chosen against what is sounding, and then becomes part
-// of what is sounding — is resolved by the obvious thing: a new note is scored
-// against notes that have already started. That is not a workaround. It is what
-// "against what is sounding" means.
 
 import {
   UNISON,
@@ -101,11 +97,9 @@ export class Sonority {
   }
 
   /**
-   * How much a remembered note still counts.
-   *
-   * While it is sounding it counts fully. Once it has stopped it fades, so a
-   * note that ended half a second ago still colours how the next one is heard
-   * and one from a minute ago does not.
+   * How much a remembered note still counts. Fully while it is sounding, then
+   * fading — so a note that ended half a second ago still colours how the next
+   * one is heard and one from a minute ago does not.
    */
   weightOf(entry, now) {
     if (entry.endedAt === null) return entry.velocity;
@@ -162,11 +156,10 @@ export class Sonority {
    * unoccupied points around them, express every remembered note relative to
    * each, and score by how tangled those ratios are.
    *
-   * Unoccupied points are tested too, but be aware of a bias: a candidate that
-   * is itself one of the sounding notes scores zero for that note, and no empty
-   * point can match that. So in practice the centre lands on a note that is
-   * playing unless gravity pulls it elsewhere. Finding a genuinely absent root
-   * would need a different measure — see §4 of the design notes.
+   * There is a bias: a candidate that is itself one of the sounding notes scores
+   * zero for that note, and no empty point can match that, so in practice the
+   * centre lands on a note that is playing unless gravity pulls it elsewhere.
+   * Finding a genuinely absent root would need a different measure — see §4.
    */
   estimateCentre(memory) {
     if (memory.length === 0) {
@@ -187,9 +180,9 @@ export class Sonority {
       }
       score /= totalWeight;
 
-      // Gravity: a pull back toward the reference. At zero the centre is free
-      // to wander off and never return, which is the whole point of §3 — but
-      // it is also what breaks ties, so it earns its place here.
+      // A pull back toward the reference. At zero the centre is free to wander
+      // off and never return, which is the point of §3 — but it is also what
+      // breaks ties.
       if (gravity !== 0) {
         score += gravity * complexity(octaveReduce(div(candidate, reference)));
       }
@@ -199,13 +192,11 @@ export class Sonority {
 
     scored.sort((a, b) => a.score - b.score);
 
-    // Confidence is the gap to the runner-up. Two near-ties is genuine
-    // ambiguity of centre, which is a strong musical device, so it is reported
-    // as a number rather than hidden behind a winner.
-    //
-    // Scores are average complexity per note, in bits, and the gaps that
-    // separate a clear root from a murky one turn out to be a few tenths of a
-    // bit — so that is the scale confidence is measured against.
+    // Confidence is the gap to the runner-up. Two near-ties is genuine ambiguity
+    // of centre, which is a strong musical device, so it is reported as a number
+    // rather than hidden behind a winner. Scores are average complexity per note
+    // in bits, and the gaps that separate a clear root from a murky one are a
+    // few tenths of a bit, which is what MARGIN_SCALE is.
     const margin = scored.length > 1 ? scored[1].score - scored[0].score : Infinity;
     const confidence = margin === Infinity ? 1 : 1 - Math.exp(-margin / MARGIN_SCALE);
 
@@ -243,11 +234,9 @@ export class Sonority {
   }
 
   /**
-   * How far the centre has wandered from home, and by what interval.
-   *
-   * Reported as the shorter way round, so a centre 3/2 above home comes
-   * back as 4/3 below — that is the correction the gravity knob would
-   * have to make, and it is the smaller of the two.
+   * How far the centre has wandered from home, and by what interval. Reported as
+   * the shorter way round, so a centre 3/2 above home comes back as 4/3 below —
+   * the correction the gravity knob would have to make.
    */
   measureDrift(centre) {
     if (!centre) return null;
@@ -264,10 +253,8 @@ export class Sonority {
   }
 
   /**
-   * Which way the music has been travelling on the lattice.
-   *
-   * A move is the interval from one note to the next. Averaging the recent ones
-   * gives a heading — "it has been walking up by 3/2" — which is something a
+   * Which way the music has been travelling on the lattice. Averaging the recent
+   * intervals gives a heading — "it has been walking up by 3/2" — which a
    * generator can either follow or deliberately contradict.
    */
   measureDirection(memory) {

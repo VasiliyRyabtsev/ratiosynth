@@ -1,20 +1,17 @@
 // How rough two sounds are together.
 //
-// The effect is simple to state. Two pure tones at the same frequency are
-// smooth. Move one away and it starts to buzz — the two are close enough to
-// interfere but far enough apart to be heard fighting. Keep moving and the
-// buzzing fades again, and you hear two separate clean tones. So roughness for
-// one pair of pure tones is a bump: zero, up to a peak, back to zero.
+// Two pure tones at the same frequency are smooth. Move one away and it starts
+// to buzz — close enough to interfere, far enough apart to be heard fighting.
+// Keep moving and the buzzing fades again. So roughness for one pair of pure
+// tones is a bump: zero, up to a peak, back to zero. Where the peak sits depends
+// on pitch: low notes need a much wider gap before they stop fighting, which is
+// why a chord that sounds fine in the middle of the keyboard turns to mud an
+// octave down.
 //
-// Where the peak sits depends on pitch. Low notes need a much wider gap before
-// they stop fighting, which is why a chord that sounds fine in the middle of
-// the keyboard turns to mud an octave down.
-//
-// Real notes are not pure tones — they are a stack of partials — so the
-// roughness of two notes is the sum over every pair of partials, one from each.
-// That is where the whole premise of this project comes from: 3/2 sounds smooth
-// because the partials of the two notes land on each other instead of near each
-// other.
+// Real notes are a stack of partials, so the roughness of two notes is the sum
+// over every pair of partials, one from each. That is where the premise of this
+// project comes from: 3/2 sounds smooth because the partials of the two notes
+// land on each other instead of near each other.
 
 // The bump. These constants place the peak at about a quarter of the distance
 // the ear needs to separate two tones, which is where measured roughness peaks.
@@ -53,9 +50,9 @@ function reach(hz) {
 /**
  * Roughness between two sounds, each given as partials sorted by frequency.
  *
- * Most pairs of partials are too far apart to interfere at all, so this sweeps
- * a window through the second sound rather than comparing everything with
- * everything. Same answer, a fraction of the work.
+ * Most pairs are too far apart to interfere at all, so this sweeps a window
+ * through the second sound rather than comparing everything with everything.
+ * Same answer, a fraction of the work.
  */
 export function roughnessBetween(a, b) {
   let total = 0;

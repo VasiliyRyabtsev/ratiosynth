@@ -2,18 +2,15 @@
 //
 // Take a handful of factors — 1, 3, 5, 7 — and make every product of two of
 // them. That is six pitches, and it is Erv Wilson's Hexany. Six factors taken
-// three at a time gives twenty, the Eikosany. Nothing in this construction knows
-// what a scale degree is, and that is the point of using it.
+// three at a time gives twenty, the Eikosany.
 //
 // What makes it worth the trouble is what a *move* becomes. Two pitches are
 // neighbours when their factor sets differ by a single element, and the interval
 // between them is then the ratio of the factor swapped out to the one swapped
 // in. Exchange 5 for 7 and you have moved by 7/5. So a melodic move is not a
 // displacement of n positions — it is an operation with a name and an identity,
-// and its size is a plain ratio of two small whole numbers.
-//
-// This is the answer to scale-degree thinking leaking in everywhere. There are
-// no positions here to think in.
+// and its size is a plain ratio of two small whole numbers. There are no
+// positions here to think in, which is the point of using it.
 
 import { fromFraction, mul, div, octaveReduce, complexity, cents, equals } from "../../src/ratio.js";
 
@@ -60,8 +57,8 @@ export function productSet(factors, choose) {
  * The moves available from a pitch: swap one factor for one it does not have.
  *
  * Returned with the ratio of the exchange, which is the interval, and with the
- * two factors named — because "I traded the 5 for a 7" is a thing that can be
- * remembered and repeated, and "I moved up two places" is not.
+ * two factors named — "I traded the 5 for a 7" can be remembered and repeated,
+ * and "I moved up two places" cannot.
  */
 export function movesFrom(set, point) {
   const here = new Set(point.subset);
@@ -106,9 +103,9 @@ export function describe(set) {
  * Every other member, with the interval to it.
  *
  * `movesFrom` gives only the single-factor exchanges, which is the harmonic
- * relation. This gives all of them, because a melody needs to be able to go
- * somewhere near and the nearest pitch is often not a factor-neighbour. The
- * interval is still a ratio of the factors involved either way.
+ * relation. A melody needs to be able to go somewhere near, and the nearest
+ * pitch is often not a factor-neighbour. The interval is still a ratio of the
+ * factors involved either way.
  */
 export function allMoves(set, point) {
   const here = new Set(point.subset);

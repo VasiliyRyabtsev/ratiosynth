@@ -144,8 +144,7 @@ const MAX_EXACT = 2 ** 53;
  *
  * Multiplying the prime powers is exact while the numbers stay small, which
  * covers everything musical. Far out on the lattice it overflows, so there we
- * fall back to powers of two and accept the last-digit error — by then the
- * number is only being used to set a frequency anyway.
+ * fall back to powers of two and accept the last-digit error.
  */
 export function toNumber(a) {
   let n = 1;
@@ -233,11 +232,7 @@ export function withOctaves(a, octaves) {
   return trim(out);
 }
 
-/**
- * Forget which octave this is in — the identity of the note, ignoring height.
- * This is what the lattice display draws: only the 3s and 5s move you around
- * the picture, the 2s just move you up and down.
- */
+/** Forget which octave this is in — the note's identity, ignoring height. */
 export function pitchClass(a) {
   if (a.length === 0) return [];
   const out = a.slice();

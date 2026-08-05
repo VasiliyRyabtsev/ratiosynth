@@ -32,15 +32,14 @@ export class Engine {
     const context = new AudioContext({ latencyHint: "interactive" });
     // The version matters. An AudioWorklet module is fetched once per context
     // and cached hard by the browser, so a changed processor is silently ignored
-    // — a new field in a message is simply dropped by the old code, and the
-    // result measures perfectly offline while making no sound at all. Bump this
+    // — a new field in a message is dropped by the old code, and the result
+    // measures perfectly offline while making no sound. Bump PROCESSOR_VERSION
     // whenever modal-processor.js changes.
     //
-    // The path has to be written relative to the page rather than to the host,
-    // because on GitHub Pages the page lives in a subdirectory and a leading
-    // slash would leave the site. BASE_URL is filled in at build time: "/" while
-    // developing, "./" in a build. Do not reach for import.meta.url here — that
-    // points at the bundle inside assets/, one level below the processor.
+    // The path is relative to the page rather than the host: on GitHub Pages the
+    // page lives in a subdirectory and a leading slash would leave the site.
+    // BASE_URL is filled in at build time. Not import.meta.url — that points at
+    // the bundle inside assets/, one level below the processor.
     const base = import.meta.env.BASE_URL;
     await context.audioWorklet.addModule(`${base}modal-processor.js?v=${PROCESSOR_VERSION}`);
 
