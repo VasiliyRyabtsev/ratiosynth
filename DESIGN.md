@@ -72,167 +72,54 @@ them still sounds correctly, it is just harder to place in the picture.
 
 ## 3. No fixed scale
 
-**Most of what follows describes the engine removed in §22.** It is kept because
-it is the reasoning that led to the present one, and because two of the findings
-in it were expensive to get. But it is not a description of what runs. What
-survives is the premise at the top: we do not pick N notes out of infinity,
-nothing is rounded, and the pitch material is derived rather than listed. What
-went with the old engine is the machinery underneath — the two scores, the cost
-curve for the size of a melodic move, the drift and gravity knobs, the harmonic
-field held and then moved, and the sections that swell.
+We do not pick N notes out of infinity. The pitch material is derived from the
+ratios rather than listed, and nothing is rounded. Pitch space is then genuinely
+unquantized while every individual moment stays simple, because the ear compares
+notes to their neighbours rather than checking them against a list.
 
-The engine that replaced it fixes the root rather than managing a moving one,
-and takes its pitches from a combination product set that unfolds and folds back
-up again. That is §13 onwards.
+The machinery that first carried this went with the engine removed in §22: two
+scores balanced against each other, a cost curve for the size of a melodic move,
+a harmonic field held and then transposed, and sections that swell. The engine
+that replaced it fixes the root rather than managing a moving one, and takes its
+pitches from a combination product set that unfolds and folds back up again —
+§13 onwards. Three findings outlived it.
 
-Two things below still hold and are worth reading first. The mistake about
-melodic distance is why the current engine scores how far the ear has to jump at
-all — that is `nearness`, its one honest constant. And "neither score is
-something to minimise" was learned again in the new engine, where an entropy
-target that flattened the weights turned the whole choice of move into a uniform
-random walk: a prior that gets overridden whenever it says something is not a
-prior. That one is recorded in `invent()` in `explore/ratios/compose.js` rather
-than here, which is itself a small failure of this file.
+**Neither score is something to minimise.** Always picking the smoothest
+available note gives the most boring available music, so a score wants a target
+— aim at smooth, aim at rough, or anywhere between — rather than a direction.
+That one change is most of the difference between sterile and alive, and §12
+records the shape it takes in the current engine.
 
-We do not pick N notes out of infinity. Instead:
+**Melodic distance is not lattice distance**, and confusing the two took longest
+to find. 3/2 is about as simple as a ratio gets and is also a leap of 702 cents,
+so scoring a move by how simple its ratio is *rewards every line for jumping
+about*. Measured over a few hundred notes: 39% repeated notes and 34% leaps of a
+fourth or more — static and chaotic at the same time, which is exactly what it
+sounded like. The shape of the fix matters as much as having one. "Prefer small
+moves" is wrong and settles on repeating a single note forever; the cost has to
+be dear at zero, dear again far out, and cheapest around a step of a hundred-odd
+cents. That is why the current engine scores how far the ear has to jump at all,
+as `nearness`, its one honest constant.
 
-**Each new pitch is chosen by scoring candidates against everything in recent
-memory** — not against a fixed home note, and not against a single anchor.
+**Drift is a control, not a bug.** Walk up by 3/2 a few times and back down by
+5/4 and you do not land where you started — the pitch centre slowly wanders. One
+end of the knob is a free walk that never returns; the other is a gravity pulling
+back toward a reference pitch. No conventional tuning system can even express
+this, and it survives as the gravity parameter on §4's estimate.
 
-Pitch space is then genuinely infinite and unquantized, but every individual
-moment is simple. The ear follows it easily, because the ear compares notes to
-their neighbours rather than checking them against a list.
-
-### Two scores, not one
-
-Notes still ringing and notes that have just ended affect a new note by different
-mechanisms, and they must be scored separately.
-
-**Harmonic score** — against notes *sounding right now*. Their overtones are
-physically in the air together and actually beat against each other. This is about
-roughness, and it applies only to notes literally playing.
-
-**Melodic score** — against the recency-weighted memory, *including notes that have
-ended*. Those can't beat with anything, but the ear still hears a new note in
-relation to them. This is about how simple the ratio is, not about roughness.
-
-The two combine with a balance knob, which is musically meaningful: harmonic-heavy
-produces music about chords and blend, melodic-heavy produces music about line and
-motion.
-
-**Neither score is something to minimise.** Always picking the smoothest available
-note gives the most boring available music. So each score has a *target* rather than
-a direction: aim at smooth, aim at rough, or anywhere between. Same for simplicity.
-That one change is most of the difference between sterile and alive.
-
-One thing had to be added that the design did not anticipate: **a cost for doubling
-a pitch already sounding.** An octave of a note that is playing is the smoothest and
-simplest thing on offer every single time, so without a penalty the music stacks
-octaves and never finds a new pitch. It is a knob, not a rule.
-
-Scoring against the whole weighted set (rather than picking a ratio to one anchor)
-also handles the case where several sounding notes disagree about what is simple —
-the weighted scores just sum.
-
-### The mistake that took longest to find
-
-For a long time the melodic score used **lattice distance where it needed pitch
-distance**, and they are not the same question. 3/2 is about as simple as a ratio
-gets, and it is also a leap of 702 cents. Scoring a move only by how simple the
-ratio is therefore *rewarded every line for jumping about*.
-
-Measured over a few hundred notes, the result was 39% repeated notes and 34%
-leaps of a fourth or more — static and chaotic at the same time, which is exactly
-what it sounded like. Nothing in the design said to do this; it was simply an
-assumption never examined.
-
-So a third term: **how far the line moves in pitch**, scored against that line's
-own previous note rather than against the sonority as a whole. Its shape matters.
-"Prefer small moves" is wrong — it settles on repeating one note forever. The cost
-is dear at zero, dear again far out, and cheapest around a step of a hundred-odd
-cents. With it, the same measurement gives 62% steps, 34% thirds, and almost no
-leaps.
-
-This also clarifies a division of labour that was muddled before. **The field
-decides which pitches are available; the chooser decides voice leading.** Once
-harmony is constrained by the field, the chooser's real remaining job is how each
-line moves through it.
-
-### Sections have to breathe
-
-Every phrase carried identical weight, which reads as flat however good the notes
-are. So the time the field stays put is a **section**, and a section swells and
-recedes: louder and fuller in the middle, quieter and thinner at its edges. One
-knob, and at zero it is exactly as flat as it was before.
-
-One sizing mistake here too. The phrase was defined as the point where every
-layer's cycle realigns — the lowest common multiple — which for cycles of 12, 10
-and 8 is 120 pulses, half a minute. Sections were running two minutes and no arc
-was audible. The phrase is now the longest layer's cycle; full realignment still
-happens and is a bonus rather than the unit structure is counted in.
-
-### Drift
-
-Walk up by 3/2 a few times and back down by 5/4 and you don't land where you
-started. The pitch centre slowly wanders. This is not a bug to fix — it is a
-control:
-
-- One end: free walk, never returns, the centre drifts forever.
-- Other end: a gravity that pulls back toward a reference pitch.
-
-No conventional tuning system can even express this knob.
-
-### The harmonic field — added after listening
-
-There is a difference between *not having a fixed scale* and *choosing every note
-freshly from the whole neighbourhood*, and the second one is what the first build
-actually did. It sounded like churn: the material never stayed still long enough
-to be recognised, so nothing related to anything.
-
-So a **field**: a small set of lattice points, held for several phrases, then
-deliberately moved — the whole set steps somewhere else. Within a few seconds the
-material is consistent; over a minute it has travelled.
-
-This does not contradict "no fixed scale". The set is derived from the lattice
-rather than chosen from a list, it is never the same set for long, and nothing in
-it is rounded. It is a moving window on infinity.
-
-Two things fall out that are worth having:
-
-- The field around 1/1 comes out as **1/1, 3/2, 4/3, 5/3, 5/4, 6/5, 8/5** —
-  both thirds and both sixths, a rich just set — with nothing written down. It
-  is what "nearest on the lattice" means.
-- Moving the field is a **modulation with nothing approximated**. Shift by 3/2
-  and every internal relationship is identical, exactly, because transposition
-  here is exact. Roughly four of seven pitches survive a move, so it is heard as
-  a pivot rather than a cut. No keyboard can do this.
-
-Speed of movement is the harmonic rhythm, and it is a knob. Holding the field is
-what lets material settle; moving it is what stops the music being one chord
-forever.
-
-### Constraints are configurable, not built in
-
-Whatever limits comprehensibility — how many relationships at once, how much
-recurrence, how far a step may jump on the lattice — these are **parameters in
-the playground**, not rules baked into the engine. Exploring the constraint space
-is part of the instrument.
+Whatever else limits comprehensibility — how many relationships at once, how much
+recurrence, how far a step may jump — those are parameters in the playground too,
+not rules baked into the engine. Exploring the constraint space is part of the
+instrument.
 
 ## 4. The Sonority block
 
-**Built and still running, but nothing composing reads it any more.**
-`src/sonority.js` is current: it holds what is sounding, the memory that fades,
-and the estimated centre with its confidence, all as described below. What reads
-it is the panel on the page and the picture in §24. The engine does not —
-`explore/ratios/compose.js` imports `src/ratio.js` and its own `cps.js` and
-nothing else, because a fixed root answers "where is the centre" by construction.
-
-So the claim below that this is where the musical intelligence lives was true of
-the engine removed in §22 and is not true today. §16 is about what that costs and
-what would have to change in the texture before it could be worth having back.
-The estimation still earns its place: it is what the readouts report, and §25
-records that it moves far too often to steer a camera with, which is a fact about
-the estimate and not about the panel.
+**Built and still running, but nothing composing reads it any more.** What reads
+it is the panel on the page and the picture in §24; the engine does not, because
+a fixed root answers "where is the centre" by construction. So the claim below
+that this is where the musical intelligence lives was true of the engine removed
+in §22 and is not true today — §16 is about what that costs and what would have
+to change in the texture before it could be worth having back.
 
 Choosing pitches against "what's sounding" means information travels *backwards*,
 from the voice pool at the output end to the decision blocks upstream. Almost
@@ -282,37 +169,35 @@ origin, makes all the current notes have the simplest ratios?**
 4. Sum, weighted by each note's memory weight.
 5. Lowest total wins.
 
-Three things fall out for free:
+Two things fall out for free. **Confidence is the margin** between best and
+runner-up, so two near-ties report genuine ambiguity as a number. And **drift is
+measurable** — the estimated centre against the reference point is the input the
+gravity knob needs.
 
-- **Confidence is the margin** between best and runner-up. Two near-ties means
-  genuine ambiguity, now as a number.
-- **Drift is measurable** — compare the estimated centre against the reference point
-  and that is the input the gravity knob needs.
+**The estimate is not a slow-moving thing, and anything reading it has to expect
+that.** Over five minutes of the engine playing itself the centre changes 77
+times, once every 3.9 seconds, because it lands on whichever sounding note makes
+everything simplest and that keeps changing. Fine for a readout; ruinous for
+anything that has to move smoothly, as §25 found out.
 
-Both of those work as described. The third thing we expected does not:
+A third thing we expected does not work. **The centre needn't be a sounding note,
+but in practice it always is.** The hope was that an absent root would be found by
+testing empty lattice points, and it cannot be, for a structural reason: a
+candidate that *is* one of the sounding notes scores zero for that note, and no
+empty point can beat a free zero. Play only 5/4 and 3/2 and the answer comes back
+3/2, not the missing 1/1. That is not wrong — with two notes the root is
+genuinely ambiguous — but the implied root does not emerge on its own.
 
-- **The centre needn't be a sounding note — but in practice it always is.** The
-  hope was that an absent root would be found by testing empty lattice points.
-  It cannot be, and the reason is structural: a candidate that *is* one of the
-  sounding notes scores zero for that note, and no empty point can beat a free
-  zero. Play only 5/4 and 3/2 and the answer comes back 3/2, not the missing 1/1.
-
-  That answer is not wrong — with two notes the root is genuinely ambiguous, and
-  3/2 is a defensible reading. But the implied root does not emerge on its
-  own. Two ways out, neither taken yet:
-
-  - **Gravity does it already.** Home is an unoccupied point, and turning gravity
-    up lets it win. This works today, and it means the mechanism is "pull toward
-    a reference", not "discover an implied root".
-  - **A different measure would do it properly.** Express the notes as whole
-    numbers over a common base and take their greatest common divisor — for
-    5/4 and 3/2 that gives 5 and 6 over 4, whose common divisor sits exactly on
-    the absent 1/1. This is the classical account of an implied root and it gets
-    the right answer directly. What it loses is everything the current measure
-    gives: no weighting by memory, no confidence, and one odd note drags the
-    answer a long way.
-
-  Worth revisiting when note choice actually depends on it.
+Two ways out, neither taken yet. Gravity does it already, since home is an
+unoccupied point and turning gravity up lets it win, which means the mechanism is
+"pull toward a reference" rather than "discover an implied root". Or a different
+measure would do it properly: express the notes as whole numbers over a common
+base and take their greatest common divisor — for 5/4 and 3/2 that is 5 and 6
+over 4, whose common divisor sits exactly on the absent 1/1. That is the
+classical account of an implied root and gets the right answer directly, but it
+loses everything the current measure gives: no weighting by memory, no
+confidence, and one odd note drags the answer a long way. Worth revisiting when
+note choice actually depends on it.
 
 ### Memory
 
@@ -432,22 +317,6 @@ around 10–20%.
 
 ## 7. Rhythm from the same numbers
 
-**The two "Built" notes below belong to the engine removed in §22.** The layer
-periods read off the chord's whole numbers, and the onset patterns spread through
-a longer cycle, went with it.
-
-The idea at the top of the section did not. In the current engine every duration
-is a whole number of one shared unit, and which whole number is drawn in
-proportion to 1/n — so doubling a note is one bit and common, five-quarters is
-four bits and rare, which is the same arithmetic that chooses pitches (§14). The
-parts move at 1, 1/2, 1/3 of each other's speed, which is the harmonic series
-used as a tempo relation. Whole numbers, and the simple ones more often.
-
-What is genuinely missing is the part where the *sounding chord* sets those
-numbers. The rhythm is made of small whole numbers; they are just not the ones
-currently in the air. Restoring that needs the same precondition as §16 — parts
-that strike together often enough for a vertical to exist.
-
 A pitch ratio and a rhythm ratio are the same relationship at different speeds.
 3/2 means one wave cycles three times while the other cycles twice — hundreds of
 times a second, so we hear a chord. Slow the identical relationship to a few
@@ -458,67 +327,38 @@ per bar. Change the harmony and the rhythm follows automatically, because both
 read the same list. Composition falls out of the same machinery instead of needing
 a separate sequencer — which is also how we avoid ever writing a score.
 
-### Built: the chord sets the rhythm
+Getting the numbers out of a chord is free: express every sounding note as a whole
+number over a common base, which on the lattice is the smallest exponent used on
+each prime, and 1/1, 5/4, 3/2 comes out as **4, 5, 6** directly.
 
-Getting the numbers out of a chord turned out to be free. Express every sounding
-note as a whole number over a common base — which on the lattice is just the
-smallest exponent used on each prime — and the chord 1/1, 5/4, 3/2 comes out as
-**4, 5, 6** directly. Those become the periods: one part plays every 4 pulses,
-another every 5, another every 6.
+**Half of this is built and half is not.** In the current engine every duration is
+a whole number of one shared unit, and which whole number is drawn in proportion
+to 1/n — so doubling a note is one bit and common, five-quarters is four bits and
+rare, the same arithmetic that chooses pitches (§14). The parts move at 1, 1/2,
+1/3 of each other's speed, which is the harmonic series used as a tempo relation.
+Whole numbers, and the simple ones more often.
 
-They come back into line every 60 pulses, and that is a phrase. Nobody chose the
-phrase length — it is what those three numbers do together. Change the harmony
-and the rhythm changes with it, because they were never separate things.
+What is missing is the part where the *sounding chord* sets those numbers. The
+rhythm is made of small whole numbers; they are just not the ones currently in the
+air. Restoring that needs the same precondition as §16 — parts that strike
+together often enough for a vertical to exist.
 
-### Built: patterns, not pulses
-
-The first version gave each layer a plain period — it played every N pulses,
-full stop. Three layers at 6, 5 and 4 are polyrhythmic against each other, but
-*nothing inside a part was uneven*, so the combined result was a near-even
-stream of events. It was monotonous, and it was monotonous by construction.
-
-The fix is to spread a few onsets as evenly as possible through a longer cycle,
-which is uneven whenever the count does not divide the cycle. Three in eight
-comes out `x..x.x..` — long, long, short — which is the most common rhythm on
-earth, and nobody had to write it down.
-
-Three things fell out of it:
-
-- **Note lengths vary for free.** A note lasts until its part's next onset, so
-  the sparse places in a pattern give long notes and the busy places give short
-  ones. Nobody decides that separately.
-- **The pattern repeats exactly**, which is the rhythmic recurrence §8 asks for
-  and which the pitch-shape pool alone could not provide.
-- **An accent on the first beat of a cycle.** Without one a pattern is only a
-  list of onsets; with one it has a shape you can feel.
-
-Two sizing rules were needed. A short cycle has nowhere to be uneven, so cycles
-are doubled until they have room. And a count that divides the cycle exactly
-spreads out evenly — two in six is just every third step — so it is nudged until
-it does not. Layers also get slightly different densities, sparser at the bottom,
-which stops two parts that happen to share a cycle length from producing the
-identical pattern and locking together.
+One finding from the version that went with the old engine is worth keeping,
+because it will apply again. A part with a plain period plays every N pulses and
+*nothing inside it is uneven*, so several such parts still add up to a near-even
+stream — monotonous by construction. Spreading a few onsets as evenly as possible
+through a longer cycle is uneven whenever the count does not divide the cycle:
+three in eight comes out `x..x.x..`, long, long, short, which is the most common
+rhythm on earth and nobody had to write it down. Note lengths then vary for free,
+since a note lasts until the next onset.
 
 ## 8. Generating moves, recurrence, and sanity
 
-**Read this as three parts with three different fates.**
-
-*The generator* has never been built. The cellular automaton is still the plan
-and still unwritten; §12 records the one question that has to be answered first,
-which is where its cells would live.
-
-*What recurs* was built twice. The pool of remembered shapes described here
-belonged to the engine removed in §22. Recurrence now works through phrases and
-sections in `explore/ratios/compose.js` — §13, §14 and §18. The claim that made
-both versions possible is unchanged and is the reason either could work: a shape
-is a set of moves rather than a set of pitches, and moving it is exact.
-
-*Density control* is built in part. Register spacing is there — the parts split
-the range between them and it opens out as the piece unfolds. The hard voice cap
-with stealing is there, sixteen voices in the worklet. The roughness budget is
-not, and §16 explains why the roughness machinery was written for this engine and
-then taken out again: at 1684 cents apart the parts barely interfere, so it had
-nothing to choose between.
+**Three parts with three different fates.** The generator has never been built.
+Recurrence was built twice, and now works through phrases and sections in
+`explore/ratios/compose.js` — §13, §14 and §18. Density control is built in part:
+register spacing and the hard voice cap are there, the roughness budget is not,
+and §16 says why.
 
 ### The generator: cellular automata on the lattice
 
@@ -556,9 +396,8 @@ This system has a property a fixed set of notes cannot have: **transposition is
 exact and free.** Move a shape anywhere on the lattice and every interval inside it
 is preserved perfectly, because the move is an addition on the exponents and the
 distances between them do not change. Nowhere else does a shape survive being
-moved. Lattice shape
-isn't just *a* candidate for the unit of recurrence — it is what this system is
-unusually good at.
+moved, so lattice shape is not just *a* candidate for the unit of recurrence — it
+is what this system is unusually good at.
 
 Two more carriers, because pitch relations alone are a lot to ask a listener to track:
 
@@ -567,48 +406,29 @@ Two more carriers, because pitch relations alone are a lot to ask a listener to 
 - **Register, timbre, density.** A voice that always appears low and always sounds the
   same way is recognisable whatever pitches it plays. Nearly free, does a lot of work.
 
-Many CA rules also produce oscillators — patterns that cycle with a period — so some
-recurrence emerges from the generator rather than being imposed.
-
 **How gestures get remembered — decided.** The system does it, you steer. It keeps a
 pool of the shapes it has recently played, and when it wants to repeat something it
 picks from that pool. Entries fade out over time, the same way the sonority's memory
-in §4 fades, so the pool stays current on its own.
-
-Manual control exists but is secondary: a **pin** that stops one entry from fading, so
-a shape you liked keeps coming back. That is the whole manual interface — no marking
-things out by hand as a precondition for anything working.
+in §4 fades, so the pool stays current on its own. Manual control is secondary: a
+**pin** that stops one entry from fading, so a shape you liked keeps coming back
+(§18). That is the whole manual interface.
 
 This avoids the hard version of the problem. Nothing has to *recognise* a repeated
 shape in the output; the system simply remembers what it played and reuses it.
 
-**Built, with two corrections.**
-
-*A repeated shape ran away with the music.* Replaying a shape from wherever the
-part happened to be means any shape with net displacement moves the music further
-every time it comes round — after a few minutes the ratios were 1296/625 and the
-music had wandered off the lattice entirely. Fixed by starting every repeat from a
-freshly *chosen* note: same figure, new starting pitch, which is what music does
-anyway. There is also a limit that abandons a shape which has carried a part too
-far out.
-
-*Nothing pulled the music home.* §3 describes gravity as a knob, but it was only
-ever applied to the *estimate* of where the centre is — nothing acted on the notes.
-Each step was locally sensible and the sum of them was a wander. Gravity now also
-costs candidates by their distance from the reference, which is what §3 meant.
-
-One sizing mistake worth recording: shapes were first recorded per phrase, which
-meant a part whose period equalled the phrase length played exactly one note per
-phrase and never had a shape to remember at all. Shape length is now its own
-parameter, independent of the phrase.
+One correction, found twice and likely to be found again: **a repeated shape runs
+away with the music** if it is replayed from wherever the part happens to be. Any
+shape with net displacement moves the music further every time it comes round —
+after a few minutes the ratios were 1296/625 and the music had wandered off the
+lattice entirely. A repeat has to start from a freshly chosen note: same figure,
+new starting pitch, which is what music does anyway.
 
 ### Density control
 
 Not a voice count — a **roughness budget**. Compute the total roughness of what is
 sounding; if adding a note would exceed a threshold, don't add it, or drop something
 first. Better than counting voices because it is perceptual: five consonant notes are
-clearer than three that clash. Roughness is already computed for the display, so it
-is free.
+clearer than three that clash.
 
 Three layers, cheapest first:
 
@@ -672,34 +492,15 @@ The reason is not just effort. We cannot design good blocks until we've found ou
 by playing which parameters actually matter. Guessing at block boundaries first
 means rebuilding them later.
 
-Rough order:
-
-1. Ratio model (prime-exponent pitch, ratio arithmetic, complexity measure,
-   reference conversion). **Done.**
-2. One instrument — modal, with the four aliveness rules. **Done.**
-3. The Sonority object (facts + reading + memory), including tonal-centre
-   estimation. **Done.**
-4. Candidate scoring (harmonic + melodic) driving voices from the sonority.
-   **Done**, and it needed the roughness model brought forward from §12.
-5. Rhythm layers from the same ratios, and separate parts. **Done** — see below.
-6. Recurrence: shapes kept and replayed. **Done** — see below.
-7. The harmonic field, so the material holds still long enough to be heard.
-   **Done** — see §3.
-8. Voice leading and section dynamics. **Done** — see §3. This is where the
-   melodic-distance mistake was found.
-9. The lattice display.
-10. Register spacing and roughness budget.
-11. Roughness curve, spectrum, Lissajous.
-12. CA generator proposing lattice moves.
-13. Only then: turn the fixed setup into connectable blocks.
+**Structure before pictures**, and that ordering is the one part of the original
+plan that survived the engine it was written for. The displays were meant to come
+before rhythm and recurrence, and listening proved that wrong: with the
+note-choosing machinery finished and no structure-making machinery at all, it
+sounded like *"a random sequence of sounds without inner logic"*, which is exactly
+what it was. Nothing recurred, there was no pulse, and there were no separate
+parts, so there was nothing for the ear to recognise coming back.
 
 ### Where this stands
-
-**The list above is the plan as it was written, and steps 3 to 8 were built,
-listened to, and then thrown away with the engine in §22.** They are left as
-written because the order turned out to be the useful part — "structure before
-pictures" is the lesson, and it survived the engine that taught it. What follows
-is the state of the thing today.
 
 `src/` is the instrument and the ear: ratios, the lattice, the modal resonators,
 roughness, the sonority. It composes nothing. All the composing is three files in
@@ -708,11 +509,11 @@ the root sounding underneath, phrases as fixed transposable objects, variation b
 a single ratio move, a set of notes that unfolds and folds back up, and whatever
 somebody plays taken up as material for the piece to mean. That is §§13 to 23.
 
-Of the four pictures in §9, one exists: the sounding ratios drawn as interfering
-waves, flat on the bench and flown through in the live view (§24, §25). The
-lattice display, the roughness curve, the spectrum and the Lissajous figures are
-not built. Neither is the automaton of §8, or the node editor, which is still
-deliberately last.
+One picture exists, and it is not one of the four §9 asked for: the sounding
+ratios drawn as interfering waves, flat on the bench and flown through in the
+live view (§24, §25). What is left to build, in order: the lattice display;
+register spacing and the roughness budget; §9's other three pictures; §8's
+automaton; and only then the connectable blocks.
 
 Everything is covered by tests that run with `node --test` and need no framework,
 and by the measuring tools in `tools/`, which are the only way anything here gets
@@ -726,108 +527,40 @@ other at all.
 
 ### On the number of knobs
 
-There are now more parameters than anyone can hold in their head, which is itself
-a symptom: a large space in which most positions do not sound like anything. The
+There are more parameters than anyone can hold in their head, which is itself a
+symptom: a large space in which most positions do not sound like anything. The
 answer is not fewer knobs — the point of the project is that the constraints are
-adjustable — but **landmarks**. A handful of presets mark the corners that work,
-everything beyond the dozen musical controls folds away, and the full set is one
-checkbox away for when it is wanted.
+adjustable — but **landmarks**, a handful of presets marking the corners that
+work.
 
-*Answered by deleting the engine that had them.* §22 records it: five panels
-became one, and what is left is six things a listener could name — how fast, how
-adventurous, how many cents are worth one bit, how long it remembers, how many
-parts, how busy. The presets were rewritten in those terms, because the old ones
-were written in a vocabulary that no longer meant anything.
+Hiding the rest is not part of the answer, and the count was never the problem.
+Reported from the bench: *it is not the amount that is confusing, it is the
+mental effort to process the layout.* So every control is shown, grouped in the
+order the sound is made, with each group headed by a short sentence saying what
+its sliders do.
 
-**The folding away is gone, and the count was never the problem.** Reported from
-the bench: *it is not the amount that is confusing, it is the mental effort to
-process the layout.* Two things caused that, and neither was the number of
-sliders.
-
-The panels were named in the builder's vocabulary. "strike and life" borrowed a
-phrase from §6 that appears nowhere on the page; "the body" never said whose
-body; "listening" never said who listens to what. None of the four told you which
-one to open for the thing you wanted, so every visit meant opening all four.
-
-And hiding two thirds of the controls made it worse rather than better. Of the
-twenty-four sliders, fifteen were folded away, which left three of the four
-panels showing exactly one slider each. The column read as one real panel and
-three stubs — so not only could you not tell which panel a control lived in, the
-panel it lived in looked like it had nothing in it. The checkbox was answering
-"too many" while causing "which one is this".
-
-So every control is shown, and each panel is headed by a short sentence saying
-what its sliders do, in the order the sound is made:
-
-- **the music** — pulse, how adventurous, how long it remembers, parts, how busy
-- **the sound of one note** — attack, noise, brightness, drift, sustain, release,
-  output
-- **what that sound is made of** — how many partials, how they fall off and fade,
-  detune, stretch, room
-- **how it listens to itself** — how long a note counts as still sounding, the
-  pull toward home, how far it searches
-
-*the music* comes first because it is the one you reach for while listening, and
-it is the one heading that was right from the start — it was kept as it was
-found.
-
-The last one is worth its own note, because it went through four tries. Those
-three sliders change nothing you can hear: they feed the estimate of the note
-everything else is being heard against, which the panel opposite prints as
-*centre*. "listening" was the original and the report on it was *who listens to
-what?* — the answer being that the instrument listens to its own sound and the
-panel on the left prints what it makes of it, so the heading now says exactly
-that, and pairs with that panel's "the sonority — what it hears".
-
-**Naming a thing and then gesturing at it does not work here, and it is worth
-saying why.** There is no settled vocabulary for most of this machinery, so the
-tempting shape is a noun plus a clause that rescues it — "the strike — how a note
-is set going", "the body — what the strike sets going", "the ear — how it finds
-the centre". Every one of those is a riddle followed by its answer, and it was
-written that way three times before the report came back as *what does this all
-mean???* A heading that is simply a short sentence needs nothing rescuing it. The
-noun was never the useful part; the clause always was, so the clause is the whole
-heading now.
-
-The landmarks stay, and they matter more now than they did: with everything
-visible they are the only thing that moves twenty-four sliders at once to a place
-that is known to sound like something.
-
-### Why rhythm and recurrence moved forward
-
-They were originally steps 9 and 10, after all the displays. That was wrong, and
-listening to step 4 proved it: with the note-choosing machinery finished and no
-structure-making machinery at all, it sounded like *"a random sequence of sounds
-without inner logic"* — which is exactly what it was. Every note was an
-independent decision scored against the ones before it, which is a scored random
-walk however good the scoring is.
-
-Nothing recurred, there was no pulse, and there were no separate parts, so there
-was nothing for the ear to recognise coming back. The doc had already said as
-much in §8; the build order just had it in the wrong place. **Structure before
-pictures.**
+**Naming a thing and then gesturing at it does not work here.** There is no
+settled vocabulary for most of this machinery, so the tempting shape is a noun
+plus a clause that rescues it — "the strike — how a note is set going", "the body
+— what the strike sets going", "the ear — how it finds the centre". Every one of
+those is a riddle followed by its answer, and it was written that way three times
+before the report came back as *what does this all mean???* The noun was never
+the useful part; the clause always was, so the clause is the whole heading.
 
 ## 12. Still open
 
-**How do we put a number on "rough"?**
+**How do we put a number on "rough"?** *Answered and built.*
 
-The whole project leans on knowing how rough two notes sound together. We need an
-actual formula. The basic effect is simple: two pure tones very close in pitch but
-not identical produce a buzzing, unsteady sound. Identical — smooth. Far apart —
-smooth. Somewhere in between — worst. So roughness for one pair of tones is a small
-bump-shaped curve.
+Two pure tones very close in pitch but not identical produce a buzzing, unsteady
+sound. Identical — smooth. Far apart — smooth. Somewhere in between — worst. So
+roughness for one pair of tones is a small bump-shaped curve, placed at about a
+quarter of the distance the ear needs to separate two tones and widening as pitch
+falls. Real notes have many overtones, so the roughness of two notes is that bump
+summed over every pair of partials, each weighted by how loud they are.
 
-Real notes have many overtones, so you compare every overtone of one note against
-every overtone of the other, weight each pair by how loud those overtones are, and
-add it all up. That gives a number.
-
-*Built, and it was as low-risk as expected.* The bump is placed at about a quarter
-of the distance the ear needs to separate two tones, and widens as pitch falls.
-Sweeping an octave puts the valleys exactly on 5/4, 4/3, 3/2 and 5/3 without any of
-those being written down anywhere — which is the premise of the project, now
-measured rather than assumed. Speed was never the problem it looked like: most pairs
-of partials are too far apart to interfere, so a moving window skips them and gives
-an identical answer.
+Sweeping an octave puts the valleys exactly on 5/4, 4/3, 3/2 and 5/3 without any
+of those being written down anywhere — the premise of the project, measured rather
+than assumed.
 
 Two things worth knowing, both discovered by building it:
 
@@ -851,26 +584,24 @@ exists and the answer will be obvious from watching it.
 
 **Is the composition engine the right shape at all?**
 
-Answered, and the answer is no. Recorded here because it cost a long time to find
-and because the way it was found matters as much as the finding.
+*Answered, and the answer was no.* Recorded here because it constrains everything
+built since.
 
-The engine in `choose.js` scores each candidate note with a weighted sum of terms
-— roughness against what is sounding, simplicity against what is remembered, pull
-toward home, size of the melodic move — and then picks one. Measurement against a
-corpus of eight thousand folk melodies and the Bach chorales (`tools/`, and see
-below on what that corpus is and is not for) found three things.
+The old engine scored each candidate note with a weighted sum of terms —
+roughness against what is sounding, simplicity against what is remembered, pull
+toward home, size of the melodic move — and then picked one. Measured against the
+corpus, three things came out.
 
 - **The melodic move curve was invented and wrong.** It made standing still the
-  most expensive move available. Real melody repeats a note about one time in six.
-  Ours did it four times in a thousand. It also made an octave leap barely dearer
-  than a third, so real melody leapt one time in eight where ours leapt one in
-  twenty-seven. Everything piled into a single narrow hill of medium-sized moves,
+  most expensive move available: real melody repeats a note about one time in six,
+  ours did it four times in a thousand. It also made an octave leap barely dearer
+  than a third. Everything piled into a single narrow hill of medium-sized moves,
   which is what "chaotic yet monotonous" sounds like from the inside.
 - **A voice's own sounding note was counted in the harmony it was judged against.**
   A unison adds no roughness at all, so repeating a note scored as perfectly smooth
-  and the harmonic term quietly recommended standing still on every decision. This
-  is the same family of error as §4's implied root: a candidate must not be scored
-  against itself. **Fixed.**
+  and the harmonic term quietly recommended standing still on every decision. Same
+  family of error as §4's implied root: a candidate must not be scored against
+  itself.
 - **The real defect is structural and survives any weights.** The picker takes its
   cheapest option far more often than not, because the temperature it samples at is
   much smaller than the spread of every cost term. A chooser that reliably takes the
@@ -878,14 +609,19 @@ below on what that corpus is and is not for) found three things.
   cost function is. No setting anywhere in a three-parameter sweep brought the
   output inside the range human music occupies.
 
-So the weighted-sum-of-costs approach is being replaced rather than tuned. The
-requirement it failed is worth stating plainly, because it constrains the
-replacement: **the aim is a distribution over what happens next, not a ranking.**
+So the requirement, stated plainly because it is what any replacement has to
+meet: **the aim is a distribution over what happens next, not a ranking.**
 
-A corpus-derived cost curve was tried as a fix and then removed. It works, and it
-is the wrong kind of solution: reading the curve off European folk melody smuggles
-the diatonic scale into a project founded on refusing that inheritance, and a
-fitted table is exactly the sort of thing this design is trying not to contain.
+The same trap has a second door. Sharpening or flattening those weights to hit an
+entropy target is a prior that gets overridden whenever it says something — which
+makes it not a prior, and turns the choice of move into a uniform random walk. So
+weights are drawn at their own strength.
+
+A cost curve fitted to the corpus is not the way out, and it is worth knowing that
+it *works* — the temptation is real. Reading the curve off European folk melody
+smuggles the diatonic scale into a project founded on refusing that inheritance,
+and a fitted table is exactly the sort of thing this design is trying not to
+contain.
 
 **What the corpus in `_dev_data` is for.**
 
@@ -908,36 +644,34 @@ shifted whenever our own scale logic shifted would not be a reference.
 
 **What replaces it.**
 
-Open, and being explored. The constraints are: no tables, no hand-set weights, no
-predefined patterns; five or fewer parameters, each a musical intention a listener
-could name rather than a weight balancing two terms; structure emerging from the
-ratio algebra at every timescale rather than imposed on it; and steerable while it
-plays. Four families are under investigation — self-similarity across timescales,
-entrainment between coupled oscillators, prediction and surprise measured in bits,
-and the algebra of the lattice itself.
+The engine of §§13 to 23, built to those constraints: no tables, no hand-set
+weights, no predefined patterns; five or fewer parameters, each a musical
+intention a listener could name rather than a weight balancing two terms;
+structure emerging from the ratio algebra at every timescale rather than imposed
+on it; and steerable while it plays.
 
-*One result from the exploration is worth recording even though the work was cut
-short.* The surprisal branch found an identity that was sitting in `ratio.js`
-unnoticed. `complexity(a) = log2(numerator × denominator)` is already there, and
-that is **literally the number of bits it takes to write the fraction down**. So
-setting the probability of a ratio to `2^-complexity(a) / Z` makes "how complex is
-this interval" and "how surprising is this interval" the same measurement, up to a
-constant. Nothing is chosen: `Z` is forced by the probabilities having to sum to
-one.
+**It rests on an identity that was sitting in `ratio.js` unnoticed.**
+`complexity(a) = log2(numerator × denominator)` is **literally the number of bits
+it takes to write the fraction down**. So setting the probability of a ratio to
+`2^-complexity(a) / Z` makes "how complex is this interval" and "how surprising is
+this interval" the same measurement, up to a constant. Nothing is chosen: `Z` is
+forced by the probabilities having to sum to one. Everything the engine draws —
+which note, which duration, which variation, which phrase — is that one rule at a
+different level.
 
 There is a second half to it. `Z` only converges for a finite set of primes,
 because the sum of `1/p` over all primes diverges. **The prime limit is therefore
 not an arbitrary restriction on the tuning system — it is exactly the condition
-under which complexity-in-bits is a probability at all.** If that holds up it is
-the most satisfying thing the project has turned up: the lattice and the
+under which complexity-in-bits is a probability at all.** The lattice and the
 information measure are one structure seen twice, and a distribution over next
 notes comes out of the ratio algebra with no table and no weight anywhere.
 
 ## 13. Patterns first
 
-The engine used to generate note by note and hope a pattern emerged. It does the
-opposite now: it builds patterns out of the ratio logic and assembles the piece
-from them. What follows is what that took, and what it cost.
+The engine builds patterns out of the ratio logic and assembles the piece from
+them, rather than generating note by note and hoping a pattern emerges. What that
+takes is more than inventing the patterns, and each condition below was found by
+its absence.
 
 **The repetition was already there; none of it was audible.** Measured over ten
 minutes, the fixed-root engine used *nine* distinct phrases across *two thousand*
@@ -992,11 +726,10 @@ small. Long-range repetition, which is the measure of whether anything is
 
 ## 14. Variation, and how it comes home
 
-The first attempt at development was a list of named devices — backwards, upside
-down, a note added, a note dropped, a note held. Those are edits to a *word*.
-They are what you would do to any string of symbols and nothing about them comes
-from the numbers, which makes them the table of weights again in different
-clothes. They were removed.
+Development is not a list of named devices — backwards, upside down, a note
+added, a note dropped, a note held. Those are edits to a *word*: what you would
+do to any string of symbols, with nothing about them coming from the numbers,
+which makes them the table of weights again in different clothes.
 
 **There is one move.** One note of a phrase goes to a different member of the
 set, chosen by the complexity of the ratio between where it was and where it
@@ -1045,7 +778,7 @@ Measured against the set, 3/2 was the worst string available:
   smoothest moment against any melody note was 0.198, because there is no note
   the melody can land on to meet it.
 
-So the drone is the root and the root an octave up, and nothing else. The whole
+So the drone is the root and the root an octave below, and nothing else. The whole
 reason a melodic step is allowed to be an ugly number is that each note is heard
 against 1/1, which means 1/1 is what should be sounding. If a second string is
 wanted for its shimmer, it has to be a member of the set.
@@ -1054,17 +787,16 @@ wanted for its shimmer, it has to be a member of the set.
 a gap in the melody was silence and the music appeared to stop, which is why the
 defaults kept creeping upwards to fill it. With the root sustaining, a gap is
 the drone alone — which is a texture rather than an absence — so the piece can
-afford to be much emptier. The defaults moved accordingly: pulse 0.26 to 0.32
-and density 0.75 to 0.6, which is 1.65 notes a second where it used to be 2.6.
+afford to be much emptier — 1.65 notes a second rather than the 2.6 the defaults
+had crept up to.
 
 ## 16. What the old engine has, and why we cannot use it yet
 
 The old engine sounds chaotic and occasionally produces something jazzy, with
 real chords. Both come from one mechanism: **every note is chosen against the
 sonority actually sounding** — not against a chord symbol, but against the
-partials in the air, by roughness, from the instrument's own spectrum
-(`src/choose.js`). Three things make that pay: the pitches come from a small
-held field that is periodically transposed exactly, which is modulation with
+partials in the air, by roughness, from the instrument's own spectrum. Three
+things make that pay: the pitches come from a small held field that is periodically transposed exactly, which is modulation with
 nothing approximated; the voices share a register, so they can interfere at all;
 and the chooser aims at a roughness *target* rather than the minimum, because
 always taking the smoothest note gives the most boring music available.
@@ -1102,19 +834,15 @@ is what gave the project a pulse in the first place. But the rest between
 phrases was then scaled by a fractional roominess, which pushed the part off the
 grid and left it there for the rest of the piece.
 
-Measured: **53% of onsets were landing on the shared grid, and 100% do now.**
-Nothing else changed. It is one line, and it is the only part of the vertical
-experiment worth keeping — found by accident while looking for something else.
+Measured: **53% of onsets landing on the shared grid, against 100% once the rest
+is an integer too.** Nothing else changed, and it is one line. Anything that
+scales a duration by a real number does this, wherever it appears.
 
 ## 18. Pinning a shape
 
-The old engine had one manual control worth keeping: a panel of remembered
-shapes, each fading with age, and a click to pin one so it stops fading. It was
-wired only to the old engine, so the sentence describing it in the page was
-false for the engine anyone was actually listening to.
-
-The fixed-root engine now has it, and pinning means something exact here rather
-than something approximate. Two things:
+There is one manual control worth having: a panel of remembered shapes, each
+fading with age, and a click to pin one so it stops fading. Pinning means
+something exact here rather than something approximate. Two things:
 
 - **A pinned shape stops fading.** It is exempt from the decay that makes an old
   phrase less likely to be built into a new section.
@@ -1135,21 +863,18 @@ the notes each shape moves through and, in small type, how long each is held.
 
 ## 19. The drone was a metronome
 
-It restruck every sixteen pulses — 5.12 seconds at the default, forever, exactly
-regular. Measured, each restrike jumped the level by 3.6 to 15.5 dB. In a
-texture playing 0.65 notes a second that was the loudest and by far the most
-regular event in the music, so the music sounded like a metronome, because it
-had one.
+Restruck every sixteen pulses — 5.12 seconds, forever, exactly regular — it
+jumped the level by 3.6 to 15.5 dB each time. In a texture playing 0.65 notes a
+second that is the loudest and by far the most regular event in the music, so the
+music sounded like a metronome, because it had one.
 
-The restriking was a mistake about this instrument. It was imitating a tanpura's
+The restriking was a mistake about this instrument. It imitates a tanpura's
 repeated pluck, but these resonators are driven by a continuous trickle of noise
-for as long as a note is held, so they genuinely sustain and never needed
-renewing. Holding a drone is one line; the pulse was pure artefact.
-
-It is now struck once, at the start, and held until the piece stops. Nothing
-periodic is generated at all, so there is nothing to hear as a beat. Levels were
-retuned for a note that no longer decays between strikes — it sits 7.7 dB under
-the melody in the band that carries.
+for as long as a note is held, so they genuinely sustain and never need renewing.
+The drone is struck once, at the start, and held until the piece stops. Nothing
+periodic is generated at all, so there is nothing to hear as a beat, and the
+levels are set for a note that never decays: 7.7 dB under the melody in the band
+that carries.
 
 **And the sonority panel shows it apart from the rest.** The drone belongs in the
 reading: it is sounding, and under this engine every other note means its ratio
@@ -1166,49 +891,37 @@ set of notes and then stayed there, so the last forty-five minutes had no shape
 above the length of a section. The question was when it should fold back up
 again, and the answer had to come from the music rather than from a clock.
 
-**First the counter had to mean what it said.** "Settled" is meant to mean the
-piece just repeated itself, and it was measuring something else: a phrase's
-`count` rises when it is picked to build a *new section* out of, so a phrase
-inside a section that repeats for ten minutes could be heard two hundred times
-with its count still at one — and every one of those statements reset the
-counter to zero. The engine was calling its most repetitive stretches unsettled.
-Measured, one run in three never finished unfolding in an hour, and whether it
-unfolded at all was close to a coin toss. It now counts statements of a phrase
-that has been stated before, which is what the words always meant. All three
-seeds now unfold, in the same order, at comparable times.
+**The counter had to be made to mean what it said, twice, and both mistakes are
+the same kind.** "Settled" means the piece just repeated itself, and each time it
+was found to be measuring something else, the piece stalled at the opening stage
+for want of admitting the next note.
 
-**And it counts notes, not phrases.** A phrase is named by its notes *and* its
-rhythm, because two rhythms over the same notes really are two phrases — that is
-right everywhere else, and it is wrong here. A variation changes the rhythm alone
-about half the time, so half of everything the engine invented was arriving at
-this counter as something new to say and setting it back to nought. What the gate
-decides is whether to admit another *note*, and a fresh rhythm is no evidence
-either way.
+First, it counted a phrase being picked to build a *new section* out of, so a
+phrase inside a section repeating for ten minutes could be heard two hundred
+times with its count still at one — and every one of those statements reset the
+counter. The engine was calling its most repetitive stretches unsettled, and one
+run in three never finished unfolding in an hour. It now counts statements of a
+phrase that has been stated before.
 
-Measured, the counter was reaching 53 of the 64 it needed and falling back, so
-the opening stage was consuming the whole of the first eight minutes: four notes
-in play and nine words of them, and the shapes panel showing one word up to four
-times over with only the durations differing. Counting a statement as settled
-when its *notes* have been stated before, over eight seeds: at eight minutes the
-alphabet goes 4.1 → 4.6 notes and the vocabulary 9.0 → 10.9 words, and the twelve
-rows of the shapes panel hold 7.4 → 8.5 distinct words, with the largest run of
-same-notes-different-rhythm falling from 3.9 rows to 3.1. At an hour it is
-45.5 → 46.3 words, so this is not more material in the end — it is the same
-material arriving sooner.
+Second, **it counts notes, not phrases.** A phrase is named by its notes *and*
+its rhythm, because two rhythms over the same notes really are two phrases — that
+is right everywhere else and wrong here. A variation changes the rhythm alone
+about half the time, so half of everything invented arrived at this counter as
+something new to say. What the gate decides is whether to admit another *note*,
+and a fresh rhythm is no evidence either way. Over eight seeds, counting notes
+puts 4.6 notes and 10.9 words in play at eight minutes against 4.1 and 9.0, and
+at an hour the vocabularies are the same size — so it is not more material in the
+end, it is the same material arriving sooner. It costs about 7% more notes a
+second, and the step and leap shares do not move. Three seeds showed a five-point
+drop in steps and twelve showed that was noise, which is a standing caution about
+`tools/ratios.js`: it runs three.
 
 The alternative was to shorten the threshold itself, and it is worth recording
 why not. Re-basing the cube on the stage rather than on the notes in play —
 1, 8, 27 instead of 64, 125, 216 — gives a slightly wider vocabulary at eight
-minutes, and costs 17.6 fold-backs per half hour against 0.3. A fold-back every
+minutes and costs 17.6 fold-backs per half hour against 0.3. A fold-back every
 hundred seconds is not an event any more. The counter was miscounting; the
 threshold was not wrong.
-
-The one real cost is that the piece is about 7% busier, 0.71 → 0.76 notes a
-second at eight minutes, which follows from having more notes in play sooner. The
-step and leap shares do not move: over twelve seeds, steps 53.7 → 53.1 and leaps
-18.5 → 18.8, against a seed-to-seed spread of ±15 and ±12. Three seeds showed a
-five-point drop in steps, and twelve seeds show that was noise — a caution about
-`tools/ratios.js`, which runs three.
 
 **Then the fold-back is the other branch of the same test.** Settling long
 enough means the piece has run out of things to say with what it has. If there
@@ -1321,8 +1034,9 @@ ear — ratios, the lattice, the resonator model, roughness, the sonority — an
 nothing that composes. All the composing is in `explore/ratios/`, three files.
 The controls went from five panels to one, and the presets, which were written
 in the old engine's vocabulary and had no meaning in this one, were rewritten in
-terms of the five things that are left: pulse, how adventurous, cents worth one
-bit, how long it remembers, how many parts, how busy.
+terms of what is left: how fast, how adventurous, how long it remembers, how many
+parts, how busy — and `nearness`, the cents worth one bit, which is the only one
+that is a measurement rather than an intention.
 
 ## 23. A phrase has to go somewhere
 
@@ -1370,8 +1084,9 @@ something derives them.
 
 ## 24. The field
 
-§9 asked for four pictures and got none of them. This is the first: the notes
-drawn as waves, and what you see is where the waves cross.
+§9 asked for four pictures and none of them is built. This is a fifth, and the
+one that exists: the notes drawn as waves, and what you see is where the waves
+cross.
 
 Each note that is sounding, or is still remembered, is one plane wave. Three
 things about that wave, and all three are read off the ratio. Nothing is chosen.
@@ -1393,13 +1108,12 @@ other way round below it. Two notes slide past each other at the difference, so
 after 1/(difference in octaves) seconds that pair is drawing the same figure
 again, moved along.
 
-That last one is the point of the panel. Since rate is height, the pair that
-takes longest is the pair *closest together in pitch*, and the wait is simply one
-over that gap. An octave takes a second. 1/1 against 3/2 takes 1.7. 5/4 against
-81/64, a comma apart and near enough the same note to the ear at first hearing,
-takes 56. The picture turns an interval into a *duration* — how long you have to
-sit through before two ways of getting to one place admit they are not the same
-place.
+That last one has a consequence. Since rate is height, the pair that takes longest
+to come back round is the pair *closest together in pitch*, and the wait is simply
+one over that gap. An octave takes a second; 5/4 against 81/64, a comma apart and
+near enough the same note to the ear at first hearing, takes 56. The picture turns
+an interval into a *duration* — and it is imperceptible, which is the subject of
+"what the panel is legible for" below.
 
 Two waves that have come round are drawing the identical figure, moved along: a
 shared phase step across two waves running different ways is exactly a rigid
@@ -1408,54 +1122,64 @@ a test, not a hope. Three or more *moving* waves never repeat at all — their
 rates are logs of whole numbers, so no common period exists and the picture only
 ever comes close.
 
-### The drone keeps one string
+### What the panel is legible for
 
-The drone is three notes — root, root an octave down, and 3/2 — and it never
-stops, so it was three of the twelve slots and 22% of the picture's amplitude,
-permanently, in a panel whose whole subject is what changes. §4's own readout
-already excludes it from the note list for that reason.
+*I could never make sense of the picture. It was fun to look at though.* That is
+the kind of report §12 warns about — impressionistic, and so about a missing
+structure rather than a wording. Two rewrites of the caption did nothing, because
+what was missing was not in the caption at all.
 
-Removing it entirely would have been wrong: it is sounding, and a picture of what
-is in the room should have it. What went instead is the two strings that are
-octaves of the root, and the rule is not a hand-picked ratio but a property —
-`sameClass(ratio, UNISON)`, and only for the drone tag.
+**The return period is the wrong thing to sell the panel on.** The arithmetic
+above is exact and there are tests for it. The trouble is what it looks like. The
+picture translates rigidly — one velocity `v` with `k·v = rate` for every wave,
+which is the invertible 2x2 read as a motion — so the visible thing is a drift,
+and the drift does not track the interval at all:
 
-The justification is that the picture is already drawn *from* the root: it is the
-origin every arrow is measured out from. A drone string an octave from the root
-redraws the coordinate system. And measuring the three showed those are exactly
-the two that misbehave:
-
-| string | grain | sweeps the panel |
+| held together | repeats after | drifts at |
 |---|---|---|
-| 1/1 | 0.00 | not at all — no arrow, so it adds an even wash and nothing else |
-| 1/2 | 1.00 | **once a second**, forever |
-| 3/4 | 3.46 | once every 8.3s |
+| 1/1 and 2/1 | 1.0s | 1.000 panel widths/s |
+| 1/1 and 5/4 | 3.1s | 0.088 |
+| 5/4 and 81/64 (d and 2) | 55.8s | 0.095 |
 
-For comparison the music itself runs at 4.3s for 3/2, 11.4s for 5/4, 35s for
-81/64. So 1/2 was the fastest-moving thing on the panel by four times, and never
-stopped. What survives is 3/4 — the 3/2 the drone is strung for, at a speed that
-sits among the music rather than on top of it. Measured after the change: 0.99
-slots of twelve, 8% of the amplitude.
+A pair that comes round in three seconds and a pair that takes fifty-six move
+across the panel at the same speed. Nothing about the motion says which you are
+looking at. The return is real and it is in view — sampled, the panel at `t=T`
+correlates 0.975 with the panel at `t=0` — but seeing it means holding a
+fifty-six-second-old image in your head and comparing, with no mark on the panel
+to compare against. No eye does that. **It is true, it is tested, it is in front
+of you, and it is imperceptible.**
 
-A melody note on 2/1 is untouched. That is an event; the drone's is a fixture.
+**What is instant is the other two.** How fine the bands are is the arrow's
+length, which is the ratio's complexity — the same number that shades the pad.
+Which way they lean is the direction, which is which primes and how many of each.
+Both are legible in a glance, and everything built the same way lines up:
 
-### The panel prints nothing
+| ratio | lean | bands across the panel |
+|---|---|---|
+| 3/2 | 19° | 2.5 |
+| 9/8 | 16° | 6.0 |
+| 27/16 | 17° | 8.4 |
+| 81/64 | 16° | 11.9 |
+| 5/4 | 145° | 3.7 |
 
-It had a caption, giving that duration for whichever pair of sounding notes was
-closest together. Two things were wrong with it, and only the second was fatal.
+Stack 3s and the lean holds while the grain gets finer, one countable step at a
+time. That is the lattice, drawn, and you can see it in four seconds instead of a
+minute.
 
-It described the drawing rather than the music. To read "the closest pair comes
-back round every 56 seconds" you had to already know that a note is a wave and
-that waves slide, which is a fact about this file, not about what you are
-hearing.
+And it makes the project's argument better than the durations did. 5/4 and 81/64
+are 21.5 cents apart — near enough the same note to the ear at first hearing —
+and they draw pictures with nothing in common: 3.7 broad bands one way against
+11.9 fine ones the other. The panel does not say *these are nearly the same and
+here is the tiny difference*. It says *these were reached completely differently,
+and here is what that looks like*. Printed as characters, the two are not even
+the same kind of image.
 
-Worse, it read as noise. Simulating a normal two-part run and sampling every
-frame, it parked on one value for seconds at a time and then leapt: 14, 14, 14,
-13, 13, 13, 56, 56, 56, 56, 56, 56, 11, 56, 13, 56 — biggest single-frame jump 45
-seconds. Nothing a viewer could track, because the pair it described kept being
-replaced by a different pair. The duration is only ever watchable for two notes
-held by hand, and that is now said once, in the prose under the bench, rather
-than sixty times a second in a caption.
+**Nor can the number be printed live.** For whichever pair of sounding notes is
+closest together it reads as noise, because that pair keeps being replaced by a
+different pair: sampled every frame over a normal two-part run it parks on one
+value for seconds and then leaps — 14, 14, 14, 13, 13, 13, 56, 56, 56, 11, 56,
+13, 56, biggest single-frame jump 45 seconds. The duration is only ever watchable
+for two notes held by hand.
 
 (A first attempt at that measurement was wrong in a way worth recording: it built
 the whole timeline and *then* sampled the Sonority at earlier times. A note whose
@@ -1463,11 +1187,30 @@ the whole timeline and *then* sampled the Sonority at earlier times. A note whos
 showed up at full weight and the memory looked three times its real size. Feed a
 simulated clock forwards, never sideways.)
 
-`longestReturn()` went with it. What survives is the claim, as two tests: that the
-wait is one over the gap, and that a pair which has come round is drawing a
-translated copy. The heading changed too — "what the ratios do to each other" was
-a gesture, where "every note a wave, and where they cross" is the rule for
-reading the picture.
+So the panel teaches the grammar — grain, lean, and that it slides faster the
+higher the note. The return period stays in this file as arithmetic with two
+tests, and off the panel. This is also the one panel that has to be told what it
+means rather than shown: the sonority prints ratios, the shapes print ratios, the
+partials are a table, and an unlabelled moving image reads as decoration.
+
+§25 sells the flight on the wait becoming a distance, which is the same claim in
+another sense. That has not been re-examined, and the same measurement probably
+applies to it.
+
+### The drone is not drawn
+
+The drone never stops, so in a panel whose whole subject is what changes it was a
+fixed share of the slots and of the amplitude, permanently. §4's own readout
+already sets it apart for that reason.
+
+The rule is not a hand-picked ratio but a property: a drone string in the same
+pitch class as the root is left out. The picture is drawn *from* the root — it is
+the origin every arrow is measured out from — so a drone string an octave from it
+redraws the coordinate system rather than adding to the picture. Measured, that
+string also swept the panel once a second, forever, four times faster than
+anything the music does, where 3/2 takes 4.3s and 81/64 35s.
+
+A melody note on 2/1 is untouched. That is an event; the drone's is a fixture.
 
 ### Octaves count here, and nowhere else
 
@@ -1574,54 +1317,32 @@ limit; only the far-flung pads reach it, and 81/64, the most remote thing on the
 bench, sits right on it and comes out faint. That is the honest answer rather
 than a lucky one.
 
-### The camera made people dizzy
+**The eye does not move sideways, and that is a decision.** The freedom was once
+spent on easing toward wherever §4 estimates the tonal centre to be, so the
+picture would move with the harmony instead of running on rails. It made people
+dizzy. §4's centre changes every few seconds and each change is a long way — the
+hexany's members sit 1.7 to 3.7 units from the root on the picture — so the eye
+was sliding sideways at up to **0.92 units a second against a forward speed of
+1.00**, then decelerating, then swerving again. Repeated unpredictable sideways
+acceleration is how you make somebody sick.
 
-The eye's forward motion is forced, but where it sits sideways is not, and that
-freedom was spent on having it ease toward wherever §4 estimates the tonal centre
-to be — so the picture would move with the harmony instead of running on rails.
-It made people dizzy, and measuring it says plainly why.
-
-- The centre is not a slow-moving thing. Over five minutes of the engine playing
-  itself it **changes 77 times, once every 3.9 seconds**, because §4's estimate
-  lands on whichever sounding note makes everything simplest and that keeps
-  changing — which §4 already says, and which is fine for a readout and ruinous
-  for a camera.
-- Each change is a long way. The hexany's members sit 1.7 to 3.7 units from the
-  root on the picture, so easing toward one over the memory time starts the eye
-  sliding sideways at up to **0.92 units a second against a forward speed of
-  1.00**. It is very nearly strafing as fast as it flies, then decelerating, then
-  swerving again four seconds later.
-
-Repeated unpredictable sideways acceleration is how you make somebody sick. So
-the eye sits on the root's axis and does not move, which is not the absence of a
-decision but the right one: §24 draws the whole picture *from* the root — it is
-the origin every arrow is measured out from — and under this engine every note
-means its ratio to it. Nothing was lost, because what makes the picture move is
-the waves changing, and they change on every note.
-
-Two smaller things went with it, both aimed at the same complaint.
-
-**The march starts a little ahead of the eye.** What is nearest always crosses
-the view quickest, and the eye is inside the solid, so the material it is
-standing in was both meaninglessly magnified and the fastest-sweeping thing on
-screen. Starting at eight tenths of a unit costs a little of the view and settles
-most of the flicker: the share of each frame's change that is the whole frame
-brightening and dimming together falls from **0.15 to 0.02**, and contrast rises
-from 0.74 to 0.86.
-
-**And the lens came back in.** It had been opened wide to stop the structure
-arriving as clouds, but width buys sharpness by stretching the edges of the view,
-which is exactly where the eye reads speed from. A near plane buys the same
-sharpness without that, so with it the lens returned to about ninety degrees and
-the pictures measured *better* rather than worse — the comma pair went from 0.44
-to 0.67 in contrast.
+Sitting still on the root's axis is the right answer rather than the absence of
+one: §24 draws the whole picture *from* the root, and under this engine every
+note means its ratio to it. Nothing was lost, because what makes the picture move
+is the waves changing, and they change on every note.
 
 **What is not a fact about the ratios**, on the same terms as §24: how far a ray
 steps, how far it goes and where it starts; how solid a crest is, which is one
 number and not two, because setting brightness equal to it pins the brightest
 possible ray at exactly one so nothing can blow past; how hard the curve is; how
 much the root glows; and how wide the lens is. That last one is §24's fringe
-scale being re-chosen for a view of a different shape. A page is not a strip.
+scale being re-chosen for a view of a different shape — a page is not a strip —
+and it is worth knowing that a near plane and a narrow lens go together. The
+march starts eight tenths of a unit ahead of the eye, which costs a little of the
+view and settles most of the flicker, and with it the lens can stay at about
+ninety degrees and measure *better* than a wide one: the comma pair went from
+0.44 to 0.67 in contrast. Width buys sharpness by stretching the edges of the
+view, which is exactly where the eye reads speed from.
 
 One bug worth recording because it will happen again. These constants are folded
 into the shader source as text, and `${2.0}` in a template comes out as `"2"` —
@@ -1636,219 +1357,12 @@ over the sets the engine actually produces, then in a headless browser reading
 the pixels back. It lands at a mean of 0.17 to 0.35 with contrast 0.36 to 0.50,
 nothing blown and nothing empty, which is dark enough to read text over.
 
-**The live view shows less on purpose.** Where the music thinks it is and how
-sure of that, how far through unfolding, what is sounding, and the drone on its
-own line for §19's reason. No vocabulary, no parts, no partials, and no pinning —
-those are for understanding what the engine did. Pinning is the one control
-§18 argues is worth having, and it stays on the bench, where you can see the
-shape you are pinning.
-
-**The pads are the same elements, moved.** Not a second set styled differently:
-the very same buttons, reparented, so every handler, the map of what is held and
-the keyboard keep working and there is only ever one pad per ratio to get out of
-step. They are told to say less over a picture — the cents and the row headings
-are reading matter.
+**The live view shows less on purpose**: what you would read while playing, and
+nothing that is there to explain what the engine did. Pinning goes with the
+latter, even though §18 argues it is the one control worth having, because you
+have to see a shape to decide to pin it.
 
 Marching costs far more than slicing, so the view watches its own frame times and
 gives up resolution rather than smoothness, and only ever downwards: climbing back
 as soon as it is comfortable makes it oscillate between two resolutions, which is
 worse than the lower one.
-
-## 26. The top of the page is not a menu
-
-The row across the top of the bench had grown into a place where anything that
-needed a button ended up, and four different kinds of thing were sitting in it as
-if they were alternatives to each other.
-
-**A precondition is not a choice.** The first button said "click to start audio",
-was pressed exactly once, and then vanished and shifted everything after it
-sideways. It never had a job: a browser needs a gesture before it will make
-sound, and every other control on the page is also a gesture, so the sound was
-always going to start on whatever you touched first. The one press it taught you
-was a press you would never make again, at a place that then stopped existing.
-It is now a line of text in a slot that always holds one line, so nothing moves
-when it changes: "no sound yet" before, and afterwards what 1/1 is in Hz — the
-one number this page otherwise never prints, and the only place in the whole
-project where a ratio becomes a frequency.
-
-**Two fixed chords are a table, and so is their replacement.** There were buttons
-for 4:5:6 and 4:5:6:7. Two hard-coded chords are a table of patterns, which is
-the thing this project does not do anywhere else, and they were a second way of
-sounding notes the pads already sound. They are gone.
-
-What they were answering, though, is worth writing down, because the first
-replacement answered it too and was also wrong. A mouse has one pointer: you can
-hold a, d and g on the keyboard and hear a pure triad, and with a mouse you
-cannot build a chord at all. So the pads were given a latch — hold shift and a
-pad stays down — which is the general form of what the two chords did specially.
-
-**That was still an answer to a question the page answers twice already.**
-Anybody who can reach shift can reach a, d and g, so on a keyboard the latch buys
-nothing; a touch screen has several fingers and no shift key at all, so there it
-buys nothing and cannot be reached either. And if what you actually want is sound
-going on while your hands are somewhere else — on the sliders, which is what a
-bench of live sliders is for — the page has a control for exactly that, and it is
-the first button in the transport. A latch is a second, worse way of doing what
-*let it play itself* does.
-
-So: nothing holds a pad but a finger or a key. The general answer to "a mouse has
-one pointer" turned out to be that the instrument has a keyboard, and it is
-printed on the pads.
-
-**Say what a button does to what.** "stop all" did not name what it stops, and it
-stood next to a button whose running caption was "stop". It is now "silence", and
-the other one says which direction the handover goes: *let it play itself*, and
-then *take it back*. That is what actually happens — the parts hold back while
-somebody plays (§21), so the instrument is never taken away, it is lent.
-
-**A change of view is not a sound control.** Entering the flight was a button of
-the same weight as the ones that make noise. It sits at the far end of the row
-now, outlined rather than filled, and says where it goes.
-
-**The landmarks were in the wrong room.** §11 answers "too many knobs" with
-landmarks, and they were under the transport behind the words "start from" —
-wrong twice, because nothing stops you jumping to one an hour in, and because
-they were nowhere near the sliders they move. They now sit on top of those
-sliders, where pressing one visibly moves them, and the landmark you are standing
-on stays marked until a slider moves off it, so the panel says where you are and
-not only where you could go.
-
-## 27. Writing on the page, and where it goes
-
-The page had accumulated three kinds of writing, and two of them were being
-read by nobody.
-
-**The subtitle described the build, not the thing.** It said that pitches are
-ratios, that frequencies happen once at the end, and that the rhythm is the same
-numbers as the harmony. Every clause is true and none of it is audible. The
-second is a fact about which module does what; a visitor cannot hear where in the
-code a frequency is computed. What a subtitle owes somebody who has just arrived
-is the one claim the page is about to demonstrate in front of them, so it is now
-that every note is an exact fraction of another and nothing is rounded to fit a
-keyboard — which the pads then print, one fraction each.
-
-**A caption that explains what the interface is already doing is noise.** The
-landmarks panel had a line under it saying that these are the corners of the
-parameter space that sound like something, and that each one moves the sliders
-below. The first half is the justification for the feature, which is §11 and
-belongs there. The second half describes something you watch happen: you press
-`bells` and eight sliders move. It is gone.
-
-**A footer nobody reads is not documentation.** Two hundred words in one
-lowercase paragraph at the bottom of the page, holding the only instructions
-there were: how to sustain, what the brightness of a pad means, how to pin a
-shape, and — buried at sixty percent — the one genuinely good invitation on the
-page, which is to hold `d` and `2` together and watch two ways of reaching almost
-the same place refuse to agree.
-
-The rule that replaced it: **every line of writing sits against the thing it is
-about, and there is at most a line or two of it.** What your hands do is under
-the pads. What the picture is doing, and the invitation to try the comma pair, is
-under the picture. What pinning means is under the shapes. Anything named — a
-key, a button — is drawn in the accent colour, so the eye finds it without
-reading the sentence around it.
-
-What is left over is the reasoning, and the reasoning already has a home. The
-footer is now one line pointing at this file.
-
-### The panel was sold on the one thing you cannot see
-
-The caption was rewritten twice before somebody said the thing that mattered: *I
-could never make sense of the picture. It was fun to look at though.* That is the
-report §12 warns about — impressionistic, and therefore about a missing structure
-rather than a wording. Measured, it was right, and what was missing was not in
-the caption at all.
-
-**What the panel had been sold on is its return period.** §24 calls that "the
-point of the panel": the closer two notes sit, the longer their figure takes to
-repeat, so an interval becomes a duration. The arithmetic is exact and there are
-tests for it. The trouble is what it looks like.
-
-The picture translates rigidly — there is one velocity `v` with `k·v = rate` for
-every wave, which is §24's invertible 2x2 read as a motion. So the visible thing
-is a drift, and the drift does not track the interval at all:
-
-| held together | repeats after | drifts at |
-|---|---|---|
-| 1/1 and 2/1 | 1.0s | 1.000 panel widths/s |
-| 1/1 and 5/4 | 3.1s | 0.088 |
-| 5/4 and 81/64 (d and 2) | 55.8s | 0.095 |
-
-A pair that comes round in three seconds and a pair that takes fifty-six move
-across the panel at the same speed. Nothing about the motion says which you are
-looking at. The return is real and it is in view — sampled, the panel at `t=T`
-correlates 0.975 with the panel at `t=0` — but seeing it means holding a
-fifty-six-second-old image in your head and comparing, with no mark on the panel
-to compare against. No eye does that. **It is true, it is tested, it is in front
-of you, and it is imperceptible.**
-
-**What is instant is the other two.** How fine the bands are is the arrow's
-length, which is the ratio's complexity — the same number that shades the pad.
-Which way they lean is the direction, which is which primes and how many of each.
-Both are legible in a glance, and everything built the same way lines up:
-
-| ratio | lean | bands across the panel |
-|---|---|---|
-| 3/2 | 19° | 2.5 |
-| 9/8 | 16° | 6.0 |
-| 27/16 | 17° | 8.4 |
-| 81/64 | 16° | 11.9 |
-| 5/4 | 145° | 3.7 |
-
-Stack 3s and the lean holds while the grain gets finer, one countable step at a
-time. That is the lattice, drawn, and you can see it in four seconds instead of a
-minute.
-
-And it makes the project's argument better than the durations did. 5/4 and 81/64
-are 21.5 cents apart — near enough the same note to the ear at first hearing —
-and they draw pictures with nothing in common: 3.7 broad bands one way against
-11.9 fine ones the other. The panel does not say *these are nearly the same and
-here is the tiny difference*. It says *these were reached completely differently,
-and here is what that looks like*. Printed as characters, the two are not even
-the same kind of image.
-
-So the page teaches the grammar — grain, lean, and that it slides faster the
-higher the note — and names the four keys that show it. The return period stays
-in this file as arithmetic with a test, and off the panel.
-
-The live view inherits the same problem and has not been re-examined: §25 sells
-the flight on the wait becoming a distance, which is the same claim in another
-sense, and the same measurement probably applies to it.
-
-### A caption on a picture says what it means
-
-The field's caption failed a test the others passed, and the test is worth
-naming: **does the sentence say what something means, or only what to do to it?**
-
-What was there read "try holding d and 2 together, or s and w — two ways of
-reaching almost the same place, which refuse to agree. watch the waves come back
-round: the better part of a minute." Every clause is true. Taken together they
-are stage directions: press these, wait, something will happen. A reader who
-follows them exactly ends up watching a pattern change for no stated reason,
-which is worse than not reading, because now they think they have missed
-something.
-
-The rule the picture is drawn by was never in it. §24 states it plainly — the
-closer two notes are in pitch, the longer their figure takes to repeat, so the
-wait *is* the interval — and that is the whole claim of the panel and the only
-thing on the page that could not be said any other way. Without it, "come back
-round" is a fact about the drawing. With it, the minute you sit through is the
-size of a difference your ear nearly misses, and a comma stops being a word.
-
-So the caption states the rule first, then one pair of keys as the thing that
-shows the rule doing what nothing else on the page can do. The two numbers in it
-are checked against `slideRate` rather than remembered: 1/1 with 2/1 is 1.0s, and
-5/4 with 81/64 — d with 2 — is 55.8s.
-
-This is also the answer to whether the panel needs words at all. It is the only
-panel on the bench that can say nothing about itself: the sonority prints ratios,
-the shapes print ratios, the partials are a table, and the field is an
-unlabelled moving image. An unlabelled moving image reads as decoration, and the
-one thing this picture is not is decoration.
-
-The second line went the other way for the same reason. Everything the old one
-said about the flight — one panel width a second, the wait becoming a distance,
-escape coming back — is either discoverable by pressing the button or already
-visible once you have (there is a "back to the bench" button in view the whole
-time). What is left is the single thing you could get wrong, which is thinking it
-is a different picture. So it says that it is the same one.

@@ -94,6 +94,14 @@ shape at all?").
 DESIGN.md. Explain a term the first time it appears. Terse bullet lists are where
 this slips; a short paragraph beats a dense one-liner.
 
+**Writing on the page sits against the thing it is about**, and there is at most
+a line or two of it. What your hands do goes under the pads, what the picture is
+doing goes under the picture. Collected into a footer it is two hundred words
+nobody reads. Two ways a line earns nothing: it describes the build rather than
+the thing — that a frequency is computed once at the end is true and inaudible —
+or it narrates what you can already watch happen. The reasoning does not go on
+the page at all; it goes in DESIGN.md, which the footer points at.
+
 **Commit messages carry the finding and the measurement**, not just the change,
 in the same voice as DESIGN.md. No `Co-Authored-By` trailer.
 

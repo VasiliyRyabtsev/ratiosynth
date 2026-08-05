@@ -331,7 +331,7 @@ function drawPartials(modes) {
 
 const held = new Map(); // pad element -> voice id
 
-// There is no way to leave a pad down, and that is deliberate — see DESIGN §26.
+// There is no way to leave a pad down, and that is deliberate.
 // The keyboard can hold as many pads as you have fingers, and if what you want
 // is sound going on while your hands are elsewhere, that is the button at the
 // top left.
