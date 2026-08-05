@@ -92,30 +92,30 @@ const SCALE = GROUPS.flatMap((group) => group.keys);
 // --- parameters ---
 
 const voiceKnobs = [
-  { advanced: true, name: "strike", label: "strike", min: 1, max: 120, step: 1, value: 18, unit: "ms" },
+  { name: "strike", label: "strike", min: 1, max: 120, step: 1, value: 18, unit: "ms" },
   { name: "noise", label: "strike noise", min: 0, max: 1, step: 0.02, value: 0.5 },
-  { advanced: true, name: "brightness", label: "brightness", min: 200, max: 9000, step: 50, value: 2000, unit: "Hz" },
-  { advanced: true, name: "drift", label: "drift", min: 0, max: 25, step: 0.5, value: 4, unit: "¢" },
-  { advanced: true, name: "driftRate", label: "drift rate", min: 0.05, max: 6, step: 0.05, value: 0.7, unit: "Hz" },
-  { advanced: true, name: "sustain", label: "sustain (bowing)", min: 0, max: 0.4, step: 0.005, value: 0.24 },
-  { advanced: true, name: "damping", label: "release damping", min: 0, max: 1, step: 0.01, value: 0.25 },
-  { advanced: true, name: "gain", label: "output", min: 0, max: 0.6, step: 0.01, value: 0.25 },
+  { name: "brightness", label: "brightness", min: 200, max: 9000, step: 50, value: 2000, unit: "Hz" },
+  { name: "drift", label: "drift", min: 0, max: 25, step: 0.5, value: 4, unit: "¢" },
+  { name: "driftRate", label: "drift rate", min: 0.05, max: 6, step: 0.05, value: 0.7, unit: "Hz" },
+  { name: "sustain", label: "sustain (bowing)", min: 0, max: 0.4, step: 0.005, value: 0.24 },
+  { name: "damping", label: "release damping", min: 0, max: 1, step: 0.01, value: 0.25 },
+  { name: "gain", label: "output", min: 0, max: 0.6, step: 0.01, value: 0.25 },
 ];
 
 const bodyKnobs = [
-  { advanced: true, name: "count", label: "partials", min: 1, max: 32, step: 1, value: 16, rebuild: true },
-  { advanced: true, name: "ampSlope", label: "amp falloff", min: 0.2, max: 2.5, step: 0.05, value: 1, rebuild: true },
+  { name: "count", label: "partials", min: 1, max: 32, step: 1, value: 16, rebuild: true },
+  { name: "ampSlope", label: "amp falloff", min: 0.2, max: 2.5, step: 0.05, value: 1, rebuild: true },
   { name: "decay", label: "decay", min: 0.1, max: 8, step: 0.1, value: 2.5, rebuild: true, unit: "s" },
-  { advanced: true, name: "decaySlope", label: "high partials fade faster", min: 0, max: 1.6, step: 0.05, value: 0.7, rebuild: true },
-  { advanced: true, name: "detune", label: "partial detune", min: 0, max: 20, step: 0.5, value: 3, rebuild: true, unit: "¢" },
-  { advanced: true, name: "stretchAmount", label: "stretch", min: 0, max: 1, step: 0.01, value: 0, rebuild: true },
-  { advanced: true, name: "reverb", label: "room", min: 0, max: 0.6, step: 0.01, value: 0.25 },
+  { name: "decaySlope", label: "high partials fade faster", min: 0, max: 1.6, step: 0.05, value: 0.7, rebuild: true },
+  { name: "detune", label: "partial detune", min: 0, max: 20, step: 0.5, value: 3, rebuild: true, unit: "¢" },
+  { name: "stretchAmount", label: "stretch", min: 0, max: 1, step: 0.01, value: 0, rebuild: true },
+  { name: "reverb", label: "room", min: 0, max: 0.6, step: 0.01, value: 0.25 },
 ];
 
 const hearingKnobs = [
   { name: "memory", label: "memory", min: 0.2, max: 20, step: 0.1, value: 4, unit: "s" },
-  { advanced: true, name: "gravity", label: "gravity toward home", min: 0, max: 2, step: 0.02, value: 0 },
-  { advanced: true, name: "radius", label: "search radius", min: 1, max: 3, step: 1, value: 1 },
+  { name: "gravity", label: "gravity toward home", min: 0, max: 2, step: 0.02, value: 0 },
+  { name: "radius", label: "search radius", min: 1, max: 3, step: 1, value: 1 },
 ];
 
 const rootKnobs = [
@@ -152,7 +152,6 @@ function buildKnobs(container, knobs, onChange) {
     input.step = knob.step;
     input.value = knob.value;
     knob.input = input;
-    if (knob.advanced) wrap.classList.add("advanced");
 
     const show = () => {
       value.textContent = `${Number(input.value)}${knob.unit ? " " + knob.unit : ""}`;
@@ -162,6 +161,7 @@ function buildKnobs(container, knobs, onChange) {
     input.addEventListener("input", () => {
       state[knob.name] = Number(input.value);
       show();
+      landmarkLeft();
       onChange(knob);
     });
 
@@ -211,10 +211,17 @@ buildKnobs(document.getElementById("hearingKnobs"), hearingKnobs, () => {
 buildKnobs(document.getElementById("rootKnobs"), rootKnobs, () => applyRootParams());
 
 
-// --- presets ---
+// --- landmarks ---
 //
 // Not shortcuts so much as landmarks. The parameter space is enormous and most
 // of it does not sound like anything; these are the corners that do.
+//
+// They used to sit under the transport behind the words "start from", which was
+// wrong twice over: they are not a start — nothing stops you jumping to one an
+// hour in — and they were nowhere near the sliders they move. They now sit on
+// top of those sliders, and the one you are standing on stays marked until a
+// slider moves off it, so the panel says where you are and not only where you
+// could go.
 
 const PRESETS = {
   settled: {
@@ -252,6 +259,23 @@ const PRESETS = {
   },
 };
 
+// Which landmark the knobs are standing on, or null once any of them has been
+// moved by hand. Set before the knobs are applied, because setting a slider from
+// code goes through the same path a hand does.
+let landmark = null;
+
+function landmarkLeft() {
+  if (!landmark) return;
+  landmark = null;
+  markLandmark();
+}
+
+function markLandmark() {
+  for (const button of document.getElementById("presets").children) {
+    button.classList.toggle("on", button.dataset.preset === landmark);
+  }
+}
+
 function applyPreset(name) {
   const preset = PRESETS[name];
   if (!preset) return;
@@ -270,12 +294,16 @@ function applyPreset(name) {
   sonority.setParams({ memory: state.memory, gravity: state.gravity, radius: state.radius });
   applyRootParams();
   rebuildInstrument();
+
+  landmark = name;
+  markLandmark();
 }
 
 function buildPresets() {
   const row = document.getElementById("presets");
   for (const [name, preset] of Object.entries(PRESETS)) {
     const button = document.createElement("button");
+    button.dataset.preset = name;
     button.textContent = preset.label;
     button.addEventListener("click", () => applyPreset(name));
     row.append(button);
@@ -310,6 +338,13 @@ function drawPartials(modes) {
 // --- playing ---
 
 const held = new Map(); // pad element -> voice id
+
+// There is no way to leave a pad down, and that is deliberate. See DESIGN §26:
+// the two chord buttons that used to be here were answering "a mouse has one
+// pointer", a latch answered it more generally, and both were answering a
+// question the page had already answered twice — the keyboard is right there
+// and can hold as many pads as you have fingers, and if what you want is sound
+// going on while your hands are elsewhere, that is the button at the top left.
 
 // A pad carries two facts, and they are not the same kind of fact. How far up it
 // is, in cents, is a position — so it is printed, and the pads are ordered by it.
@@ -369,26 +404,36 @@ function buildPads() {
         <div class="c">${cents(entry.ratio).toFixed(0)}¢</div>
         <div class="k">${entry.key}</div>`;
 
-      const down = (event) => {
+      pad.addEventListener("pointerdown", (event) => {
         event.preventDefault();
-        if (held.has(pad)) return;
-        pad.classList.add("on");
-        startNote(pad, entry.ratio);
-      };
-      const up = () => {
-        pad.classList.remove("on");
-        stopNote(pad);
-      };
-
-      pad.addEventListener("pointerdown", down);
-      pad.addEventListener("pointerup", up);
-      pad.addEventListener("pointerleave", up);
-      pad.addEventListener("pointercancel", up);
+        press(pad, entry.ratio);
+      });
+      pad.addEventListener("pointerup", () => release(pad));
+      pad.addEventListener("pointerleave", () => release(pad));
+      pad.addEventListener("pointercancel", () => release(pad));
 
       entry.pad = pad;
       row.append(pad);
     }
   }
+}
+
+// A pad going down and coming up. One pair for both ways in, a pointer and a
+// key, so there is one description of what pressing a pad means.
+function press(pad, ratio) {
+  if (held.has(pad)) return; // already down, from the other input
+  pad.classList.add("on");
+  startNote(pad, ratio);
+}
+
+function release(pad) {
+  pad.classList.remove("on");
+  stopNote(pad);
+}
+
+/** Let go of everything. */
+function releaseAll() {
+  for (const pad of document.querySelectorAll(".pad.on")) release(pad);
 }
 
 async function startNote(pad, ratio) {
@@ -406,6 +451,25 @@ function stopNote(pad) {
 
 // Audio can only start from a gesture, and any pad counts as one, so every
 // entry point goes through here.
+//
+// There was a button for this. It was the first thing in the row, it was pressed
+// exactly once, and then it vanished and shifted everything after it sideways —
+// so the one press it taught you was a press you would never make again, at a
+// place that then stopped existing. It never had a job either: every other
+// control here is also a gesture, so the browser was already going to let the
+// sound start.
+//
+// What is left is the fact, in a slot that always holds one line: asleep, and
+// then what 1/1 is in Hz, which is the one number this page otherwise never
+// prints and the one place where ratios turn into frequencies.
+const status = document.getElementById("status");
+const showStatus = () => {
+  status.innerHTML = engine.running
+    ? `1/1 = <b>${engine.referenceHz} Hz</b>`
+    : "no sound yet — press anything";
+};
+showStatus();
+
 let started = false;
 async function ensureStarted() {
   await engine.start();
@@ -414,7 +478,7 @@ async function ensureStarted() {
     applyVoiceParams();
     engine.setReverb(state.reverb);
   }
-  document.getElementById("start").hidden = true;
+  showStatus();
 }
 
 // One place where a pad becomes a sounding note.
@@ -497,13 +561,17 @@ function applyRootParams() {
   });
 }
 
+// The two captions are the two directions of the same handover, which is what
+// this button is: the parts hold back while you play (§21), so the instrument is
+// never taken from you, it is lent. "stop" was the old off-caption and it sat
+// next to a button that also said stop.
 async function toggleAuto() {
   const button = document.getElementById("auto");
 
   if (rootLive.running) {
     rootLive.stop();
     button.classList.remove("on");
-    button.textContent = "let it play";
+    button.textContent = "let it play itself";
     return;
   }
 
@@ -511,36 +579,19 @@ async function toggleAuto() {
   applyRootParams();
   rootLive.start();
   button.classList.add("on");
-  button.textContent = "stop";
+  button.textContent = "take it back";
 }
 
-// --- chords and buttons ---
+// --- the transport ---
 
-async function playChord(fractions) {
-  await ensureStarted();
-
-  const ids = [];
-  for (const [n, d] of fractions) {
-    ids.push(await noteOnExact(fromFraction(n, d), 0.75));
-  }
-  setTimeout(() => ids.forEach(releaseNote), 2600);
-}
-
-
-document.getElementById("start").addEventListener("click", ensureStarted);
 document.getElementById("auto").addEventListener("click", toggleAuto);
 
-document.getElementById("triad").addEventListener("click", () => {
-  playChord([[1, 1], [5, 4], [3, 2]]);
-});
-
-document.getElementById("seventh").addEventListener("click", () => {
-  playChord([[1, 1], [5, 4], [3, 2], [7, 4]]);
-});
-
+// "stop all" did not say what it stops, and it does more than stop: it cuts what
+// is sounding, hands the instrument back, and clears what the ear is holding, so
+// the reading and the field start again from nothing.
 document.getElementById("panic").addEventListener("click", () => {
+  releaseAll();
   held.clear();
-  document.querySelectorAll(".pad.on").forEach((pad) => pad.classList.remove("on"));
   if (rootLive.running) toggleAuto();
   engine.allOff();
   sonority.clear();
@@ -563,16 +614,12 @@ window.addEventListener("keydown", (event) => {
   const entry = byKey.get(event.key.toLowerCase());
   if (!entry) return;
   event.preventDefault();
-  if (held.has(entry.pad)) return;
-  entry.pad.classList.add("on");
-  startNote(entry.pad, entry.ratio);
+  press(entry.pad, entry.ratio);
 });
 
 window.addEventListener("keyup", (event) => {
   const entry = byKey.get(event.key.toLowerCase());
-  if (!entry) return;
-  entry.pad.classList.remove("on");
-  stopNote(entry.pad);
+  if (entry) release(entry.pad);
 });
 
 // --- the field ---
@@ -886,19 +933,6 @@ document.getElementById("gestures").addEventListener("pointerdown", (event) => {
 
 
 buildPresets();
-document.getElementById("showAll").addEventListener("change", (event) => {
-  document.body.classList.toggle("expert", event.target.checked);
-});
-
-// A panel whose controls are all advanced would otherwise sit there as an empty
-// heading, so it hides with them.
-for (const panel of document.querySelectorAll(".panel")) {
-  const knobs = panel.querySelectorAll(".knob");
-  if (knobs.length > 0 && [...knobs].every((knob) => knob.classList.contains("advanced"))) {
-    panel.classList.add("advanced");
-  }
-}
-
 buildPads();
 rebuildInstrument();
 drawReading();

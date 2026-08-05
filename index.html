@@ -24,7 +24,12 @@
       }
       h1 { font-size: 15px; font-weight: 600; margin: 0 0 2px; letter-spacing: 0.04em; }
       .sub { color: var(--dim); margin-bottom: 20px; }
-      .layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
+      /* 290 rather than 260 because two knob labels — "settled ← → adventurous"
+         and "high partials fade faster" — wrapped to a second line at the old
+         width once every control was shown, and a slider whose name is two lines
+         tall is exactly the reading cost this column was meant to lose. The field
+         panel gives up thirty pixels of a width it was not using. */
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 20px; align-items: start; }
       @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
 
       button {
@@ -37,8 +42,15 @@
         cursor: pointer;
       }
       button:hover { border-color: var(--dim); }
-      #start { border-color: var(--accent); color: var(--accent); }
-      #start[hidden] { display: none; }
+
+      /* The transport row. `silence` and `let it play itself` are the two
+         things you do to the sound; the view switch is not one of them, so it
+         is pushed to the far end and outlined rather than filled. */
+      #auto { border-color: var(--dim); }
+      #auto.on { border-color: var(--hot); color: var(--hot); }
+      #perform { margin-left: auto; background: none; color: var(--accent); border-color: var(--accent); }
+      #transport .status { color: var(--dim); font-size: 11px; }
+      #transport .status b { color: var(--text); font-weight: normal; }
 
       .pads { margin: 14px 0; }
       .padrow { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -78,7 +90,9 @@
       .fieldnote:empty { display: none; }
 
       .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
-      .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); margin: 0 0 10px; font-weight: 600; }
+      /* A heading names a thing and then says what it does, so it may run to two
+         lines in the narrow column; 1.35 keeps the second line off the first. */
+      .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); margin: 0 0 10px; font-weight: 600; line-height: 1.35; }
       .panel + .panel { margin-top: 14px; }
 
       .knob { margin-bottom: 9px; }
@@ -93,6 +107,7 @@
       .partials { max-height: 260px; overflow-y: auto; }
       .bar { display: inline-block; height: 7px; background: var(--accent); border-radius: 1px; vertical-align: middle; }
       .note { color: var(--dim); margin-top: 12px; }
+      .note a { color: var(--accent); }
 
       .reading { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 12px; }
       .reading div { display: flex; gap: 6px; }
@@ -140,11 +155,25 @@
       .shape.live { color: var(--fg); }
       .shape sub { font-size: 8px; opacity: 0.55; vertical-align: baseline; }
       .shape .bar { display: block; height: 2px; margin-top: 3px; background: currentColor; }
-      #auto.on { border-color: var(--hot); color: var(--hot); }
       .row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
-      .knob.advanced, .panel.advanced { display: none; }
-      body.expert .knob.advanced { display: block; }
-      body.expert .panel.advanced { display: block; }
+      /* Every line of writing on this page sits against the thing it is about,
+         and there is at most a line or two of it. See DESIGN §27. A hint under a
+         heading pulls up against it; one that comes after what it describes sits
+         below. Anything mentioned by name — a key, a button — is drawn in the
+         accent so the eye can find it without reading the sentence. */
+      .hint { color: var(--dim); font-size: 11px; margin: -4px 0 9px; }
+      .hint.after { margin: 10px 0 0; }
+      .hint b { color: var(--accent); font-weight: normal; }
+      .hint + .hint { margin-top: 3px; }
+      /* A landmark stays marked until a slider moves off it, so the panel says
+         where you are and not only where you can go. */
+      #presets button { padding: 5px 9px; font-size: 12px; }
+      #presets button.on { border-color: var(--hot); color: var(--hot); }
+      /* Every control is shown. Two thirds of them used to be folded away behind
+         a checkbox, which left three of the four panels showing a single slider
+         each — so the column read as one real panel and three stubs, and the
+         question "which panel is this in" had no answer you could see. See
+         DESIGN §11. */
 
       /* --- the live view ---
          The bench is for finding out what a parameter does; this is for
@@ -206,29 +235,58 @@
   </head>
   <body>
     <h1>ratiosynth</h1>
-    <div class="sub">pitches are ratios; frequencies happen once, at the end. the rhythm is the same numbers as the harmony.</div>
+    <!-- The subtitle used to describe the build: pitches stored as ratios,
+         frequencies computed last, rhythm from the same numbers. All true, none
+         of it audible, and all three are in DESIGN.md where the reasoning is.
+         What a subtitle owes a visitor is the one claim the page then goes on to
+         demonstrate in front of them. -->
+    <div class="sub">every note is an exact fraction of another, and nothing is rounded to fit a keyboard.</div>
 
     <div class="layout">
       <div>
-        <div class="row">
-          <button id="start">click to start audio</button>
-          <button id="auto">let it play</button>
-          <button id="triad">play 4:5:6</button>
-          <button id="seventh">play 4:5:6:7</button>
-          <button id="panic">stop all</button>
-          <button id="perform">perform</button>
-        </div>
-
-        <div class="row" id="presets" style="margin-top:10px">
-          <span class="lbl" style="color:var(--dim)">start from</span>
+        <!-- Three kinds of thing used to share this row: a precondition, the
+             transport, two fixed chords and a change of view. Only the
+             transport is a choice you make more than once, so it is what the
+             row is now — with the state of the audio in a slot that always
+             holds one line, so nothing moves when it changes, and the view
+             switch pushed to the far end where it is plainly not a sound
+             control. -->
+        <div class="row" id="transport">
+          <button id="auto">let it play itself</button>
+          <button id="panic" title="cut every sounding note, take the instrument back, and clear what the ear is holding">silence</button>
+          <span class="status" id="status"></span>
+          <button id="perform">go inside the field</button>
         </div>
 
         <div class="pads" id="pads"></div>
+        <!-- Kept with the pads rather than in a paragraph at the foot of the
+             page. It stays behind when the pads move into the live view, which
+             is right — §25 has that view saying less, and a hint over the
+             picture is reading matter. -->
+        <div id="padhint">
+          <div class="hint after">hold a pad or its key to sustain · under each ratio is how far above the root it
+            sits, and the simpler the ratio, the brighter the pad</div>
+        </div>
 
         <div class="panel">
           <h2>the field — every note a wave, and where they cross</h2>
           <canvas class="field" id="field"></canvas>
           <div class="fieldnote" id="fieldnote"></div>
+          <!-- This is the one panel that can say nothing about itself: no
+               labels, no numbers, nothing named. So it gets the grammar — the
+               two things about a wave you can read off it at a glance — and one
+               demonstration that takes four seconds rather than a minute.
+               DESIGN §24 has why it is no longer sold on how long it takes to
+               come back round: that is true, and tested, and nobody can see it.
+               -->
+          <div class="hint after">each note is one wave. the simpler the ratio, the broader
+            its bands — the same thing the pad's brightness says; the higher the note, the
+            faster it slides; and notes reached the same way lean the same way. press
+            <b>g</b>, <b>s</b>, <b>2</b> — built on 3, leaning alike, at 2½ then 6 then 12
+            bands. then press <b>d</b>: almost the same pitch as <b>2</b>, and a completely
+            different picture.</div>
+          <div class="hint"><b>go inside the field</b> is this same picture, with the eye
+            inside it.</div>
         </div>
 
         <div class="panel">
@@ -243,6 +301,8 @@
           <div class="reading" id="shape"></div>
           <div class="parts" id="parts"></div>
           <div class="gestures" id="gestures"></div>
+          <div class="hint after">the small numbers are how long each note is held ·
+            click a shape to pin it</div>
         </div>
 
         <div class="panel">
@@ -250,51 +310,48 @@
           <div class="partials"><table id="partials"></table></div>
         </div>
 
+        <!-- What was here was a two-hundred-word paragraph nobody reads. Every
+             part of it that told you how to do something now sits next to the
+             thing it is about; the rest was reasoning, and the reasoning has a
+             home already. -->
         <div class="note">
-          hold a pad or its key to sustain. click a remembered shape to pin it, and it
-          stops fading and keeps coming back — under the fixed-root engine a pinned
-          shape also counts as home wherever the music is, so it can arrive in the
-          middle of anything. the small numbers are how long each note is held.
-          nothing anywhere rounds a pitch to a fixed step: every note you hear is
-          the exact ratio printed on its pad. under each ratio is how far above
-          the root it sits. how brightly a pad is drawn is the other thing worth
-          knowing about it — how simply it relates to that root, so the plain
-          ones come forward and the far-flung ones recede. hover a pad for the
-          number. the field above is those same ratios as waves, one each,
-          running the way its prime points and as fine as it is far from home;
-          what you see is where they cross. try d then 2, or s then w: each pair
-          is a comma apart — two different ways of reaching almost the same
-          place, which stay stubbornly different, and here stay that way. hold
-          one of those pairs and watch the field come back round: it takes the
-          better part of a minute, where the root and 3/2 take under two
-          seconds. <b>perform</b> gives the whole page to that same picture with
-          the eye inside it rather than looking at a slice of it — flying
-          forward at one panel width a second, which is the only speed at which
-          what is ahead of you is what this panel would be showing. so the wait
-          you just sat through is a distance instead: the comma pair is a long
-          tunnel and 3/2 a short one. escape comes back here.
+          how all of this works, and why, is written down in
+          <a href="https://github.com/VasiliyRyabtsev/ratiosynth/blob/master/DESIGN.md">DESIGN.md</a>.
         </div>
       </div>
 
       <div>
+        <!-- The landmarks sit on top of the sliders they move, because that is
+             what they are: not a place to start from but a place to jump to,
+             and you can watch the knobs below arrive there. -->
         <div class="panel">
-          <label class="row"><input type="checkbox" id="showAll" /> show every control</label>
+          <h2>landmarks</h2>
+          <div class="row" id="presets"></div>
         </div>
-        <div class="panel">
-          <h2>strike and life</h2>
-          <div id="voiceKnobs"></div>
-        </div>
-        <div class="panel">
-          <h2>the body</h2>
-          <div id="bodyKnobs"></div>
-        </div>
-        <div class="panel">
-          <h2>listening</h2>
-          <div id="hearingKnobs"></div>
-        </div>
+        <!-- Four plain sentences, each saying what its sliders do. There is no
+             settled vocabulary for any of this, so the temptation is to name a
+             thing and gesture at it — "the strike", "the body", "the ear" — and
+             every one of those needed a second clause to explain the first, which
+             is a riddle rather than a label. A heading that is simply a short
+             sentence needs nothing explaining. See DESIGN §11.
+
+             "the music" is the one heading that was right from the start and it
+             is kept as it was found. -->
         <div class="panel">
           <h2>the music</h2>
           <div id="rootKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>the sound of one note</h2>
+          <div id="voiceKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>what that sound is made of</h2>
+          <div id="bodyKnobs"></div>
+        </div>
+        <div class="panel">
+          <h2>how it listens to itself</h2>
+          <div id="hearingKnobs"></div>
         </div>
       </div>
     </div>

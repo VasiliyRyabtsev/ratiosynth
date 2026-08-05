@@ -739,6 +739,60 @@ adventurous, how many cents are worth one bit, how long it remembers, how many
 parts, how busy. The presets were rewritten in those terms, because the old ones
 were written in a vocabulary that no longer meant anything.
 
+**The folding away is gone, and the count was never the problem.** Reported from
+the bench: *it is not the amount that is confusing, it is the mental effort to
+process the layout.* Two things caused that, and neither was the number of
+sliders.
+
+The panels were named in the builder's vocabulary. "strike and life" borrowed a
+phrase from §6 that appears nowhere on the page; "the body" never said whose
+body; "listening" never said who listens to what. None of the four told you which
+one to open for the thing you wanted, so every visit meant opening all four.
+
+And hiding two thirds of the controls made it worse rather than better. Of the
+twenty-four sliders, fifteen were folded away, which left three of the four
+panels showing exactly one slider each. The column read as one real panel and
+three stubs — so not only could you not tell which panel a control lived in, the
+panel it lived in looked like it had nothing in it. The checkbox was answering
+"too many" while causing "which one is this".
+
+So every control is shown, and each panel is headed by a short sentence saying
+what its sliders do, in the order the sound is made:
+
+- **the music** — pulse, how adventurous, how long it remembers, parts, how busy
+- **the sound of one note** — attack, noise, brightness, drift, sustain, release,
+  output
+- **what that sound is made of** — how many partials, how they fall off and fade,
+  detune, stretch, room
+- **how it listens to itself** — how long a note counts as still sounding, the
+  pull toward home, how far it searches
+
+*the music* comes first because it is the one you reach for while listening, and
+it is the one heading that was right from the start — it was kept as it was
+found.
+
+The last one is worth its own note, because it went through four tries. Those
+three sliders change nothing you can hear: they feed the estimate of the note
+everything else is being heard against, which the panel opposite prints as
+*centre*. "listening" was the original and the report on it was *who listens to
+what?* — the answer being that the instrument listens to its own sound and the
+panel on the left prints what it makes of it, so the heading now says exactly
+that, and pairs with that panel's "the sonority — what it hears".
+
+**Naming a thing and then gesturing at it does not work here, and it is worth
+saying why.** There is no settled vocabulary for most of this machinery, so the
+tempting shape is a noun plus a clause that rescues it — "the strike — how a note
+is set going", "the body — what the strike sets going", "the ear — how it finds
+the centre". Every one of those is a riddle followed by its answer, and it was
+written that way three times before the report came back as *what does this all
+mean???* A heading that is simply a short sentence needs nothing rescuing it. The
+noun was never the useful part; the clause always was, so the clause is the whole
+heading now.
+
+The landmarks stay, and they matter more now than they did: with everything
+visible they are the only thing that moves twenty-four sliders at once to a place
+that is known to sound like something.
+
 ### Why rhythm and recurrence moved forward
 
 They were originally steps 9 and 10, after all the displays. That was wrong, and
@@ -1599,3 +1653,202 @@ Marching costs far more than slicing, so the view watches its own frame times an
 gives up resolution rather than smoothness, and only ever downwards: climbing back
 as soon as it is comfortable makes it oscillate between two resolutions, which is
 worse than the lower one.
+
+## 26. The top of the page is not a menu
+
+The row across the top of the bench had grown into a place where anything that
+needed a button ended up, and four different kinds of thing were sitting in it as
+if they were alternatives to each other.
+
+**A precondition is not a choice.** The first button said "click to start audio",
+was pressed exactly once, and then vanished and shifted everything after it
+sideways. It never had a job: a browser needs a gesture before it will make
+sound, and every other control on the page is also a gesture, so the sound was
+always going to start on whatever you touched first. The one press it taught you
+was a press you would never make again, at a place that then stopped existing.
+It is now a line of text in a slot that always holds one line, so nothing moves
+when it changes: "no sound yet" before, and afterwards what 1/1 is in Hz — the
+one number this page otherwise never prints, and the only place in the whole
+project where a ratio becomes a frequency.
+
+**Two fixed chords are a table, and so is their replacement.** There were buttons
+for 4:5:6 and 4:5:6:7. Two hard-coded chords are a table of patterns, which is
+the thing this project does not do anywhere else, and they were a second way of
+sounding notes the pads already sound. They are gone.
+
+What they were answering, though, is worth writing down, because the first
+replacement answered it too and was also wrong. A mouse has one pointer: you can
+hold a, d and g on the keyboard and hear a pure triad, and with a mouse you
+cannot build a chord at all. So the pads were given a latch — hold shift and a
+pad stays down — which is the general form of what the two chords did specially.
+
+**That was still an answer to a question the page answers twice already.**
+Anybody who can reach shift can reach a, d and g, so on a keyboard the latch buys
+nothing; a touch screen has several fingers and no shift key at all, so there it
+buys nothing and cannot be reached either. And if what you actually want is sound
+going on while your hands are somewhere else — on the sliders, which is what a
+bench of live sliders is for — the page has a control for exactly that, and it is
+the first button in the transport. A latch is a second, worse way of doing what
+*let it play itself* does.
+
+So: nothing holds a pad but a finger or a key. The general answer to "a mouse has
+one pointer" turned out to be that the instrument has a keyboard, and it is
+printed on the pads.
+
+**Say what a button does to what.** "stop all" did not name what it stops, and it
+stood next to a button whose running caption was "stop". It is now "silence", and
+the other one says which direction the handover goes: *let it play itself*, and
+then *take it back*. That is what actually happens — the parts hold back while
+somebody plays (§21), so the instrument is never taken away, it is lent.
+
+**A change of view is not a sound control.** Entering the flight was a button of
+the same weight as the ones that make noise. It sits at the far end of the row
+now, outlined rather than filled, and says where it goes.
+
+**The landmarks were in the wrong room.** §11 answers "too many knobs" with
+landmarks, and they were under the transport behind the words "start from" —
+wrong twice, because nothing stops you jumping to one an hour in, and because
+they were nowhere near the sliders they move. They now sit on top of those
+sliders, where pressing one visibly moves them, and the landmark you are standing
+on stays marked until a slider moves off it, so the panel says where you are and
+not only where you could go.
+
+## 27. Writing on the page, and where it goes
+
+The page had accumulated three kinds of writing, and two of them were being
+read by nobody.
+
+**The subtitle described the build, not the thing.** It said that pitches are
+ratios, that frequencies happen once at the end, and that the rhythm is the same
+numbers as the harmony. Every clause is true and none of it is audible. The
+second is a fact about which module does what; a visitor cannot hear where in the
+code a frequency is computed. What a subtitle owes somebody who has just arrived
+is the one claim the page is about to demonstrate in front of them, so it is now
+that every note is an exact fraction of another and nothing is rounded to fit a
+keyboard — which the pads then print, one fraction each.
+
+**A caption that explains what the interface is already doing is noise.** The
+landmarks panel had a line under it saying that these are the corners of the
+parameter space that sound like something, and that each one moves the sliders
+below. The first half is the justification for the feature, which is §11 and
+belongs there. The second half describes something you watch happen: you press
+`bells` and eight sliders move. It is gone.
+
+**A footer nobody reads is not documentation.** Two hundred words in one
+lowercase paragraph at the bottom of the page, holding the only instructions
+there were: how to sustain, what the brightness of a pad means, how to pin a
+shape, and — buried at sixty percent — the one genuinely good invitation on the
+page, which is to hold `d` and `2` together and watch two ways of reaching almost
+the same place refuse to agree.
+
+The rule that replaced it: **every line of writing sits against the thing it is
+about, and there is at most a line or two of it.** What your hands do is under
+the pads. What the picture is doing, and the invitation to try the comma pair, is
+under the picture. What pinning means is under the shapes. Anything named — a
+key, a button — is drawn in the accent colour, so the eye finds it without
+reading the sentence around it.
+
+What is left over is the reasoning, and the reasoning already has a home. The
+footer is now one line pointing at this file.
+
+### The panel was sold on the one thing you cannot see
+
+The caption was rewritten twice before somebody said the thing that mattered: *I
+could never make sense of the picture. It was fun to look at though.* That is the
+report §12 warns about — impressionistic, and therefore about a missing structure
+rather than a wording. Measured, it was right, and what was missing was not in
+the caption at all.
+
+**What the panel had been sold on is its return period.** §24 calls that "the
+point of the panel": the closer two notes sit, the longer their figure takes to
+repeat, so an interval becomes a duration. The arithmetic is exact and there are
+tests for it. The trouble is what it looks like.
+
+The picture translates rigidly — there is one velocity `v` with `k·v = rate` for
+every wave, which is §24's invertible 2x2 read as a motion. So the visible thing
+is a drift, and the drift does not track the interval at all:
+
+| held together | repeats after | drifts at |
+|---|---|---|
+| 1/1 and 2/1 | 1.0s | 1.000 panel widths/s |
+| 1/1 and 5/4 | 3.1s | 0.088 |
+| 5/4 and 81/64 (d and 2) | 55.8s | 0.095 |
+
+A pair that comes round in three seconds and a pair that takes fifty-six move
+across the panel at the same speed. Nothing about the motion says which you are
+looking at. The return is real and it is in view — sampled, the panel at `t=T`
+correlates 0.975 with the panel at `t=0` — but seeing it means holding a
+fifty-six-second-old image in your head and comparing, with no mark on the panel
+to compare against. No eye does that. **It is true, it is tested, it is in front
+of you, and it is imperceptible.**
+
+**What is instant is the other two.** How fine the bands are is the arrow's
+length, which is the ratio's complexity — the same number that shades the pad.
+Which way they lean is the direction, which is which primes and how many of each.
+Both are legible in a glance, and everything built the same way lines up:
+
+| ratio | lean | bands across the panel |
+|---|---|---|
+| 3/2 | 19° | 2.5 |
+| 9/8 | 16° | 6.0 |
+| 27/16 | 17° | 8.4 |
+| 81/64 | 16° | 11.9 |
+| 5/4 | 145° | 3.7 |
+
+Stack 3s and the lean holds while the grain gets finer, one countable step at a
+time. That is the lattice, drawn, and you can see it in four seconds instead of a
+minute.
+
+And it makes the project's argument better than the durations did. 5/4 and 81/64
+are 21.5 cents apart — near enough the same note to the ear at first hearing —
+and they draw pictures with nothing in common: 3.7 broad bands one way against
+11.9 fine ones the other. The panel does not say *these are nearly the same and
+here is the tiny difference*. It says *these were reached completely differently,
+and here is what that looks like*. Printed as characters, the two are not even
+the same kind of image.
+
+So the page teaches the grammar — grain, lean, and that it slides faster the
+higher the note — and names the four keys that show it. The return period stays
+in this file as arithmetic with a test, and off the panel.
+
+The live view inherits the same problem and has not been re-examined: §25 sells
+the flight on the wait becoming a distance, which is the same claim in another
+sense, and the same measurement probably applies to it.
+
+### A caption on a picture says what it means
+
+The field's caption failed a test the others passed, and the test is worth
+naming: **does the sentence say what something means, or only what to do to it?**
+
+What was there read "try holding d and 2 together, or s and w — two ways of
+reaching almost the same place, which refuse to agree. watch the waves come back
+round: the better part of a minute." Every clause is true. Taken together they
+are stage directions: press these, wait, something will happen. A reader who
+follows them exactly ends up watching a pattern change for no stated reason,
+which is worse than not reading, because now they think they have missed
+something.
+
+The rule the picture is drawn by was never in it. §24 states it plainly — the
+closer two notes are in pitch, the longer their figure takes to repeat, so the
+wait *is* the interval — and that is the whole claim of the panel and the only
+thing on the page that could not be said any other way. Without it, "come back
+round" is a fact about the drawing. With it, the minute you sit through is the
+size of a difference your ear nearly misses, and a comma stops being a word.
+
+So the caption states the rule first, then one pair of keys as the thing that
+shows the rule doing what nothing else on the page can do. The two numbers in it
+are checked against `slideRate` rather than remembered: 1/1 with 2/1 is 1.0s, and
+5/4 with 81/64 — d with 2 — is 55.8s.
+
+This is also the answer to whether the panel needs words at all. It is the only
+panel on the bench that can say nothing about itself: the sonority prints ratios,
+the shapes print ratios, the partials are a table, and the field is an
+unlabelled moving image. An unlabelled moving image reads as decoration, and the
+one thing this picture is not is decoration.
+
+The second line went the other way for the same reason. Everything the old one
+said about the flight — one panel width a second, the wait becoming a distance,
+escape coming back — is either discoverable by pressing the button or already
+visible once you have (there is a "back to the bench" button in view the whole
+time). What is left is the single thing you could get wrong, which is thinking it
+is a different picture. So it says that it is the same one.
