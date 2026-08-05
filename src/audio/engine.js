@@ -35,7 +35,14 @@ export class Engine {
     // — a new field in a message is simply dropped by the old code, and the
     // result measures perfectly offline while making no sound at all. Bump this
     // whenever modal-processor.js changes.
-    await context.audioWorklet.addModule(`/modal-processor.js?v=${PROCESSOR_VERSION}`);
+    //
+    // The path has to be written relative to the page rather than to the host,
+    // because on GitHub Pages the page lives in a subdirectory and a leading
+    // slash would leave the site. BASE_URL is filled in at build time: "/" while
+    // developing, "./" in a build. Do not reach for import.meta.url here — that
+    // points at the bundle inside assets/, one level below the processor.
+    const base = import.meta.env.BASE_URL;
+    await context.audioWorklet.addModule(`${base}modal-processor.js?v=${PROCESSOR_VERSION}`);
 
     const node = new AudioWorkletNode(context, "modal", {
       numberOfInputs: 0,

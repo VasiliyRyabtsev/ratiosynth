@@ -1,0 +1,62 @@
+# Publishes the instrument to GitHub Pages on every push to master.
+#
+# Nothing built is kept in the repository. This workflow makes dist/ from source
+# each time and hands that folder straight to Pages, so dist/ stays ignored by
+# git and there is never a stale bundle sitting in a diff.
+#
+# The tests run first and the deploy waits on them, so a push that breaks the
+# ratio arithmetic does not become the published page.
+
+name: Publish to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  # Lets the workflow be started by hand from the Actions tab, which is useful
+  # for republishing without a code change.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One publish at a time. If two pushes land close together the second waits
+# rather than cancelling the first, so a deploy is never left half done.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      # 90 tests, under a second. They need no corpora and no browser.
+      - run: npm test
+
+      - run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

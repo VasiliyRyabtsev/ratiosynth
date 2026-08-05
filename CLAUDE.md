@@ -96,3 +96,10 @@ this slips; a short paragraph beats a dense one-liner.
 
 **Commit messages carry the finding and the measurement**, not just the change,
 in the same voice as DESIGN.md. No `Co-Authored-By` trailer.
+
+**No absolute paths to files.** A leading slash means the root of the web server,
+and the published page does not live there — GitHub Pages serves it from
+`/ratiosynth/`. This is a quiet one: the dev server *does* serve from the root, so
+`/thing.js` works while developing, passes every test, and fails only on the
+published page. Write `./thing.js`, or `import.meta.env.BASE_URL` in code that
+vite builds, as `src/audio/engine.js` does for the audio worklet.
