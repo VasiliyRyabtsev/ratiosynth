@@ -98,8 +98,17 @@ that ended the previous engine (DESIGN §12 "Is the composition engine the right
 shape at all?").
 
 **Plain language in everything written**, including comments, commit messages and
-DESIGN.md. Explain a term the first time it appears. Terse bullet lists are where
-this slips; a short paragraph beats a dense one-liner.
+DESIGN.md. Explain a term the first time it appears. One idea per sentence, and
+about twenty words is the ceiling — a sentence needing a second clause to rescue
+the first is two sentences. Terse bullet lists are where this slips; a short
+paragraph beats a dense one-liner.
+
+**That register belongs to the writing and not to the reply.** DESIGN.md,
+comments and commit messages carry the finding and the measurement in full. A
+reply in chat says what changed, what it measured and what is left. The reasoning
+is already in the artifact and restating it earns nothing, and this file's own
+voice is catching — so the length is a property of the document, not of the
+answer.
 
 **Writing on the page sits against the thing it is about**, and there is at most
 a line or two of it. What your hands do goes under the pads, what the picture is
