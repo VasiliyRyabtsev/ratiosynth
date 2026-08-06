@@ -40,7 +40,7 @@ jobs:
 
       - run: npm ci
 
-      # 90 tests, under a second. They need no corpora and no browser.
+      # 100 tests, under a second. They need no corpora and no browser.
       - run: npm test
 
       - run: npm run build

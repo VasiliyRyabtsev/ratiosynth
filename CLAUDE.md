@@ -40,10 +40,15 @@ so the map below is there to save reading all of it.
 `tools/` are measuring instruments, not part of the product. `test/` runs with
 `node --test` and needs no framework.
 
+`docs/composition.md` is the page the instrument links to: what the engine does,
+for somebody who will not read the code. No reasoning and no measurements —
+those stay in DESIGN.md. `build/page.js` renders it, and vite serves it while
+developing and emits it into `dist/`, so there is no generated copy to keep.
+
 ## Commands
 
     npm run dev              the page
-    npm test                 node --test, 92 tests, under a second
+    npm test                 node --test, 100 tests, under a second
     node tools/ratios.js     the engine against the corpus: interval sizes,
                              whether a repeated phrase comes back the same,
                              how busy it is, longest gap
