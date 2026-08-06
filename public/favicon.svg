@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
+  <title>ratiosynth — the lattice around the root, each dot as simple as its ratio</title>
+  <rect width="1" height="1" fill="#14161a"/>
+  <g fill="#7fd4c1">
+  <circle cx="0.1000" cy="0.1000" r="0.0401"/>
+  <circle cx="0.3000" cy="0.1000" r="0.0447"/>
+  <circle cx="0.5000" cy="0.1000" r="0.0491"/>
+  <circle cx="0.7000" cy="0.1000" r="0.0274"/>
+  <circle cx="0.1000" cy="0.3000" r="0.0700"/>
+  <circle cx="0.3000" cy="0.3000" r="0.0735"/>
+  <circle cx="0.5000" cy="0.3000" r="0.0769"/>
+  <circle cx="0.7000" cy="0.3000" r="0.0611"/>
+  <circle cx="0.9000" cy="0.3000" r="0.0427"/>
+  <circle cx="0.1000" cy="0.5000" r="0.0719"/>
+  <circle cx="0.3000" cy="0.5000" r="0.0866"/>
+  <circle cx="0.5000" cy="0.5000" r="0.1000"/>
+  <circle cx="0.7000" cy="0.5000" r="0.0866"/>
+  <circle cx="0.9000" cy="0.5000" r="0.0719"/>
+  <circle cx="0.1000" cy="0.7000" r="0.0427"/>
+  <circle cx="0.3000" cy="0.7000" r="0.0611"/>
+  <circle cx="0.5000" cy="0.7000" r="0.0769"/>
+  <circle cx="0.7000" cy="0.7000" r="0.0735"/>
+  <circle cx="0.9000" cy="0.7000" r="0.0700"/>
+  <circle cx="0.3000" cy="0.9000" r="0.0274"/>
+  <circle cx="0.5000" cy="0.9000" r="0.0491"/>
+  <circle cx="0.7000" cy="0.9000" r="0.0447"/>
+  <circle cx="0.9000" cy="0.9000" r="0.0401"/>
+  </g>
+</svg>

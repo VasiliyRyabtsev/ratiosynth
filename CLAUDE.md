@@ -43,13 +43,15 @@ so the map below is there to save reading all of it.
 ## Commands
 
     npm run dev              the page
-    npm test                 node --test, 90 tests, under a second
+    npm test                 node --test, 92 tests, under a second
     node tools/ratios.js     the engine against the corpus: interval sizes,
                              whether a repeated phrase comes back the same,
                              how busy it is, longest gap
     node tools/drone.js      is the drone audible, and which second string
     node tools/corpus.js _dev_data/essen [--by-origin]
     node tools/corpus.js _dev_data/bach/chorales
+    node tools/favicon.js    redraws public/favicon.svg from the pad shading;
+                             run it after changing that, or the test fails
 
 `tools/render.js` runs the audio worklet outside the browser, so any claim about
 the sound can be rendered and measured. `tools/lines.js` measures a corpus melody
