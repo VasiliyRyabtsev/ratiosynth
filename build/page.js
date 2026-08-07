@@ -95,9 +95,13 @@ export function renderPage(markdown = readFileSync(SOURCE, "utf8")) {
 
   // The instrument is monospace at thirteen pixels throughout, which is right for
   // numbers that have to line up and wrong for three thousand words. So the prose
-  // takes the reading face the machine already has, at a size and a measure meant
-  // for reading, and keeps everything else: the colours, and monospace wherever a
+  // takes the machine's own interface face, at a size and a measure meant for
+  // reading, and keeps everything else: the colours, and monospace wherever a
   // ratio appears.
+  //
+  // Sans rather than serif because the page is light text on a dark background.
+  // A serif at this size puts its thin strokes below the weight the screen can
+  // hold, and the letters go scratchy. A sans keeps one weight all through.
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -119,7 +123,8 @@ export function renderPage(markdown = readFileSync(SOURCE, "utf8")) {
         padding: 32px 24px 96px;
         background: var(--bg);
         color: var(--text);
-        font: 16px/1.65 ui-serif, Georgia, "Times New Roman", serif;
+        font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
       }
       main { max-width: 34em; margin: 0 auto; }
       h1 { font-size: 26px; line-height: 1.25; font-weight: 600; margin: 0 0 8px; }
